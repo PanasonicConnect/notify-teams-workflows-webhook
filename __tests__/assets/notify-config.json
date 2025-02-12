@@ -1,0 +1,11 @@
+{
+  "visible": {
+    "repository_name": true,
+    "branch_name": true,
+    "workflow_name": true,
+    "event": true,
+    "actor": true,
+    "sha1": true,
+    "changed_files": true
+  }
+}

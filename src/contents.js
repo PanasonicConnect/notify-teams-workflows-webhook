@@ -1,4 +1,3 @@
-import * as core from '@actions/core'
 import { context } from '@actions/github'
 
 const titleBlock = {
@@ -27,26 +26,46 @@ const singleTextBlockCustom2 = {
 
 const factBlock = {
   type: 'FactSet',
-  facts: [
-    {
-      title: 'Repository/Branch:',
-      value: '{GITHUB_REPOSITORY} / {BRANCH}'
-    },
-    {
-      title: 'Workflow/Event/Actor:',
-      value: '{GITHUB_WORKFLOW} / {GITHUB_EVENT_NAME} / {GITHUB_ACTOR}'
-    },
-    {
-      title: 'SHA-1:',
-      value: '{GITHUB_SHA}'
-    }
-  ],
+  facts: [],
   id: 'acFactSet'
 }
 
-const factBlockChangedFiles = {
-  title: 'Changed files:',
-  value: '{CHANGED_FILES}'
+const factBlockRepository = {
+  title: 'Repository:',
+  value: '{GITHUB_REPOSITORY}'
+}
+const factBlockBranch = {
+  title: 'Branch:',
+  value: '{BRANCH}'
+}
+const factBlockWorkflow = {
+  title: 'Workflow:',
+  value: '{GITHUB_WORKFLOW}'
+}
+const factBlockEvent = {
+  title: 'Event:',
+  value: '{GITHUB_EVENT_NAME}'
+}
+const factBlockActor = {
+  title: 'Actor:',
+  value: '{GITHUB_ACTOR}'
+}
+const factBlockSha1 = {
+  title: 'SHA-1:',
+  value: '{GITHUB_SHA}'
+}
+const singleTextBlockChangedFileTitle = {
+  type: 'TextBlock',
+  text: '**Changed files:**',
+  separator: true,
+  wrap: true
+}
+const singleTextBlockChangedFiles = {
+  type: 'TextBlock',
+  text: '{CHANGED_FILES}',
+  separator: true,
+  size: 'small',
+  wrap: false
 }
 
 /**
@@ -114,25 +133,49 @@ export const makeAction = (titles, urls) => {
 /**
  * Creates a default body for a message with optional custom messages and commit details.
  *
+ * @param {config} config - The configuration for creating the card.
  * @param {string} customMessage1 - The first custom message to include in the body.
  * @param {string} customMessage2 - The second custom message to include in the body.
  * @param {string} commitMessage - The commit message to include in the body.
  * @param {Array} changedFiles - The list of changed files to include in the body.
  * @returns {Object} The constructed body object with the provided parameters.
  */
-export const makeDefaultBody = (customMessage1, customMessage2, commitMessage, changedFiles) => {
+export const makeDefaultBody = (config, customMessage1, customMessage2, commitMessage, changedFiles) => {
   const body = []
   body.push(titleBlock)
   if (customMessage1) {
     body.push(singleTextBlockCustom1)
   }
+  // create fact set
   const fact = JSON.parse(JSON.stringify(factBlock))
-  if (changedFiles) {
-    fact.facts.push(factBlockChangedFiles)
+  if (config?.visible?.repository_name) {
+    fact.facts.push(factBlockRepository)
   }
-  body.push(fact)
+  if (config?.visible?.branch_name) {
+    fact.facts.push(factBlockBranch)
+  }
+  if (config?.visible?.workflow_name) {
+    fact.facts.push(factBlockWorkflow)
+  }
+  if (config?.visible?.event) {
+    fact.facts.push(factBlockEvent)
+  }
+  if (config?.visible?.actor) {
+    fact.facts.push(factBlockActor)
+  }
+  if (config?.visible?.sha1) {
+    fact.facts.push(factBlockSha1)
+  }
+
+  if (fact.facts.length > 0) {
+    body.push(fact)
+  }
   if (customMessage2) {
     body.push(singleTextBlockCustom2)
+  }
+  if (config?.visible?.changed_files && changedFiles) {
+    body.push(singleTextBlockChangedFileTitle)
+    body.push(singleTextBlockChangedFiles)
   }
   const replacedBody = replaceBodyParameters(JSON.stringify(body), customMessage1, customMessage2, commitMessage, changedFiles)
   const parsedBody = JSON.parse(replacedBody)

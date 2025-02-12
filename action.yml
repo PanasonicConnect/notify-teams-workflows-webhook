@@ -13,6 +13,9 @@ inputs:
   template:
     description: 'Path to the Adaptive Card template'
     required: false
+  config:
+    description: 'Path to the configuration file'
+    required: false
   message1:
     description: 'Custom message to include in the payload'
     required: false
@@ -25,10 +28,6 @@ inputs:
   action-urls:
     description: 'Action URLs to include in the payload'
     required: false
-  visible-changed-files:
-    description: 'Show changed files in the payload'
-    required: false
-    default: 'false'
 runs:
   using: node20
   main: dist/index.js

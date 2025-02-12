@@ -57,11 +57,10 @@ jobs:
         uses: ./
         with:
           webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
-          message1: 'test1 message'
-          message2: 'test2 message'
+          message1: 'normal test 1 message'
+          message2: 'normal test 2 message'
           action-titles: 'github'
           action-urls: 'https://github.co.jp/'
-          visible-changed-files: true
 
   test-action-min:
     name: GitHub Actions Test Min
@@ -89,11 +88,27 @@ jobs:
         with:
           webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
           template: './.github/body-template.json'
-          message1: 'test1 message'
-          message2: 'test2 message'
+          message1: 'template test 1 message'
+          message2: 'template test 2 message'
           action-titles: |
             github
             docs
           action-urls: |
             https://github.co.jp/
             https://docs.github.com/ja
+
+  test-action-config:
+    name: GitHub Actions Test Config
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 5
+      - name: Test Local Action (with config)
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
+          config: './.github/notify-config.json'
+          message1: 'config test 1 message'
+          message2: 'config test 2 message'
