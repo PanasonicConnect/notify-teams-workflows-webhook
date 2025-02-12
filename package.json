@@ -32,7 +32,7 @@
     "local-action": "npx local-action . src/main.js .env",
     "package": "npx rollup --config rollup.config.js",
     "package:watch": "npm run package -- --watch",
-    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
+    "test": "set NODE_OPTIONS=--experimental-vm-modules && set NODE_NO_WARNINGS=1 && npx jest",
     "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package"
   },
   "license": "MIT",
