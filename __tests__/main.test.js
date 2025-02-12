@@ -55,11 +55,14 @@ describe('Custom Action Tests', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        // Due to processing in run, the body is created by createAdapterCardPayload.
-        // We validate that it has an attachments array with the adaptive card payload.
-        body: expect.objectContaining({
-          attachments: expect.any(Array)
-        })
+        body: expect.any(String)
+      })
+    )
+    const fetchCall = fetch.mock.calls[0][1]
+    const requestBody = JSON.parse(fetchCall.body)
+    expect(requestBody).toEqual(
+      expect.objectContaining({
+        attachments: expect.any(Array)
       })
     )
   })
@@ -86,11 +89,14 @@ describe('Custom Action Tests', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        // Due to processing in run, the body is created by createAdapterCardPayload.
-        // We validate that it has an attachments array with the adaptive card payload.
-        body: expect.objectContaining({
-          attachments: expect.any(Array)
-        })
+        body: expect.any(String)
+      })
+    )
+    const fetchCall = fetch.mock.calls[0][1]
+    const requestBody = JSON.parse(fetchCall.body)
+    expect(requestBody).toEqual(
+      expect.objectContaining({
+        attachments: expect.any(Array)
       })
     )
   })
@@ -138,17 +144,23 @@ describe('Custom Action Tests', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: expect.objectContaining({
-          attachments: [
-            {
-              contentType: 'application/vnd.microsoft.card.adaptive',
-              content: expect.objectContaining({
-                body: expectedTemplate,
-                actions: expectedActions
-              })
-            }
-          ]
-        })
+        body: expect.any(String)
+      })
+    )
+
+    const fetchCall = fetch.mock.calls[0][1]
+    const requestBody = JSON.parse(fetchCall.body)
+    expect(requestBody).toEqual(
+      expect.objectContaining({
+        attachments: [
+          {
+            contentType: 'application/vnd.microsoft.card.adaptive',
+            content: expect.objectContaining({
+              body: expectedTemplate,
+              actions: expectedActions
+            })
+          }
+        ]
       })
     )
   })
