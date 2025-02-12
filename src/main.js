@@ -102,7 +102,7 @@ const postWebhookUrl = async (webhookUrl, payload) => {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: payload
+    body: JSON.stringify(payload)
   })
 
   if (!response.ok) {
