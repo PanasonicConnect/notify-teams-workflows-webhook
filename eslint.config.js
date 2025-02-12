@@ -4,7 +4,7 @@ import { fixupPluginRules } from '@eslint/compat'
 import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
 import _import from 'eslint-plugin-import'
-import jest from 'eslint-plugin-jest'
+import vitest from 'eslint-plugin-vitest'
 import prettier from 'eslint-plugin-prettier'
 import globals from 'globals'
 import path from 'node:path'
@@ -22,22 +22,17 @@ export default [
   {
     ignores: ['**/coverage', '**/dist', '**/linter', '**/node_modules']
   },
-  ...compat.extends(
-    'eslint:recommended',
-    'plugin:jest/recommended',
-    'plugin:prettier/recommended'
-  ),
   {
     plugins: {
       import: fixupPluginRules(_import),
-      jest,
+      vitest,
       prettier
     },
 
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.jest,
+        ...vitest.environments.env.globals,
         Atomics: 'readonly',
         SharedArrayBuffer: 'readonly'
       },
@@ -48,6 +43,7 @@ export default [
 
     rules: {
       camelcase: 'off',
+      ...vitest.configs.recommended.rules,
       'eslint-comments/no-use': 'off',
       'eslint-comments/no-unused-disable': 'off',
       'i18n-text/no-en': 'off',
