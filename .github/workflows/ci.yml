@@ -47,59 +47,52 @@ jobs:
   test-action:
     name: GitHub Actions Test
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
-        id: checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 5 # for using commit log
       - name: Test Local Action
-        id: test-action
         uses: ./
         with:
-          webhook-url: 'https://example.com'
-          message1: 'test1'
-          message2: 'test2'
-          action-titles: 'title1'
-          action-urls: 'https://www.yahoo.co.jp/'
+          webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
+          message1: 'test1 message'
+          message2: 'test2 message'
+          action-titles: 'github'
+          action-urls: 'https://github.co.jp/'
           visible-changed-files: true
+
   test-action-min:
     name: GitHub Actions Test Min
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
-        id: checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - name: Test Local Action Min
-        id: test-action-min
+          fetch-depth: 5
+      - name: Test Local Action (no arguments)
         uses: ./
         with:
-          webhook-url: 'https://example.com'
+          webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
+
   test-action-template:
     name: GitHub Actions Test Template
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
-        id: checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 5
       - name: Test Local Action (with template)
-        id: test-action
         uses: ./
         with:
-          webhook-url: 'https://example.com'
+          webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
           template: './.github/body-template.json'
-          message1: 'test1'
-          message2: 'test2'
+          message1: 'test1 message'
+          message2: 'test2 message'
           action-titles: |
-            title1
-            title2
+            github
+            docs
           action-urls: |
-            https://www.yahoo.co.jp/
-            https://www.example.com/
+            https://github.co.jp/
+            https://docs.github.com/ja
