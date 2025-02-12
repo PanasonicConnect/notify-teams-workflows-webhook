@@ -26,8 +26,243 @@ describe('makeDefaultBody', () => {
     const customMessage2 = 'Custom Message 2'
     const commitMessage = 'Initial commit'
     const changedFiles = ['file1.js', 'file2.js']
+    const config = {
+      visible: {
+        repository_name: true,
+        branch_name: true,
+        workflow_name: true,
+        event: true,
+        actor: true,
+        sha1: true,
+        changed_files: true
+      }
+    }
 
-    const body = makeDefaultBody(customMessage1, customMessage2, commitMessage, changedFiles)
+    const body = makeDefaultBody(config, customMessage1, customMessage2, commitMessage, changedFiles)
+    console.log(body)
+    expect(body).toEqual([
+      {
+        type: 'TextBlock',
+        text: '#123 Initial commit',
+        id: 'Title',
+        spacing: 'Medium',
+        size: 'large',
+        weight: 'Bolder',
+        color: 'Accent'
+      },
+      {
+        type: 'TextBlock',
+        text: 'Custom Message 1',
+        separator: true,
+        wrap: true
+      },
+      {
+        type: 'FactSet',
+        facts: [
+          {
+            title: 'Repository:',
+            value: 'test-repo'
+          },
+          {
+            title: 'Branch:',
+            value: 'main'
+          },
+          {
+            title: 'Workflow:',
+            value: 'CI'
+          },
+          {
+            title: 'Event:',
+            value: 'push'
+          },
+          {
+            title: 'Actor:',
+            value: 'test-actor'
+          },
+          {
+            title: 'SHA-1:',
+            value: 'abc123'
+          }
+        ],
+        id: 'acFactSet'
+      },
+      {
+        type: 'TextBlock',
+        text: 'Custom Message 2',
+        separator: true,
+        wrap: true
+      },
+      {
+        type: 'TextBlock',
+        text: '**Changed files:**',
+        separator: true,
+        wrap: true
+      },
+      {
+        type: 'TextBlock',
+        text: `\`file1.js\`
+
+\`file2.js\``,
+        separator: true,
+        size: 'small',
+        wrap: false
+      }
+    ])
+  })
+
+  it('should create a default body without custom messages', () => {
+    const customMessage1 = ''
+    const customMessage2 = ''
+    const commitMessage = 'Initial commit'
+    const changedFiles = ['file1.js', 'file2.js']
+    const config = {
+      visible: {
+        repository_name: true,
+        branch_name: true,
+        workflow_name: true,
+        event: true,
+        actor: true,
+        sha1: true,
+        changed_files: true
+      }
+    }
+
+    const body = makeDefaultBody(config, customMessage1, customMessage2, commitMessage, changedFiles)
+    expect(body).toEqual([
+      {
+        type: 'TextBlock',
+        text: '#123 Initial commit',
+        id: 'Title',
+        spacing: 'Medium',
+        size: 'large',
+        weight: 'Bolder',
+        color: 'Accent'
+      },
+      {
+        type: 'FactSet',
+        facts: [
+          {
+            title: 'Repository:',
+            value: 'test-repo'
+          },
+          {
+            title: 'Branch:',
+            value: 'main'
+          },
+          {
+            title: 'Workflow:',
+            value: 'CI'
+          },
+          {
+            title: 'Event:',
+            value: 'push'
+          },
+          {
+            title: 'Actor:',
+            value: 'test-actor'
+          },
+          {
+            title: 'SHA-1:',
+            value: 'abc123'
+          }
+        ],
+        id: 'acFactSet'
+      },
+      {
+        type: 'TextBlock',
+        text: '**Changed files:**',
+        separator: true,
+        wrap: true
+      },
+      {
+        type: 'TextBlock',
+        text: `\`file1.js\`
+
+\`file2.js\``,
+        separator: true,
+        size: 'small',
+        wrap: false
+      }
+    ])
+  })
+  it('should create a default body without custom messages and changed files', () => {
+    const customMessage1 = ''
+    const customMessage2 = ''
+    const commitMessage = 'Initial commit'
+    const config = {
+      visible: {
+        repository_name: true,
+        branch_name: true,
+        workflow_name: true,
+        event: true,
+        actor: true,
+        sha1: true,
+        changed_files: false
+      }
+    }
+
+    const body = makeDefaultBody(config, customMessage1, customMessage2, commitMessage, undefined)
+    expect(body).toEqual([
+      {
+        type: 'TextBlock',
+        text: '#123 Initial commit',
+        id: 'Title',
+        spacing: 'Medium',
+        size: 'large',
+        weight: 'Bolder',
+        color: 'Accent'
+      },
+      {
+        type: 'FactSet',
+        facts: [
+          {
+            title: 'Repository:',
+            value: 'test-repo'
+          },
+          {
+            title: 'Branch:',
+            value: 'main'
+          },
+          {
+            title: 'Workflow:',
+            value: 'CI'
+          },
+          {
+            title: 'Event:',
+            value: 'push'
+          },
+          {
+            title: 'Actor:',
+            value: 'test-actor'
+          },
+          {
+            title: 'SHA-1:',
+            value: 'abc123'
+          }
+        ],
+        id: 'acFactSet'
+      }
+    ])
+  })
+
+  it('should create a default body based on config visibility', () => {
+    const customMessage1 = 'Custom Message 1'
+    const customMessage2 = 'Custom Message 2'
+    const commitMessage = 'Initial commit'
+    const changedFiles = ['file1.js', 'file2.js']
+    const config = {
+      visible: {
+        repository_name: true,
+        branch_name: false,
+        workflow_name: true,
+        event: false,
+        actor: true,
+        sha1: false,
+        changed_files: true
+      }
+    }
+
+    const body = makeDefaultBody(config, customMessage1, customMessage2, commitMessage, changedFiles)
 
     expect(body).toEqual([
       {
@@ -49,22 +284,16 @@ describe('makeDefaultBody', () => {
         type: 'FactSet',
         facts: [
           {
-            title: 'Repository/Branch:',
-            value: 'test-repo / main'
+            title: 'Repository:',
+            value: 'test-repo'
           },
           {
-            title: 'Workflow/Event/Actor:',
-            value: 'CI / push / test-actor'
+            title: 'Workflow:',
+            value: 'CI'
           },
           {
-            title: 'SHA-1:',
-            value: 'abc123'
-          },
-          {
-            title: 'Changed files:',
-            value: `\`file1.js\`
-
-\`file2.js\``
+            title: 'Actor:',
+            value: 'test-actor'
           }
         ],
         id: 'acFactSet'
@@ -74,86 +303,21 @@ describe('makeDefaultBody', () => {
         text: 'Custom Message 2',
         separator: true,
         wrap: true
-      }
-    ])
-  })
-
-  it('should create a default body without custom messages', () => {
-    const customMessage1 = ''
-    const customMessage2 = ''
-    const commitMessage = 'Initial commit'
-    const changedFiles = ['file1.js', 'file2.js']
-
-    const body = makeDefaultBody(customMessage1, customMessage2, commitMessage, changedFiles)
-    expect(body).toEqual([
-      {
-        type: 'TextBlock',
-        text: '#123 Initial commit',
-        id: 'Title',
-        spacing: 'Medium',
-        size: 'large',
-        weight: 'Bolder',
-        color: 'Accent'
       },
       {
-        type: 'FactSet',
-        facts: [
-          {
-            title: 'Repository/Branch:',
-            value: 'test-repo / main'
-          },
-          {
-            title: 'Workflow/Event/Actor:',
-            value: 'CI / push / test-actor'
-          },
-          {
-            title: 'SHA-1:',
-            value: 'abc123'
-          },
-          {
-            title: 'Changed files:',
-            value: `\`file1.js\`
-
-\`file2.js\``
-          }
-        ],
-        id: 'acFactSet'
-      }
-    ])
-  })
-  it('should create a default body without custom messages and changed files', () => {
-    const customMessage1 = ''
-    const customMessage2 = ''
-    const commitMessage = 'Initial commit'
-
-    const body = makeDefaultBody(customMessage1, customMessage2, commitMessage, undefined)
-    expect(body).toEqual([
-      {
         type: 'TextBlock',
-        text: '#123 Initial commit',
-        id: 'Title',
-        spacing: 'Medium',
-        size: 'large',
-        weight: 'Bolder',
-        color: 'Accent'
+        text: '**Changed files:**',
+        separator: true,
+        wrap: true
       },
       {
-        type: 'FactSet',
-        facts: [
-          {
-            title: 'Repository/Branch:',
-            value: 'test-repo / main'
-          },
-          {
-            title: 'Workflow/Event/Actor:',
-            value: 'CI / push / test-actor'
-          },
-          {
-            title: 'SHA-1:',
-            value: 'abc123'
-          }
-        ],
-        id: 'acFactSet'
+        type: 'TextBlock',
+        text: `\`file1.js\`
+
+\`file2.js\``,
+        separator: true,
+        size: 'small',
+        wrap: false
       }
     ])
   })

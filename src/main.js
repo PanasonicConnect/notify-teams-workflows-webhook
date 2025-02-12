@@ -19,11 +19,11 @@ const getInputs = () => {
   return {
     webhookUrl: core.getInput('webhook-url'),
     template: core.getInput('template'),
+    config: core.getInput('config'),
     customMessage1: core.getInput('message1'),
     customMessage2: core.getInput('message2'),
     actionTitles: core.getInput('action-titles')?.split('\n') || [],
-    actionUrls: core.getInput('action-urls')?.split('\n') || [],
-    visibleChangedFiles: core.getInput('visible-changed-files')
+    actionUrls: core.getInput('action-urls')?.split('\n') || []
   }
 }
 /**
@@ -37,12 +37,13 @@ const getInputs = () => {
  * @param {string} [inputs.template] - Optional path to the template file.
  * @param {string} inputs.customMessage1 - The first custom message.
  * @param {string} inputs.customMessage2 - The second custom message.
+ * @param {config} config - The configuration for creating the card.
  * @param {string} commitMessage - The commit message used in the body.
  * @param {string[]} changedFiles - Array of file names that were changed.
  * @returns {Object} The body object generated from the template or default values.
  * @throws {Error} Throws an error if the template file specified by inputs.template cannot be loaded or parsed.
  */
-const getBody = (inputs, commitMessage, changedFiles) => {
+const getBody = (inputs, config, commitMessage, changedFiles) => {
   if (inputs.template) {
     try {
       const templatesContent = fs.readFileSync(inputs.template, { encoding: 'utf8' })
@@ -53,8 +54,7 @@ const getBody = (inputs, commitMessage, changedFiles) => {
       throw new Error(`Failed to load template from ${inputs.template}: ${err.message}`)
     }
   } else {
-    const useChangedFiles = inputs.visibleChangedFiles == 'true' ? changedFiles : undefined
-    const defaultBody = makeDefaultBody(inputs.customMessage1, inputs.customMessage2, commitMessage, useChangedFiles)
+    const defaultBody = makeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitMessage, changedFiles)
     core.group('Default body', () => core.info(JSON.stringify(defaultBody, null, 2)))
     return defaultBody
   }
@@ -65,12 +65,13 @@ const getBody = (inputs, commitMessage, changedFiles) => {
  * @param {Object} inputs - The input parameters for creating the card.
  * @param {string[]} inputs.actionTitles - An array of titles for the action buttons.
  * @param {string[]} inputs.actionUrls - An array of URLs corresponding to each action.
+ * @param {config} config - The configuration for creating the card.
  * @param {string} commitMessage - The commit message to display in the card body.
  * @param {Array} changedFiles - A list of changed files to be included in the card body.
  * @returns {Object} An object representing the Adaptive Card payload with attachments.
  */
-const createAdapterCardPayload = (inputs, commitMessage, changedFiles) => {
-  const bodyContent = getBody(inputs, commitMessage, changedFiles)
+const createAdapterCardPayload = (inputs, config, commitMessage, changedFiles) => {
+  const bodyContent = getBody(inputs, config, commitMessage, changedFiles)
   const actionsContent = makeAction(inputs.actionTitles, inputs.actionUrls)
 
   return {
@@ -114,7 +115,10 @@ export async function run() {
     // get inputs
     const inputs = getInputs()
 
-    // Retrieve basic information from GitHub Actions environment variables
+    // Read the contents of the config file
+    const config = inputs.config ? fs.readFileSync(inputs.config, { encoding: 'utf8' }) : {}
+
+    // Retrieve basic information from GitHub Actions context
     const sha = context.sha
     const execOptions = {
       ignoreReturnCode: true
@@ -130,13 +134,14 @@ export async function run() {
 
     core.group('Inputs', () => {
       core.info(`inputs: ${JSON.stringify(inputs, null, 2)}`)
+      core.info(`config: ${JSON.stringify(config, null, 2)}`)
       core.info(`commit message: ${commitMessage}`)
       core.info(`changed files: ${changedFiles}`)
       core.info(`context: ${JSON.stringify(context, null, 2)}`)
     })
 
     // Create the body and actions of the Adaptive Card
-    const payload = createAdapterCardPayload(inputs, commitMessage, changedFiles)
+    const payload = createAdapterCardPayload(inputs, config, commitMessage, changedFiles)
     core.group('Payload', () => core.info(JSON.stringify(payload, null, 2)))
 
     // Send Adaptive Card to webhook-url via POST request

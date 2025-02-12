@@ -66,6 +66,7 @@ describe('Custom Action Tests', () => {
       })
     )
   })
+
   it('sends correct adaptive card payload when no template is provided and visible changed files', async () => {
     core.getInput.mockImplementation((name) => {
       if (name === 'token') return 'dummyToken'

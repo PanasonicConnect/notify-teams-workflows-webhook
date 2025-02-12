@@ -61,7 +61,6 @@ jobs:
           message2: 'test2 message'
           action-titles: 'github'
           action-urls: 'https://github.co.jp/'
-          visible-changed-files: true
 
   test-action-min:
     name: GitHub Actions Test Min
@@ -97,3 +96,19 @@ jobs:
           action-urls: |
             https://github.co.jp/
             https://docs.github.com/ja
+
+  test-action-config:
+    name: GitHub Actions Test Config
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 5
+      - name: Test Local Action (with config)
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
+          config: './.github/notify-config.json'
+          message1: 'test1 message'
+          message2: 'test2 message'

@@ -31258,26 +31258,46 @@ const singleTextBlockCustom2 = {
 
 const factBlock = {
   type: 'FactSet',
-  facts: [
-    {
-      title: 'Repository/Branch:',
-      value: '{GITHUB_REPOSITORY} / {BRANCH}'
-    },
-    {
-      title: 'Workflow/Event/Actor:',
-      value: '{GITHUB_WORKFLOW} / {GITHUB_EVENT_NAME} / {GITHUB_ACTOR}'
-    },
-    {
-      title: 'SHA-1:',
-      value: '{GITHUB_SHA}'
-    }
-  ],
+  facts: [],
   id: 'acFactSet'
 };
 
-const factBlockChangedFiles = {
-  title: 'Changed files:',
-  value: '{CHANGED_FILES}'
+const factBlockRepository = {
+  title: 'Repository:',
+  value: '{GITHUB_REPOSITORY}'
+};
+const factBlockBranch = {
+  title: 'Branch:',
+  value: '{BRANCH}'
+};
+const factBlockWorkflow = {
+  title: 'Workflow:',
+  value: '{GITHUB_WORKFLOW}'
+};
+const factBlockEvent = {
+  title: 'Event:',
+  value: '{GITHUB_EVENT_NAME}'
+};
+const factBlockActor = {
+  title: 'Actor:',
+  value: '{GITHUB_ACTOR}'
+};
+const factBlockSha1 = {
+  title: 'SHA-1:',
+  value: '{GITHUB_SHA}'
+};
+const singleTextBlockChangedFileTitle = {
+  type: 'TextBlock',
+  text: '**Changed files:**',
+  separator: true,
+  wrap: true
+};
+const singleTextBlockChangedFiles = {
+  type: 'TextBlock',
+  text: '{CHANGED_FILES}',
+  separator: true,
+  size: 'small',
+  wrap: false
 };
 
 /**
@@ -31336,25 +31356,49 @@ const makeAction = (titles, urls) => {
 /**
  * Creates a default body for a message with optional custom messages and commit details.
  *
+ * @param {config} config - The configuration for creating the card.
  * @param {string} customMessage1 - The first custom message to include in the body.
  * @param {string} customMessage2 - The second custom message to include in the body.
  * @param {string} commitMessage - The commit message to include in the body.
  * @param {Array} changedFiles - The list of changed files to include in the body.
  * @returns {Object} The constructed body object with the provided parameters.
  */
-const makeDefaultBody = (customMessage1, customMessage2, commitMessage, changedFiles) => {
+const makeDefaultBody = (config, customMessage1, customMessage2, commitMessage, changedFiles) => {
   const body = [];
   body.push(titleBlock);
   if (customMessage1) {
     body.push(singleTextBlockCustom1);
   }
+  // create fact set
   const fact = JSON.parse(JSON.stringify(factBlock));
-  if (changedFiles) {
-    fact.facts.push(factBlockChangedFiles);
+  if (config?.visible?.repository_name) {
+    fact.facts.push(factBlockRepository);
   }
-  body.push(fact);
+  if (config?.visible?.branch_name) {
+    fact.facts.push(factBlockBranch);
+  }
+  if (config?.visible?.workflow_name) {
+    fact.facts.push(factBlockWorkflow);
+  }
+  if (config?.visible?.event) {
+    fact.facts.push(factBlockEvent);
+  }
+  if (config?.visible?.actor) {
+    fact.facts.push(factBlockActor);
+  }
+  if (config?.visible?.sha1) {
+    fact.facts.push(factBlockSha1);
+  }
+
+  if (fact.facts.length > 0) {
+    body.push(fact);
+  }
   if (customMessage2) {
     body.push(singleTextBlockCustom2);
+  }
+  if (config?.visible?.changed_files && changedFiles) {
+    body.push(singleTextBlockChangedFileTitle);
+    body.push(singleTextBlockChangedFiles);
   }
   const replacedBody = replaceBodyParameters(JSON.stringify(body), customMessage1, customMessage2, commitMessage, changedFiles);
   const parsedBody = JSON.parse(replacedBody);
@@ -31402,11 +31446,11 @@ const getInputs = () => {
   return {
     webhookUrl: coreExports.getInput('webhook-url'),
     template: coreExports.getInput('template'),
+    config: coreExports.getInput('config'),
     customMessage1: coreExports.getInput('message1'),
     customMessage2: coreExports.getInput('message2'),
     actionTitles: coreExports.getInput('action-titles')?.split('\n') || [],
-    actionUrls: coreExports.getInput('action-urls')?.split('\n') || [],
-    visibleChangedFiles: coreExports.getInput('visible-changed-files')
+    actionUrls: coreExports.getInput('action-urls')?.split('\n') || []
   }
 };
 /**
@@ -31420,12 +31464,13 @@ const getInputs = () => {
  * @param {string} [inputs.template] - Optional path to the template file.
  * @param {string} inputs.customMessage1 - The first custom message.
  * @param {string} inputs.customMessage2 - The second custom message.
+ * @param {config} config - The configuration for creating the card.
  * @param {string} commitMessage - The commit message used in the body.
  * @param {string[]} changedFiles - Array of file names that were changed.
  * @returns {Object} The body object generated from the template or default values.
  * @throws {Error} Throws an error if the template file specified by inputs.template cannot be loaded or parsed.
  */
-const getBody = (inputs, commitMessage, changedFiles) => {
+const getBody = (inputs, config, commitMessage, changedFiles) => {
   if (inputs.template) {
     try {
       const templatesContent = require$$1.readFileSync(inputs.template, { encoding: 'utf8' });
@@ -31436,8 +31481,7 @@ const getBody = (inputs, commitMessage, changedFiles) => {
       throw new Error(`Failed to load template from ${inputs.template}: ${err.message}`)
     }
   } else {
-    const useChangedFiles = inputs.visibleChangedFiles == 'true' ? changedFiles : undefined;
-    const defaultBody = makeDefaultBody(inputs.customMessage1, inputs.customMessage2, commitMessage, useChangedFiles);
+    const defaultBody = makeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitMessage, changedFiles);
     coreExports.group('Default body', () => coreExports.info(JSON.stringify(defaultBody, null, 2)));
     return defaultBody
   }
@@ -31448,12 +31492,13 @@ const getBody = (inputs, commitMessage, changedFiles) => {
  * @param {Object} inputs - The input parameters for creating the card.
  * @param {string[]} inputs.actionTitles - An array of titles for the action buttons.
  * @param {string[]} inputs.actionUrls - An array of URLs corresponding to each action.
+ * @param {config} config - The configuration for creating the card.
  * @param {string} commitMessage - The commit message to display in the card body.
  * @param {Array} changedFiles - A list of changed files to be included in the card body.
  * @returns {Object} An object representing the Adaptive Card payload with attachments.
  */
-const createAdapterCardPayload = (inputs, commitMessage, changedFiles) => {
-  const bodyContent = getBody(inputs, commitMessage, changedFiles);
+const createAdapterCardPayload = (inputs, config, commitMessage, changedFiles) => {
+  const bodyContent = getBody(inputs, config, commitMessage, changedFiles);
   const actionsContent = makeAction(inputs.actionTitles, inputs.actionUrls);
 
   return {
@@ -31497,7 +31542,10 @@ async function run() {
     // get inputs
     const inputs = getInputs();
 
-    // Retrieve basic information from GitHub Actions environment variables
+    // Read the contents of the config file
+    const config = inputs.config ? require$$1.readFileSync(inputs.config, { encoding: 'utf8' }) : {};
+
+    // Retrieve basic information from GitHub Actions context
     const sha = githubExports.context.sha;
     const execOptions = {
       ignoreReturnCode: true
@@ -31513,13 +31561,14 @@ async function run() {
 
     coreExports.group('Inputs', () => {
       coreExports.info(`inputs: ${JSON.stringify(inputs, null, 2)}`);
+      coreExports.info(`config: ${JSON.stringify(config, null, 2)}`);
       coreExports.info(`commit message: ${commitMessage}`);
       coreExports.info(`changed files: ${changedFiles}`);
       coreExports.info(`context: ${JSON.stringify(githubExports.context, null, 2)}`);
     });
 
     // Create the body and actions of the Adaptive Card
-    const payload = createAdapterCardPayload(inputs, commitMessage, changedFiles);
+    const payload = createAdapterCardPayload(inputs, config, commitMessage, changedFiles);
     coreExports.group('Payload', () => coreExports.info(JSON.stringify(payload, null, 2)));
 
     // Send Adaptive Card to webhook-url via POST request
