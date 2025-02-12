@@ -31568,7 +31568,7 @@ async function run() {
     const commitMessage = stdout.trim();
 
     // Get the list of changed files from the latest commit
-    const { stdout: changedFilesStdout } = await execExports.getExecOutput('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', sha], execOptions);
+    const { stdout: changedFilesStdout } = await execExports.getExecOutput('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', `${sha}^1`, sha], execOptions);
     const changedFiles = changedFilesStdout.trim().split('\n');
 
     coreExports.group('Inputs', () => {
