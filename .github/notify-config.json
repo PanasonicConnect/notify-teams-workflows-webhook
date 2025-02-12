@@ -3,9 +3,9 @@
     "repository_name": true,
     "branch_name": true,
     "workflow_name": true,
-    "event": false,
-    "actor": false,
-    "sha1": false,
-    "changed_files": false
+    "event": true,
+    "actor": true,
+    "sha1": true,
+    "changed_files": true
   }
 }

@@ -31431,6 +31431,18 @@ const replaceBodyParameters = (target, customMessage1, customMessage2, commitMes
     .replace('{CUSTOM_MESSAGE_2}', customMessage2)
 };
 
+const DEFAULT_CONFIG = {
+  visible: {
+    repository_name: true,
+    branch_name: true,
+    workflow_name: true,
+    event: false,
+    actor: false,
+    sha1: false,
+    changed_files: true
+  }
+};
+
 /**
  * Retrieves and processes input values required for the custom action.
  *
@@ -31543,7 +31555,7 @@ async function run() {
     const inputs = getInputs();
 
     // Read the contents of the config file
-    const config = inputs.config ? require$$1.readFileSync(inputs.config, { encoding: 'utf8' }) : {};
+    const config = inputs.config ? JSON.parse(require$$1.readFileSync(inputs.config, { encoding: 'utf8' })) : DEFAULT_CONFIG;
 
     // Retrieve basic information from GitHub Actions context
     const sha = githubExports.context.sha;

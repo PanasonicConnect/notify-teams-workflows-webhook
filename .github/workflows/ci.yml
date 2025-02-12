@@ -57,8 +57,8 @@ jobs:
         uses: ./
         with:
           webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
-          message1: 'test1 message'
-          message2: 'test2 message'
+          message1: 'normal test 1 message'
+          message2: 'normal test 2 message'
           action-titles: 'github'
           action-urls: 'https://github.co.jp/'
 
@@ -88,8 +88,8 @@ jobs:
         with:
           webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
           template: './.github/body-template.json'
-          message1: 'test1 message'
-          message2: 'test2 message'
+          message1: 'template test 1 message'
+          message2: 'template test 2 message'
           action-titles: |
             github
             docs
@@ -110,5 +110,5 @@ jobs:
         with:
           webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
           config: './.github/notify-config.json'
-          message1: 'test1 message'
-          message2: 'test2 message'
+          message1: 'config test 1 message'
+          message2: 'config test 2 message'
