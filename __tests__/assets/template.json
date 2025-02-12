@@ -1,0 +1,57 @@
+[
+  {
+    "type": "TextBlock",
+    "text": "{GITHUB_RUN_NUMBER}",
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{COMMIT_MESSAGE}",
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{CUSTOM_MESSAGE_1}",
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{GITHUB_REPOSITORY}",
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{BRANCH}",
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{GITHUB_EVENT_NAME}",
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{GITHUB_WORKFLOW}",
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{GITHUB_ACTOR}",
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{GITHUB_SHA}",
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{CHANGED_FILES}",
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{CUSTOM_MESSAGE_2}",
+    "wrap": true
+  }
+]

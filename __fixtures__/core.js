@@ -1,12 +1,16 @@
 /**
  * This file is used to mock the `@actions/core` module in tests.
  */
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 
-export const debug = jest.fn()
-export const error = jest.fn()
-export const info = jest.fn()
-export const getInput = jest.fn()
-export const setOutput = jest.fn()
-export const setFailed = jest.fn()
-export const warning = jest.fn()
+export const debug = vi.fn()
+export const isDebug = vi.fn()
+export const error = vi.fn()
+export const info = vi.fn()
+export const getInput = vi.fn()
+export const setOutput = vi.fn()
+export const setFailed = vi.fn()
+export const warning = vi.fn()
+export const startGroup = vi.fn()
+export const endGroup = vi.fn()
+export const group = vi.fn()

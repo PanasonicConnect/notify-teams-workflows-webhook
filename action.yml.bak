@@ -25,10 +25,6 @@ inputs:
   action-urls:
     description: 'Action URLs to include in the payload'
     required: false
-  visible-changed-files:
-    description: 'Show changed files in the payload'
-    required: false
-    default: 'false'
 runs:
   using: node20
   main: dist/index.js

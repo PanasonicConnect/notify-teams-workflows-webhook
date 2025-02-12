@@ -52,13 +52,54 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
       - name: Test Local Action
         id: test-action
         uses: ./
         with:
-          milliseconds: 1000
+          webhook-url: 'https://example.com'
+          message1: 'test1'
+          message2: 'test2'
+          action-titles: 'title1'
+          action-urls: 'https://www.yahoo.co.jp/'
+          visible-changed-files: true
+  test-action-min:
+    name: GitHub Actions Test Min
+    runs-on: ubuntu-latest
 
-      - name: Print Output
-        id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Test Local Action Min
+        id: test-action-min
+        uses: ./
+        with:
+          webhook-url: 'https://example.com'
+  test-action-template:
+    name: GitHub Actions Test Template
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Test Local Action (with template)
+        id: test-action
+        uses: ./
+        with:
+          webhook-url: 'https://example.com'
+          template: './.github/body-template.json'
+          message1: 'test1'
+          message2: 'test2'
+          action-titles: |
+            title1
+            title2
+          action-urls: |
+            https://www.yahoo.co.jp/
+            https://www.example.com/
