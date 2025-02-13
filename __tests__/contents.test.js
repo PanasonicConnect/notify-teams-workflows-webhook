@@ -84,7 +84,8 @@ describe('makeDefaultBody', () => {
             value: 'abc123'
           }
         ],
-        id: 'acFactSet'
+        id: 'acFactSet',
+        separator: true
       },
       {
         type: 'TextBlock',
@@ -103,7 +104,6 @@ describe('makeDefaultBody', () => {
         text: `\`file1.js\`
 
 \`file2.js\``,
-        separator: true,
         size: 'small',
         wrap: false
       }
@@ -166,7 +166,8 @@ describe('makeDefaultBody', () => {
             value: 'abc123'
           }
         ],
-        id: 'acFactSet'
+        id: 'acFactSet',
+        separator: true
       },
       {
         type: 'TextBlock',
@@ -179,7 +180,6 @@ describe('makeDefaultBody', () => {
         text: `\`file1.js\`
 
 \`file2.js\``,
-        separator: true,
         size: 'small',
         wrap: false
       }
@@ -240,7 +240,8 @@ describe('makeDefaultBody', () => {
             value: 'abc123'
           }
         ],
-        id: 'acFactSet'
+        id: 'acFactSet',
+        separator: true
       }
     ])
   })
@@ -296,7 +297,8 @@ describe('makeDefaultBody', () => {
             value: 'test-actor'
           }
         ],
-        id: 'acFactSet'
+        id: 'acFactSet',
+        separator: true
       },
       {
         type: 'TextBlock',
@@ -315,7 +317,6 @@ describe('makeDefaultBody', () => {
         text: `\`file1.js\`
 
 \`file2.js\``,
-        separator: true,
         size: 'small',
         wrap: false
       }

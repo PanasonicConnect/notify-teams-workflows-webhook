@@ -27,6 +27,7 @@ const singleTextBlockCustom2 = {
 const factBlock = {
   type: 'FactSet',
   facts: [],
+  separator: true,
   id: 'acFactSet'
 }
 
@@ -63,7 +64,6 @@ const singleTextBlockChangedFileTitle = {
 const singleTextBlockChangedFiles = {
   type: 'TextBlock',
   text: '{CHANGED_FILES}',
-  separator: true,
   size: 'small',
   wrap: false
 }
