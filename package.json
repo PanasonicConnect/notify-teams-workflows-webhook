@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.6",
-    "@github/local-action": "^2.6.1",
+    "@github/local-action": "^2.6.2",
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@vitest/coverage-v8": "^3.0.5",
@@ -53,9 +53,9 @@
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-vitest": "^0.5.4",
     "make-coverage-badge": "^1.2.0",
-    "prettier": "^3.5.0",
+    "prettier": "^3.5.1",
     "prettier-eslint": "^16.3.0",
-    "rollup": "^4.34.6",
+    "rollup": "^4.34.8",
     "vitest": "^3.0.5"
   },
   "optionalDependencies": {
