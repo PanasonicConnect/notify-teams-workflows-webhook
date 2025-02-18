@@ -122,6 +122,26 @@ const postWebhookUrl = async (webhookUrl, payload) => {
     throw new Error(`Request failed: ${response.statusText}`)
   }
 }
+
+/**
+ * Determines whether to skip the notification based on the presence of ignore keywords in the commit message.
+ *
+ * @param {Object} notification - The notification object.
+ * @param {Array<string>} [notification.ignoreKeywords] - An array of keywords to check in the commit message.
+ * @returns {boolean} - Returns true if any of the ignore keywords are found in the commit message, otherwise false.
+ */
+const isSkipNotification = (notification) => {
+  // Notify if not specified.
+  const ignoreKeywords = notification?.ignoreKeywords
+  if (!ignoreKeywords) {
+    return false
+  }
+  if (!Array.isArray(ignoreKeywords)) {
+    return false
+  }
+  return ignoreKeywords.some((keyword) => context.payload.head_commit.message.includes(keyword))
+}
+
 export async function run() {
   try {
     // get inputs
@@ -151,6 +171,12 @@ export async function run() {
       core.info(`changed files: ${changedFiles}`)
       core.info(`context: ${JSON.stringify(context, null, 2)}`)
     })
+
+    // Skip notification if the commit message contains any of the ignore keywords
+    if (isSkipNotification(config.notification)) {
+      core.info('Skipping notification.')
+      return
+    }
 
     // Create the body and actions of the Adaptive Card
     const payload = createAdapterCardPayload(inputs, config, commitMessage, changedFiles)
