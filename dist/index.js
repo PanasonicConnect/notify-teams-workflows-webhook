@@ -31490,6 +31490,31 @@ const getInputs = () => {
     actionUrls: coreExports.getInput('action-urls')?.split('\n') || []
   }
 };
+
+/**
+ * Retrieves the commit message for a specific commit SHA.
+ *
+ * @param {string} sha - The SHA hash of the commit to check.
+ * @param {Object} execOptions - The options to pass to the exec command.
+ * @returns {Promise<string>} - A promise that resolves to the commit message.
+ */
+const getCommitMessage = async (sha, execOptions) => {
+  const { stdout } = await execExports.getExecOutput('git', ['show', '-s', '--format=%B', sha], execOptions);
+  return stdout.split('\n')[0].trim() // Get the first line of the commit message
+};
+
+/**
+ * Retrieves the list of files changed in a specific commit.
+ *
+ * @param {string} sha - The SHA hash of the commit to check.
+ * @param {object} execOptions - Options to pass to the exec command.
+ * @returns {Promise<string[]>} A promise that resolves to an array of changed file paths.
+ */
+const getChangedFiles = async (sha, execOptions) => {
+  const { stdout: changedFilesStdout } = await execExports.getExecOutput('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', `${sha}^1`, sha], execOptions);
+  return changedFilesStdout.trim().split('\n')
+};
+
 /**
  * Generates the body object for the custom action.
  *
@@ -31604,18 +31629,16 @@ async function run() {
     const config = inputs.config ? JSON.parse(require$$1.readFileSync(inputs.config, { encoding: 'utf8' })) : DEFAULT_CONFIG;
 
     // Retrieve basic information from GitHub Actions context
-    const sha = githubExports.context.sha;
     const execOptions = {
       ignoreReturnCode: true
       //silent: !core.isDebug()
     };
+
     // Get the latest commit message
-    const { stdout } = await execExports.getExecOutput('git', ['show', '-s', '--format=%B', sha], execOptions);
-    const commitMessage = stdout.trim();
+    const commitMessage = await getCommitMessage(githubExports.context.sha, execOptions);
 
     // Get the list of changed files from the latest commit
-    const { stdout: changedFilesStdout } = await execExports.getExecOutput('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', `${sha}^1`, sha], execOptions);
-    const changedFiles = changedFilesStdout.trim().split('\n');
+    const changedFiles = await getChangedFiles(githubExports.context.sha, execOptions);
 
     coreExports.group('Inputs', () => {
       coreExports.info(`inputs: ${JSON.stringify(inputs, null, 2)}`);

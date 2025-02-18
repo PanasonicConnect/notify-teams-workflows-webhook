@@ -247,4 +247,48 @@ describe('Custom Action Tests', () => {
     // Validate that fetch was not called
     expect(fetch).toHaveBeenCalled()
   })
+  it('If the commit message is multi-line, only the first line is used', async () => {
+    core.getInput.mockImplementation((name) => {
+      if (name === 'token') return 'dummyToken'
+      if (name === 'webhook-url') return 'https://dummy.url'
+      if (name === 'template') return './__tests__/assets/template.json'
+      if (name === 'message1') return 'dummyMessage1'
+      if (name === 'message2') return 'dummyMessage2'
+      if (name === 'action-titles') return 'Title1'
+      if (name === 'action-urls') return 'https://url1'
+      if (name === 'config') return './__tests__/assets/config-ignore.json'
+      return ''
+    })
+
+    // Mock the commit message to include the ignore keyword
+    exec.getExecOutput.mockImplementation(() => ({ stdout: 'first line\nsecond line' }))
+
+    await run()
+
+    // Validate that fetch was not called
+    expect(fetch).toHaveBeenCalled()
+    const fetchCall = fetch.mock.calls[0][1]
+    const requestBody = JSON.parse(fetchCall.body)
+
+    const expectedTemplate = [
+      { type: 'TextBlock', text: '123', wrap: true },
+      { type: 'TextBlock', text: 'first line', wrap: true }, // first line\nsecond line -> first line
+      { type: 'TextBlock', text: 'dummyMessage1', wrap: true },
+      { type: 'TextBlock', text: 'test-repo', wrap: true },
+      { type: 'TextBlock', text: 'main', wrap: true },
+      { type: 'TextBlock', text: 'push', wrap: true },
+      { type: 'TextBlock', text: 'CI', wrap: true },
+      { type: 'TextBlock', text: 'test-actor', wrap: true },
+      { type: 'TextBlock', text: 'abc123', wrap: true },
+      {
+        type: 'TextBlock',
+        text: `\`first line\`
+
+\`second line\``,
+        wrap: true
+      },
+      { type: 'TextBlock', text: 'dummyMessage2', wrap: true }
+    ]
+    expect(requestBody?.attachments[0].content.body).toEqual(expectedTemplate)
+  })
 })
