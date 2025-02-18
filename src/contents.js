@@ -177,14 +177,36 @@ export const makeDefaultBody = (config, customMessage1, customMessage2, commitMe
     body.push(singleTextBlockChangedFileTitle)
     body.push(singleTextBlockChangedFiles)
   }
-  const replacedBody = replaceBodyParameters(JSON.stringify(body), customMessage1, customMessage2, commitMessage, changedFiles)
+  const replacedBody = replaceBodyParameters(config, JSON.stringify(body), customMessage1, customMessage2, commitMessage, changedFiles)
   const parsedBody = JSON.parse(replacedBody)
   return parsedBody
 }
 
 /**
+ * Generates a string representation of the changed files.
+ *
+ * @param {Object} config - The configuration object.
+ * @param {Object} config.changedFile - Configuration for changed files.
+ * @param {number} config.changedFile.max - The maximum number of files to display.
+ * @param {string[]} changedFiles - An array of changed file paths.
+ * @returns {string} A formatted string of changed files, limited by the max number specified in the config.
+ */
+export const generateChangedFilesString = (config, changedFiles) => {
+  if (!Array.isArray(changedFiles)) {
+    return ''
+  }
+  const maxFiles = config?.changedFile?.max || changedFiles.length
+  const displayedFiles = changedFiles.slice(0, maxFiles).map((file) => `\`${file}\``)
+  if (changedFiles.length > maxFiles) {
+    displayedFiles.push('...')
+  }
+  return displayedFiles.join('\\n\\n')
+}
+
+/**
  * Replaces placeholders in the target string with provided values.
  *
+ * @param {config} config - The configuration for creating the card.
  * @param {string} target - The string containing placeholders to be replaced.
  * @param {string} customMessage1 - Custom message to replace the {CUSTOM_MESSAGE_1} placeholder.
  * @param {string} customMessage2 - Custom message to replace the {CUSTOM_MESSAGE_2} placeholder.
@@ -192,8 +214,9 @@ export const makeDefaultBody = (config, customMessage1, customMessage2, commitMe
  * @param {Array} changedFiles - The list of changed files to include in the body.
  * @returns {string} - The target string with all placeholders replaced by their corresponding values.
  */
-export const replaceBodyParameters = (target, customMessage1, customMessage2, commitMessage, changedFiles) => {
-  const changedFilesString = Array.isArray(changedFiles) ? changedFiles.map((file) => `\`${file}\``).join('\\n\\n') : ''
+export const replaceBodyParameters = (config, target, customMessage1, customMessage2, commitMessage, changedFiles) => {
+  const changedFilesString = generateChangedFilesString(config, changedFiles)
+
   return target
     .replace('{GITHUB_RUN_NUMBER}', context.runNumber)
     .replace('{COMMIT_MESSAGE}', commitMessage)

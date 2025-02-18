@@ -18,7 +18,7 @@ context.actor = 'test-actor'
 context.sha = 'abc123'
 context.serverUrl = 'https://github.com'
 
-const { makeDefaultBody, makeAction } = await import('../src/contents.js')
+const { makeDefaultBody, makeAction, generateChangedFilesString } = await import('../src/contents.js')
 
 describe('makeDefaultBody', () => {
   it('should create a default body with all parameters', () => {
@@ -374,5 +374,20 @@ describe('makeAction', () => {
     const titles = ['Valid Action', '']
     const urls = ['https://example.com', 'https://missing.com']
     expect(() => makeAction(titles, urls)).toThrow('Action parameters must contain a title and URL.')
+  })
+})
+
+describe('generateChangedFilesString', () => {
+  it('limits the number of displayed changed files to the max specified in config', () => {
+    const config = {
+      changedFile: {
+        max: 10
+      }
+    }
+    const changedFiles = Array.from({ length: 15 }, (_, i) => `file${i + 1}.txt`)
+    const result = generateChangedFilesString(config, changedFiles)
+    expect(result).toBe(
+      '`file1.txt`\\n\\n`file2.txt`\\n\\n`file3.txt`\\n\\n`file4.txt`\\n\\n`file5.txt`\\n\\n`file6.txt`\\n\\n`file7.txt`\\n\\n`file8.txt`\\n\\n`file9.txt`\\n\\n`file10.txt`\\n\\n...'
+    )
   })
 })
