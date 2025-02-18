@@ -41,7 +41,6 @@ describe('Custom Action Tests', () => {
       if (name === 'message2') return 'dummyMessage2'
       if (name === 'action-titles') return 'Title1\nTitle2'
       if (name === 'action-urls') return 'https://url1\nhttps://url2'
-      if (name === 'visible-changed-files') return 'false'
       return ''
     })
 
@@ -76,7 +75,6 @@ describe('Custom Action Tests', () => {
       if (name === 'message2') return 'dummyMessage2'
       if (name === 'action-titles') return 'Title1\nTitle2'
       if (name === 'action-urls') return 'https://url1\nhttps://url2'
-      if (name === 'visible-changed-files') return 'true'
       return ''
     })
 
@@ -111,7 +109,6 @@ describe('Custom Action Tests', () => {
       if (name === 'message2') return 'dummyMessage2'
       if (name === 'action-titles') return 'Title1'
       if (name === 'action-urls') return 'https://url1'
-      if (name === 'visible-changed-files') return 'false'
       return ''
     })
 
@@ -186,7 +183,6 @@ describe('Custom Action Tests', () => {
       if (name === 'message2') return 'dummyMessage2'
       if (name === 'action-titles') return ''
       if (name === 'action-urls') return ''
-      if (name === 'visible-changed-files') return 'false'
       return ''
     })
     await run()
@@ -204,10 +200,31 @@ describe('Custom Action Tests', () => {
       if (name === 'message2') return 'dummyMessage2'
       if (name === 'action-titles') return 'Title1\nTitle2'
       if (name === 'action-urls') return 'https://url1\nhttps://url2'
-      if (name === 'visible-changed-files') return 'false'
       return ''
     })
     await run()
     expect(core.setFailed).toHaveBeenCalledWith(expect.stringMatching(/Request failed: Internal Server Error/))
+  })
+
+  it('does not send notification if commit message contains ignore keyword', async () => {
+    core.getInput.mockImplementation((name) => {
+      if (name === 'token') return 'dummyToken'
+      if (name === 'webhook-url') return 'https://dummy.url'
+      if (name === 'template') return ''
+      if (name === 'message1') return 'dummyMessage1'
+      if (name === 'message2') return 'dummyMessage2'
+      if (name === 'action-titles') return 'Title1\nTitle2'
+      if (name === 'action-urls') return 'https://url1\nhttps://url2'
+      if (name === 'config') return './assets/config-ignore.json'
+      return ''
+    })
+
+    // Mock the commit message to include the ignore keyword
+    context.payload.head_commit = { message: 'typo: fixed a typo' }
+
+    await run()
+
+    // Validate that fetch was not called
+    expect(fetch).not.toHaveBeenCalled()
   })
 })
