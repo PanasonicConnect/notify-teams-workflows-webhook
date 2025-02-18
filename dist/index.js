@@ -27624,7 +27624,7 @@ function requireBeforeAfterHook () {
 
 var beforeAfterHookExports = requireBeforeAfterHook();
 
-const VERSION$5 = "9.0.5";
+const VERSION$5 = "9.0.6";
 
 const userAgent = `octokit-endpoint.js/${VERSION$5} ${getUserAgent()}`;
 const DEFAULTS = {
@@ -27721,9 +27721,9 @@ function addQueryParameters(url, parameters) {
   }).join("&");
 }
 
-const urlVariableRegex = /\{[^}]+\}/g;
+const urlVariableRegex = /\{[^{}}]+\}/g;
 function removeNonChars(variableName) {
-  return variableName.replace(/^\W+|\W+$/g, "").split(/,/);
+  return variableName.replace(/(?:^\W+)|(?:(?<!\W)\W+$)/g, "").split(/,/);
 }
 function extractUrlVariableNames(url) {
   const matches = url.match(urlVariableRegex);
@@ -27906,7 +27906,7 @@ function parse(options) {
     }
     if (url.endsWith("/graphql")) {
       if (options.mediaType.previews?.length) {
-        const previewsFromAcceptHeader = headers.accept.match(/[\w-]+(?=-preview)/g) || [];
+        const previewsFromAcceptHeader = headers.accept.match(/(?<![\w-])[\w-]+(?=-preview)/g) || [];
         headers.accept = previewsFromAcceptHeader.concat(options.mediaType.previews).map((preview) => {
           const format = options.mediaType.format ? `.${options.mediaType.format}` : "+json";
           return `application/vnd.github.${preview}-preview${format}`;
@@ -31549,6 +31549,26 @@ const postWebhookUrl = async (webhookUrl, payload) => {
     throw new Error(`Request failed: ${response.statusText}`)
   }
 };
+
+/**
+ * Determines whether to skip the notification based on the presence of ignore keywords in the commit message.
+ *
+ * @param {Object} notification - The notification object.
+ * @param {Array<string>} [notification.ignoreKeywords] - An array of keywords to check in the commit message.
+ * @returns {boolean} - Returns true if any of the ignore keywords are found in the commit message, otherwise false.
+ */
+const isSkipNotification = (notification) => {
+  // Notify if not specified.
+  const ignoreKeywords = notification?.ignoreKeywords;
+  if (!ignoreKeywords) {
+    return false
+  }
+  if (!Array.isArray(ignoreKeywords)) {
+    return false
+  }
+  return ignoreKeywords.some((keyword) => githubExports.context.payload.head_commit.message.includes(keyword))
+};
+
 async function run() {
   try {
     // get inputs
@@ -31578,6 +31598,12 @@ async function run() {
       coreExports.info(`changed files: ${changedFiles}`);
       coreExports.info(`context: ${JSON.stringify(githubExports.context, null, 2)}`);
     });
+
+    // Skip notification if the commit message contains any of the ignore keywords
+    if (isSkipNotification(config.notification)) {
+      coreExports.info('Skipping notification.');
+      return
+    }
 
     // Create the body and actions of the Adaptive Card
     const payload = createAdapterCardPayload(inputs, config, commitMessage, changedFiles);
