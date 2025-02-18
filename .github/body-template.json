@@ -1,40 +1,42 @@
 [
-    {
-        "type": "TextBlock",
-        "text": "#20 Teams通知用の設定ファイルを追加\n\n新しい通知設定ファイルとテンプレートを追加し、GitHub ActionsのワークフローにTeams通知を組み込みました。",
-        "id": "Title",
-        "spacing": "Medium",
-        "size": "large",
-        "weight": "Bolder",
-        "color": "Accent",
-        "wrap": true
-    },
-    {
-        "type": "TextBlock",
-        "text": "新しいTipsが投稿されました！",
-        "separator": true,
-        "wrap": true
-    },
-    {
-        "type": "TextBlock",
-        "text": "**Author:** ",
-        "separator": true,
-        "wrap": true
-    },
-    {
-        "type": "TextBlock",
-        "text": "`dev-mochizuki-kohei`",
-        "size": "small",
-        "wrap": false
-    },
-    {
-        "type": "TextBlock",
-        "text": "**Changed files:**",
-        "separator": true,
-        "wrap": true
-    },
-    {
-        "type": "TextBlock",
-        "text": "`.github/config/notify-teams-config.json`\\n\\n`.github/config/notify-teams-template.json`"
-    }
+  {
+    "type": "TextBlock",
+    "text": "#{GITHUB_RUN_NUMBER} {COMMIT_MESSAGE}",
+    "id": "Title",
+    "spacing": "Medium",
+    "size": "large",
+    "weight": "Bolder",
+    "color": "Accent",
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{CUSTOM_MESSAGE_1}",
+    "separator": true,
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "**Author:** ",
+    "separator": true,
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "`{GITHUB_ACTOR}`",
+    "size": "small",
+    "wrap": false
+  },
+  {
+    "type": "TextBlock",
+    "text": "**Changed files:**",
+    "separator": true,
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{CHANGED_FILES}",
+    "size": "small",
+    "wrap": false
+  }
 ]
