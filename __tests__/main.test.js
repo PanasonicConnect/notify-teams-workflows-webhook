@@ -41,7 +41,6 @@ describe('Custom Action Tests', () => {
       if (name === 'message2') return 'dummyMessage2'
       if (name === 'action-titles') return 'Title1\nTitle2'
       if (name === 'action-urls') return 'https://url1\nhttps://url2'
-      if (name === 'visible-changed-files') return 'false'
       return ''
     })
 
@@ -76,7 +75,6 @@ describe('Custom Action Tests', () => {
       if (name === 'message2') return 'dummyMessage2'
       if (name === 'action-titles') return 'Title1\nTitle2'
       if (name === 'action-urls') return 'https://url1\nhttps://url2'
-      if (name === 'visible-changed-files') return 'true'
       return ''
     })
 
@@ -111,7 +109,6 @@ describe('Custom Action Tests', () => {
       if (name === 'message2') return 'dummyMessage2'
       if (name === 'action-titles') return 'Title1'
       if (name === 'action-urls') return 'https://url1'
-      if (name === 'visible-changed-files') return 'false'
       return ''
     })
 
@@ -186,7 +183,6 @@ describe('Custom Action Tests', () => {
       if (name === 'message2') return 'dummyMessage2'
       if (name === 'action-titles') return ''
       if (name === 'action-urls') return ''
-      if (name === 'visible-changed-files') return 'false'
       return ''
     })
     await run()
@@ -204,7 +200,6 @@ describe('Custom Action Tests', () => {
       if (name === 'message2') return 'dummyMessage2'
       if (name === 'action-titles') return 'Title1\nTitle2'
       if (name === 'action-urls') return 'https://url1\nhttps://url2'
-      if (name === 'visible-changed-files') return 'false'
       return ''
     })
     await run()
