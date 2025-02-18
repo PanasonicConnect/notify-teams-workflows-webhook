@@ -31232,6 +31232,8 @@ var githubExports = requireGithub();
 
 var execExports = requireExec();
 
+const DEFAULT_MAX_CHANGED_FILES = 10;
+
 const titleBlock = {
   type: 'TextBlock',
   text: '#{GITHUB_RUN_NUMBER} {COMMIT_MESSAGE}',
@@ -31418,7 +31420,7 @@ const generateChangedFilesString = (config, changedFiles) => {
   if (!Array.isArray(changedFiles)) {
     return ''
   }
-  const maxFiles = config?.changedFile?.max || changedFiles.length;
+  const maxFiles = config?.changedFile?.max || DEFAULT_MAX_CHANGED_FILES;
   const displayedFiles = changedFiles.slice(0, maxFiles).map((file) => `\`${file}\``);
   if (changedFiles.length > maxFiles) {
     displayedFiles.push('...');

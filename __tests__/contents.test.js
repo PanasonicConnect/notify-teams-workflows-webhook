@@ -381,11 +381,16 @@ describe('generateChangedFilesString', () => {
   it('limits the number of displayed changed files to the max specified in config', () => {
     const config = {
       changedFile: {
-        max: 10
+        max: 5
       }
     }
     const changedFiles = Array.from({ length: 15 }, (_, i) => `file${i + 1}.txt`)
     const result = generateChangedFilesString(config, changedFiles)
+    expect(result).toBe('`file1.txt`\\n\\n`file2.txt`\\n\\n`file3.txt`\\n\\n`file4.txt`\\n\\n`file5.txt`\\n\\n...')
+  })
+  it('limits the number of displayed changed files to the default value', () => {
+    const changedFiles = Array.from({ length: 15 }, (_, i) => `file${i + 1}.txt`)
+    const result = generateChangedFilesString({}, changedFiles)
     expect(result).toBe(
       '`file1.txt`\\n\\n`file2.txt`\\n\\n`file3.txt`\\n\\n`file4.txt`\\n\\n`file5.txt`\\n\\n`file6.txt`\\n\\n`file7.txt`\\n\\n`file8.txt`\\n\\n`file9.txt`\\n\\n`file10.txt`\\n\\n...'
     )
