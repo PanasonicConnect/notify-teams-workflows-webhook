@@ -10,5 +10,8 @@
   },
   "notification": {
     "ignoreKeywords": ["ignore:", "typo:"]
+  },
+  "changedFile": {
+    "max": 10
   }
 }

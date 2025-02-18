@@ -59,7 +59,7 @@ const getBody = (inputs, config, commitMessage, changedFiles) => {
   if (inputs.template) {
     try {
       const templatesContent = fs.readFileSync(inputs.template, { encoding: 'utf8' })
-      const processedContent = replaceBodyParameters(templatesContent, inputs.customMessage1, inputs.customMessage2, commitMessage, changedFiles)
+      const processedContent = replaceBodyParameters(config, templatesContent, inputs.customMessage1, inputs.customMessage2, commitMessage, changedFiles)
       core.group('Template body', () => core.info(JSON.stringify(processedContent, null, 2)))
       return JSON.parse(processedContent)
     } catch (err) {
