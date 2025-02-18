@@ -1,204 +1,256 @@
-# Create a JavaScript Action
+# Notify teams workflows webhook 
 
 [![GitHub Super-Linter](https://github.com/actions/javascript-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
 ![CI](https://github.com/actions/javascript-action/actions/workflows/ci.yml/badge.svg)
+![Coverage](./badges/coverage.svg)
 
-Use this template to bootstrap the creation of a JavaScript action. :rocket:
+[English](./README-en.md)
 
-This template includes compilation support, tests, a validation workflow, publishing, and versioning guidance.
+このアクションは、指定されたWebhook URLにPOSTリクエストを送信します。
+その際、デフォルトでは以下の要素を含むJSONデータを送信します。
+* body
+  * ワークフロー番号
+  * 最終コミットのメッセージ
+  * リポジトリ名
+  * ブランチ名
+  * ワークフロー名
+  * 最終コミットの変更ファイル
+* actions
+  * GitHubのワークフロー画面に遷移するボタン
 
-If you are new, there's also a simpler introduction in the [Hello world JavaScript action repository](https://github.com/actions/hello-world-javascript-action).
+デフォルトの表示内容を変更したり、ユーザーが作成したテンプレートファイルを元に送信内容をカスタマイズすることもできます。
 
-## Create Your Own Action
+## What's new 
 
-To create your own action, you can use this repository as a template! Just follow the below instructions:
+T.B.D
 
-1. Click the **Use this template** button at the top of the repository
-1. Select **Create a new repository**
-1. Select an owner and name for your new repository
-1. Click **Create repository**
-1. Clone your new repository
+## Usage
 
-> [!IMPORTANT]
->
-> Make sure to remove or update the [`CODEOWNERS`](./CODEOWNERS) file! For details on how to use this file, see
-> [About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners).
+### Workflows
+
+```yaml
+- uses: actions/checkout@v4
+  with:
+    # 変更ファイルを表示する際は必ずfetch-depthを0または1より大きい値にしてください
+    fetch-depth: 2
+- uses: PanasonicConnect/notify-teams-workflows-webhook
+  with:
+    # Teamsの通知先チャネルのWorkflows Webhook URLを指定してください
+    webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
+    # 送信内容のテンプレートファイル(.json)を使用する場合はパスを指定してください
+    # default: 指定なし
+    # example: .github/config/notify-template.json
+    template: ''
+    # 送信設定ファイル(.json)を使用する場合はパスを指定してください
+    # default: 指定なし
+    # example: .github/config/notify-config.json
+    config: ''
+    # カスタムメッセージ1を送信する場合は以下のパラメータを指定してください
+    # default: 指定なし
+    message1: ''
+    # カスタムメッセージ2を送信する場合は以下のパラメータを指定してください
+    # default: 指定なし
+    message2: ''
+    # 通知メッセージに付与するアクションボタンのタイトルを指定してください
+    # default: View Workflow
+    # example: ['View Workflow', 'View Pages']
+    action-titles: []
+    # 通知メッセージに付与するアクションボタン押下時に遷移するURLを指定してください
+    # default: 本アクションを実行したワークフロー実行履歴画面のURL
+    # example: ['https://github-workflow-url', 'https://github-pages-url']
+    action-urls: []
+```
+
+### Permission
+
+```yaml
+permissions:
+  contents: read
+```
+
+### Template
+
+Teams workflows webhook URLに送信するアダプティブカード形式のデータのうち、
+bodyとして送信するデータをテンプレートして定義することができます。
+
+```json
+{
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.2",
+        "body": [], // templateパラメータ指定、またはDefault template内容により自動生成されます
+        "actions": [] // action-titles, action-urlsパラメータ指定内容により自動生成されます
+      }
+    }
+  ]
+}
+```
+
+templateパラメータを指定しない場合は下記テンプレートが使用されます。
+テンプレート内の`{`と`}`で囲まれた箇所が変数として扱われ、
+ワークフロー実行時の値に置換されて送信されます。
+
+#### Default template
+
+```json
+[
+  {
+    "type": "TextBlock",
+    "text": "{GITHUB_RUN_NUMBER} {COMMIT_MESSAGE}",
+    "id": "Title",
+    "spacing": "Medium",
+    "size": "large",
+    "weight": "Bolder",
+    "color": "Accent"
+  },
+  {
+    "type": "TextBlock",
+    "text": "{CUSTOM_MESSAGE_1}",
+    "separator": true,
+    "wrap": true
+  },
+  {
+    "type": "FactSet",
+    "facts": [
+      {
+        "title": "Repository:",
+        "value": "{GITHUB_REPOSITORY}"
+      },
+      {
+        "title": "Branch:",
+        "value": "{BRANCH}"
+      },
+      {
+        "title": "Workflow:",
+        "value": "{GITHUB_WORKFLOW}"
+      },
+      {
+        "title": "Event:",
+        "value": "{GITHUB_EVENT_NAME}"
+      }
+      {
+        "title": "Actor:",
+        "value": "{GITHUB_ACTOR}"
+      }
+      {
+        "title": "SHA-1:",
+        "value": "{GITHUB_SHA}"
+      }
+    ],
+    "separator": true,
+    "id": "acFactSet"
+  },
+  {
+    "type": "TextBlock",
+    "text": "{CUSTOM_MESSAGE_2}",
+    "separator": true,
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "**Changed files:**",
+    "separator": true,
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{CHANGED_FILES}",
+    "size": "small",
+    "wrap": false
+  }
+]
+```
+
+#### Variables
+
+テンプレートファイル内で使用可能な変数は以下の通りです。
+
+|変数名|説明|
+|---|---|
+|{CUSTOM_MESSAGE_1}|カスタムメッセージ1|
+|{CUSTOM_MESSAGE_2}|カスタムメッセージ2|
+|{GITHUB_RUN_NUMBER}|ワークフロー実行番号|
+|{COMMIT_MESSAGE}|最終コミットのメッセージの最初の行|
+|{GITHUB_SHA}|最終コミットのSHA-1値|
+|{CHANGED_FILES}|最終コミットの変更ファイル|
+|{GITHUB_REPOSITORY}|リポジトリ名|
+|{BRANCH}|ブランチ名|
+|{GITHUB_WORKFLOW}|ワークフロー名|
+|{GITHUB_EVENT_NAME}|ワークフローのトリガーとなったイベント名|
+|{GITHUB_ACTOR}|ワークフローのトリガーを実行したユーザー名|
+
+
+### Configuration
+
+configパラメータを指定することで、送信内容、条件のカスタマイズを行うことができます。
+
+```json
+{
+  // Default Templateの各項目を表示するかどうかを指定します
+  "visible": {
+    // {GITHUB_REPOSITORY}を含むBlockを表示するかどうかを指定します
+    // default: true
+    "repository_name": true,
+    // {BRANCH}を含むBlockを表示するかどうかを指定します
+    // default: true
+    "branch_name": true,
+    // {GITHUB_WORKFLOW}を含むBlockを表示するかどうかを指定します
+    // default: true
+    "workflow_name": true,
+    // {GITHUB_EVENT_NAME}を含むBlockを表示するかどうかを指定します
+    // default: false
+    "event": false,
+    // {GITHUB_ACTOR}を含むBlockを表示するかどうかを指定します
+    // default: false
+    "actor": false,
+    // {GITHUB_SHA}を含むBlockを表示するかどうかを指定します
+    // default: false
+    "sha1": false,
+    // {CHANGED_FILES}を含むBlockを表示するかどうかを指定します
+    // default: true
+    "changed_files": true
+  },
+  "notification": {
+    // 特定のキーワードがコミットメッセージに含まれる場合に通知を無視するかどうかを指定します
+    // default: false
+    // example: ["ignore:", "typo:"]
+    "ignoreKeywords": []
+  },
+  "changedFile": {
+    // 表示する変更ファイルの最大数を指定します
+    // default: 10
+    "max": 10
+  }
+}
+```
+
+## For developers
 
 ## Initial Setup
 
-After you've cloned the repository to your local machine or codespace, you'll need to perform some initial setup steps before you can develop your action.
+リポジトリをクローンし、依存パッケージをインストールします。
 
-> [!NOTE]
->
-> You'll need to have a reasonably modern version of [Node.js](https://nodejs.org) handy. If you are using a version manager like
-> [`nodenv`](https://github.com/nodenv/nodenv) or [`nvm`](https://github.com/nvm-sh/nvm), you can run `nodenv install` in the root of your repository to install
-> the version specified in [`package.json`](./package.json). Otherwise, 20.x or later should work!
+!!! note
+    Node.jsのバージョンは20.x以上を使用してください。
 
-1. :hammer_and_wrench: Install the dependencies
+1. パッケージをインストールする
 
    ```bash
    npm install
    ```
 
-1. :building_construction: Package the JavaScript for distribution
-
-   ```bash
-   npm run bundle
-   ```
-
-1. :white_check_mark: Run the tests
-
-   ```bash
-   $ npm test
-
-   PASS  ./index.test.js
-     ✓ throws invalid number (3ms)
-     ✓ wait 500 ms (504ms)
-     ✓ test runs (95ms)
-
-   ...
-   ```
-
-## Update the Action Metadata
-
-The [`action.yml`](action.yml) file defines metadata about your action, such as input(s) and output(s). For details about this file, see
-[Metadata syntax for GitHub Actions](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions).
-
-When you copy this repository, update `action.yml` with the name, description, inputs, and outputs for your action.
-
 ## Update the Action Code
 
-The [`src/`](./src/) directory is the heart of your action! This contains the source code that will be run when your action is invoked. You can replace the
-contents of this directory with your own code.
+1. [`src/`](./src/)以下のコードを修正してください。
+  GitHub Actions toolkitの詳細については [documentation](https://github.com/actions/toolkit/blob/main/README.md) を確認してください。
+1. [`__tests__/`](./__tests__)にテストを追加してください。
+1. `npm run test` でテストを実行して成功することを確認してください。
+1. `npm run all` でJavaScriptをパッケージ化し、テストとビルドが成功することを確認してください。
 
-There are a few things to keep in mind when writing your action code:
+## License
 
-- Most GitHub Actions toolkit and CI/CD operations are processed asynchronously. In `main.js`, you will see that the action is run in an `async` function.
-
-  ```javascript
-  const core = require('@actions/core')
-  //...
-
-  async function run() {
-    try {
-      //...
-    } catch (error) {
-      core.setFailed(error.message)
-    }
-  }
-  ```
-
-  For more information about the GitHub Actions toolkit, see the [documentation](https://github.com/actions/toolkit/blob/main/README.md).
-
-So, what are you waiting for? Go ahead and start customizing your action!
-
-1. Create a new branch
-
-   ```bash
-   git checkout -b releases/v1
-   ```
-
-1. Replace the contents of `src/` with your action code
-1. Add tests to `__tests__/` for your source code
-1. Format, test, and build the action
-
-   ```bash
-   npm run all
-   ```
-
-   > This step is important! It will run [`ncc`](https://github.com/vercel/ncc) to build the final JavaScript action code with all dependencies included. If you
-   > do not run this step, your action will not work correctly when it is used in a workflow. This step also includes the `--license` option for `ncc`, which
-   > will create a license file for all of the production node modules used in your project.
-
-1. (Optional) Test your action locally
-
-   The [`@github/local-action`](https://github.com/github/local-action) utility can be used to test your action locally. It is a simple command-line tool that
-   "stubs" (or simulates) the GitHub Actions Toolkit. This way, you can run your JavaScript action locally without having to commit and push your changes to a
-   repository.
-
-   The `local-action` utility can be run in the following ways:
-
-   - Visual Studio Code Debugger
-
-     Make sure to review and, if needed, update [`.vscode/launch.json`](./.vscode/launch.json)
-
-   - Terminal/Command Prompt
-
-     ```bash
-     # npx local action <action-yaml-path> <entrypoint> <dotenv-file>
-     npx local-action . src/main.js .env
-     ```
-
-   You can provide a `.env` file to the `local-action` CLI to set environment variables used by the GitHub Actions Toolkit. For example, setting inputs and
-   event payload data used by your action. For more information, see the example file, [`.env.example`](./.env.example), and the
-   [GitHub Actions Documentation](https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables).
-
-1. Commit your changes
-
-   ```bash
-   git add .
-   git commit -m "My first action is ready!"
-   ```
-
-1. Push them to your repository
-
-   ```bash
-   git push -u origin releases/v1
-   ```
-
-1. Create a pull request and get feedback on your action
-1. Merge the pull request into the `main` branch
-
-Your action is now published! :rocket:
-
-For information about versioning your action, see [Versioning](https://github.com/actions/toolkit/blob/main/docs/action-versioning.md) in the GitHub Actions
-toolkit.
-
-## Validate the Action
-
-You can now validate the action by referencing it in a workflow file. For example, [`ci.yml`](./.github/workflows/ci.yml) demonstrates how to reference an
-action in the same repository.
-
-```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v3
-
-  - name: Test Local Action
-    id: test-action
-    uses: ./
-    with:
-      milliseconds: 1000
-
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.time }}"
-```
-
-For example workflow runs, check out the [Actions tab](https://github.com/actions/javascript-action/actions)! :rocket:
-
-## Usage
-
-After testing, you can create version tag(s) that developers can use to reference different stable versions of your action. For more information, see
-[Versioning](https://github.com/actions/toolkit/blob/main/docs/action-versioning.md) in the GitHub Actions toolkit.
-
-To include the action in a workflow in another repository, you can use the `uses` syntax with the `@` symbol to reference a specific branch, tag, or commit
-hash.
-
-```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v4
-
-  - name: Run my Action
-    id: run-action
-    uses: actions/javascript-action@v1 # Commit with the `v1` tag
-    with:
-      milliseconds: 1000
-
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.run-action.outputs.time }}"
-```
+このプロジェクトのスクリプトとドキュメントは[MITライセンス](./LICENSE)でリリースされています。
