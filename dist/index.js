@@ -31551,13 +31551,14 @@ const postWebhookUrl = async (webhookUrl, payload) => {
 };
 
 /**
- * Determines whether to skip the notification based on the presence of ignore keywords in the commit message.
+ * Determines whether a notification should be skipped based on the commit message and specified ignore keywords.
  *
- * @param {Object} notification - The notification object.
- * @param {Array<string>} [notification.ignoreKeywords] - An array of keywords to check in the commit message.
- * @returns {boolean} - Returns true if any of the ignore keywords are found in the commit message, otherwise false.
+ * @param {string} commitMessage - The commit message to check against the ignore keywords.
+ * @param {Object} notification - The notification object containing the ignore keywords.
+ * @param {string[]} [notification.ignoreKeywords] - An array of keywords to check for in the commit message.
+ * @returns {boolean} - Returns true if the commit message contains any of the ignore keywords, otherwise false.
  */
-const isSkipNotification = (notification) => {
+const isSkipNotification = (commitMessage, notification) => {
   // Notify if not specified.
   const ignoreKeywords = notification?.ignoreKeywords;
   if (!ignoreKeywords) {
@@ -31566,7 +31567,7 @@ const isSkipNotification = (notification) => {
   if (!Array.isArray(ignoreKeywords)) {
     return false
   }
-  return ignoreKeywords.some((keyword) => githubExports.context.payload.head_commit.message.includes(keyword))
+  return ignoreKeywords.some((keyword) => commitMessage.includes(keyword))
 };
 
 async function run() {
@@ -31600,7 +31601,7 @@ async function run() {
     });
 
     // Skip notification if the commit message contains any of the ignore keywords
-    if (isSkipNotification(config.notification)) {
+    if (isSkipNotification(commitMessage, config.notification)) {
       coreExports.info('Skipping notification.');
       return
     }
