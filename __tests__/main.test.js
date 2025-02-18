@@ -1,15 +1,14 @@
 import { vi } from 'vitest'
 import * as core from '../__fixtures__/core.js'
 import { context } from '../__fixtures__/context.js'
-import { getExecOutput } from '@actions/exec'
+import * as exec from '../__fixtures__/exec.js'
 
 vi.mock('@actions/core', () => core)
 vi.mock('@actions/github', () => {
   return { context }
 })
-vi.mock('@actions/exec', () => {
-  return { getExecOutput: vi.fn().mockImplementation(() => ({ stdout: 'dummy output' })) }
-})
+vi.mock('@actions/exec', () => exec)
+
 context.runNumber = '123'
 context.payload = {
   repository: {
@@ -23,13 +22,13 @@ context.actor = 'test-actor'
 context.sha = 'abc123'
 context.serverUrl = 'https://github.com'
 
-global.fetch = vi.fn().mockImplementation(() => Promise.resolve({ ok: true, statusText: 'OK' }))
-
 const { run } = await import('../src/main.js')
 
 describe('Custom Action Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    exec.getExecOutput.mockImplementation(() => ({ stdout: 'dummy output' }))
+    global.fetch = vi.fn().mockImplementation(() => Promise.resolve({ ok: true, statusText: 'OK' }))
   })
 
   it('sends correct adaptive card payload when no template is provided', async () => {
@@ -215,16 +214,37 @@ describe('Custom Action Tests', () => {
       if (name === 'message2') return 'dummyMessage2'
       if (name === 'action-titles') return 'Title1\nTitle2'
       if (name === 'action-urls') return 'https://url1\nhttps://url2'
-      if (name === 'config') return './assets/config-ignore.json'
+      if (name === 'config') return './__tests__/assets/config-ignore.json'
       return ''
     })
 
     // Mock the commit message to include the ignore keyword
-    context.payload.head_commit = { message: 'typo: fixed a typo' }
+    exec.getExecOutput.mockImplementation(() => ({ stdout: 'typo: fixed a typo' }))
 
     await run()
 
     // Validate that fetch was not called
     expect(fetch).not.toHaveBeenCalled()
+  })
+  it('Notify if the Notify Ignore keyword is set but not included in the commit message', async () => {
+    core.getInput.mockImplementation((name) => {
+      if (name === 'token') return 'dummyToken'
+      if (name === 'webhook-url') return 'https://dummy.url'
+      if (name === 'template') return ''
+      if (name === 'message1') return 'dummyMessage1'
+      if (name === 'message2') return 'dummyMessage2'
+      if (name === 'action-titles') return 'Title1\nTitle2'
+      if (name === 'action-urls') return 'https://url1\nhttps://url2'
+      if (name === 'config') return './__tests__/assets/config-ignore.json'
+      return ''
+    })
+
+    // Mock the commit message to include the ignore keyword
+    exec.getExecOutput.mockImplementation(() => ({ stdout: 'fixed a typo' }))
+
+    await run()
+
+    // Validate that fetch was not called
+    expect(fetch).toHaveBeenCalled()
   })
 })
