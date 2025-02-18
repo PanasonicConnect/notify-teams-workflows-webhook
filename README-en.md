@@ -6,7 +6,7 @@
 
 [日本語](./README.md)
 
-This action sends a POST request to the specified Webhook URL.
+This action sends a POST request to the Webhook URL created in the workflows of the specified Teams.
 By default, it sends JSON data containing the following elements:
 * body
   * Workflow number
