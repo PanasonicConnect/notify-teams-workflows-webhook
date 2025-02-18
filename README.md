@@ -6,7 +6,7 @@
 
 [English](./README-en.md)
 
-このアクションは、指定されたWebhook URLにPOSTリクエストを送信します。
+このアクションは、指定されたTeamsのworkflowsで作成したWebhook URLにPOSTリクエストを送信します。
 その際、デフォルトでは以下の要素を含むJSONデータを送信します。
 * body
   * ワークフロー番号
