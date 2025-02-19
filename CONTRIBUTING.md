@@ -2,9 +2,7 @@
 
 ---
 
-## 日本語
-
-### Pull Requests
+## Pull Requests - ja
 
 1. リポジトリをfolkしてクローンしてください。
 1. `npm install`を実行してパッケージをインストールしてください
@@ -25,9 +23,7 @@ Pull Requestが受け入れられる可能性を高めるためにできるこ�
 
 ---
 
-## English
-
-### Pull Requests
+## Pull Requests - en
 
 1. folk and clone the repository.
 1. run `npm install` to install the package
