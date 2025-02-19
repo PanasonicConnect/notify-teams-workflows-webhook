@@ -82,7 +82,7 @@ bodyとして送信するデータをテンプレートして定義すること�
         "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
         "type": "AdaptiveCard",
         "version": "1.2",
-        "body": [], // templateパラメータ指定、またはDefault template内容により自動生成されます
+        "body": [], // templateパラメータで指定したファイルの内容、またはDefault template内容により自動生成されます
         "actions": [] // action-titles, action-urlsパラメータ指定内容により自動生成されます
       }
     }
@@ -90,11 +90,11 @@ bodyとして送信するデータをテンプレートして定義すること�
 }
 ```
 
+#### Default template
+
 templateパラメータを指定しない場合は下記テンプレートが使用されます。
 テンプレート内の`{`と`}`で囲まれた箇所が変数として扱われ、
 ワークフロー実行時の値に置換されて送信されます。
-
-#### Default template
 
 ```json
 [
@@ -165,6 +165,28 @@ templateパラメータを指定しない場合は下記テンプレートが使
 ]
 ```
 
+#### Custom template
+
+templateパラメータでは、ユーザーが作成したテンプレートファイルを指定することができます。
+テンプレート作成については[Microsoft Teams 向けアダプティブ カードの概要](https://learn.microsoft.com/ja-jp/power-automate/overview-adaptive-cards) を参考にしてください。
+
+```json
+[
+  {
+    "type": "TextBlock",
+    "text": "{COMMIT_MESSAGE}",
+    "separator": true,
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{CHANGED_FILES}",
+    "size": "small",
+    "wrap": false
+  }
+]
+```
+
 #### Variables
 
 テンプレートファイル内で使用可能な変数は以下の通りです。
@@ -187,6 +209,7 @@ templateパラメータを指定しない場合は下記テンプレートが使
 ### Configuration
 
 configパラメータを指定することで、送信内容、条件のカスタマイズを行うことができます。
+以下json内のコメントは説明のために記載していますが、実際のjson内にコメントを記載することはできません。
 
 ```json
 {

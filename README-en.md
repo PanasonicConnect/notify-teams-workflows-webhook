@@ -89,10 +89,10 @@ You can define the data sent as the body in the adaptive card format sent to the
 }
 ```
 
+#### Default template
+
 If the template parameter is not specified, the following template will be used.
 The parts enclosed in `{` and `}` in the template are treated as variables and will be replaced with the values at the time of workflow execution.
-
-#### Default template
 
 ```json
 [
@@ -163,6 +163,28 @@ The parts enclosed in `{` and `}` in the template are treated as variables and w
 ]
 ```
 
+#### Custom template
+
+The template parameter allows the specification of a user-created template file.
+Please refer to [Overview of adaptive cards for Microsoft Teams](https://learn.microsoft.com/en-us/power-automate/overview-adaptive-cards) for more information on template creation.
+
+```json
+[
+  {
+    "type": "TextBlock",
+    "text": "{COMMIT_MESSAGE}",
+    "separator": true,
+    "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "{CHANGED_FILES}",
+    "size": "small",
+    "wrap": false
+  }
+]
+```
+
 #### Variables
 
 The following variables can be used in the template file.
@@ -184,6 +206,7 @@ The following variables can be used in the template file.
 ### Configuration
 
 By specifying the config parameter, you can customize the content and conditions of the notification.
+Comments in the following json are included for illustrative purposes, but comments cannot be included in the actual json.
 
 ```json
 {
