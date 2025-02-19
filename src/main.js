@@ -70,8 +70,8 @@ const getChangedFiles = async (sha, execOptions) => {
  * @returns {Promise<string>} - A promise that resolves to the author of the most recent commit.
  */
 const getCommitAuthor = async (execOptions) => {
-  const { stdout: author } = await exec.getExecOutput('git', ['log', '-1', '--pretty=format:"%an"'], execOptions)
-  return author.replace(/"/g, '') // Remove quotes from the author name
+  const { stdout: author } = await exec.getExecOutput('git', ['log', '-1', '--pretty=format:%an'], execOptions)
+  return author.replace(/\\/g, '') // Remove quotes from the author name
 }
 /**
  * Generates the body object for the custom action.
