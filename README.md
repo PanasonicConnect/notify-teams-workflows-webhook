@@ -195,6 +195,7 @@ templateパラメータでは、ユーザーが作成したテンプレートフ
 | {COMMIT_MESSAGE}    | 最終コミットのメッセージの最初の行         |
 | {GITHUB_SHA}        | 最終コミットのSHA-1値                      |
 | {CHANGED_FILES}     | 最終コミットの変更ファイル                 |
+| {AUTHOR}            | 最終コミットの著者                         |
 | {GITHUB_REPOSITORY} | リポジトリ名                               |
 | {BRANCH}            | ブランチ名                                 |
 | {GITHUB_WORKFLOW}   | ワークフロー名                             |

@@ -231,4 +231,5 @@ export const replaceBodyParameters = (config, target, customMessage1, customMess
     .replace('{GITHUB_SHA}', context.sha)
     .replace('{CHANGED_FILES}', changedFilesString)
     .replace('{CUSTOM_MESSAGE_2}', customMessage2)
+    .replace('{AUTHOR}', commitInfo.author)
 }

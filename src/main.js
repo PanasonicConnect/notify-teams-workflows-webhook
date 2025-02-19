@@ -64,6 +64,17 @@ const getChangedFiles = async (sha, execOptions) => {
 }
 
 /**
+ * Retrieves the author of the most recent commit.
+ *
+ * @param {object} execOptions - The options to pass to the exec command.
+ * @returns {Promise<string>} - A promise that resolves to the author of the most recent commit.
+ */
+const getCommitAuthor = async (execOptions) => {
+  const { stdout: author } = await exec.getExecOutput('git', ['log', '-1', '--pretty=format:"%an"'], execOptions)
+  return author
+}
+
+/**
  * Generates the body object for the custom action.
  *
  * If a template path is provided in inputs.template, attempts to read and process the template
@@ -190,16 +201,19 @@ export async function run() {
     // Get the list of changed files from the latest commit
     const changedFiles = await getChangedFiles(context.sha, execOptions)
 
+    // Get the latest author of the commit
+    const author = await getCommitAuthor(execOptions)
+
     const commitInfo = {
       commitMessage,
-      changedFiles
+      changedFiles,
+      author
     }
 
     core.group('Inputs', () => {
       core.info(`inputs: ${JSON.stringify(inputs, null, 2)}`)
       core.info(`config: ${JSON.stringify(config, null, 2)}`)
-      core.info(`commit message: ${commitInfo.commitMessage}`)
-      core.info(`changed files: ${commitInfo.changedFiles}`)
+      core.info(`commitInfo: ${JSON.stringify(commitInfo, null, 2)}`)
       core.info(`context: ${JSON.stringify(context, null, 2)}`)
     })
 

@@ -198,6 +198,7 @@ The following variables can be used in the template file.
 | {COMMIT_MESSAGE}    | First line of the last commit message           |
 | {GITHUB_SHA}        | SHA-1 value of the last commit                  |
 | {CHANGED_FILES}     | Changed files in the last commit                |
+| {AUTHOR}            | Author in the last commit                       |
 | {GITHUB_REPOSITORY} | Repository name                                 |
 | {BRANCH}            | Branch name                                     |
 | {GITHUB_WORKFLOW}   | Workflow name                                   |

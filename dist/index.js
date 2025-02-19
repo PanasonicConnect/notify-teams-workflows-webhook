@@ -31361,11 +31361,10 @@ const makeAction = (titles, urls) => {
  * @param {config} config - The configuration for creating the card.
  * @param {string} customMessage1 - The first custom message to include in the body.
  * @param {string} customMessage2 - The second custom message to include in the body.
- * @param {string} commitMessage - The commit message to include in the body.
- * @param {Array} changedFiles - The list of changed files to include in the body.
+ * @param {Object} commitInfo - Information about the commit.
  * @returns {Object} The constructed body object with the provided parameters.
  */
-const makeDefaultBody = (config, customMessage1, customMessage2, commitMessage, changedFiles) => {
+const makeDefaultBody = (config, customMessage1, customMessage2, commitInfo) => {
   const body = [];
   body.push(titleBlock);
   if (customMessage1) {
@@ -31398,11 +31397,11 @@ const makeDefaultBody = (config, customMessage1, customMessage2, commitMessage, 
   if (customMessage2) {
     body.push(singleTextBlockCustom2);
   }
-  if (config?.visible?.changed_files && changedFiles) {
+  if (config?.visible?.changed_files && commitInfo.changedFiles) {
     body.push(singleTextBlockChangedFileTitle);
     body.push(singleTextBlockChangedFiles);
   }
-  const replacedBody = replaceBodyParameters(config, JSON.stringify(body), customMessage1, customMessage2, commitMessage, changedFiles);
+  const replacedBody = replaceBodyParameters(config, JSON.stringify(body), customMessage1, customMessage2, commitInfo);
   const parsedBody = JSON.parse(replacedBody);
   return parsedBody
 };
@@ -31429,22 +31428,23 @@ const generateChangedFilesString = (config, changedFiles) => {
 };
 
 /**
- * Replaces placeholders in the target string with provided values.
+ * Replaces placeholders in the target string with corresponding values from the provided parameters.
  *
- * @param {config} config - The configuration for creating the card.
- * @param {string} target - The string containing placeholders to be replaced.
+ * @param {Object} config - Configuration object.
+ * @param {string} target - The target string containing placeholders to be replaced.
  * @param {string} customMessage1 - Custom message to replace the {CUSTOM_MESSAGE_1} placeholder.
  * @param {string} customMessage2 - Custom message to replace the {CUSTOM_MESSAGE_2} placeholder.
- * @param {string} commitMessage - Commit message to replace the {COMMIT_MESSAGE} placeholder.
- * @param {Array} changedFiles - The list of changed files to include in the body.
- * @returns {string} - The target string with all placeholders replaced by their corresponding values.
+ * @param {Object} commitInfo - Information about the commit.
+ * @param {string} commitInfo.commitMessage - The commit message to replace the {COMMIT_MESSAGE} placeholder.
+ * @param {Array<string>} commitInfo.changedFiles - List of changed files to generate the {CHANGED_FILES} placeholder.
+ * @returns {string} The target string with all placeholders replaced by their corresponding values.
  */
-const replaceBodyParameters = (config, target, customMessage1, customMessage2, commitMessage, changedFiles) => {
-  const changedFilesString = generateChangedFilesString(config, changedFiles);
+const replaceBodyParameters = (config, target, customMessage1, customMessage2, commitInfo) => {
+  const changedFilesString = generateChangedFilesString(config, commitInfo.changedFiles);
 
   return target
     .replace('{GITHUB_RUN_NUMBER}', githubExports.context.runNumber)
-    .replace('{COMMIT_MESSAGE}', commitMessage)
+    .replace('{COMMIT_MESSAGE}', commitInfo.commitMessage)
     .replace('{CUSTOM_MESSAGE_1}', customMessage1)
     .replace('{GITHUB_REPOSITORY}', githubExports.context.payload.repository?.name)
     .replace('{BRANCH}', getBranch())
@@ -31454,6 +31454,7 @@ const replaceBodyParameters = (config, target, customMessage1, customMessage2, c
     .replace('{GITHUB_SHA}', githubExports.context.sha)
     .replace('{CHANGED_FILES}', changedFilesString)
     .replace('{CUSTOM_MESSAGE_2}', customMessage2)
+    .replace('{AUTHOR}', commitInfo.author)
 };
 
 const DEFAULT_CONFIG = {
@@ -31516,6 +31517,17 @@ const getChangedFiles = async (sha, execOptions) => {
 };
 
 /**
+ * Retrieves the author of the most recent commit.
+ *
+ * @param {object} execOptions - The options to pass to the exec command.
+ * @returns {Promise<string>} - A promise that resolves to the author of the most recent commit.
+ */
+const getCommitAuthor = async (execOptions) => {
+  const { stdout: author } = await execExports.getExecOutput('git', ['log', '-1', '--pretty=format:"%an"'], execOptions);
+  return author
+};
+
+/**
  * Generates the body object for the custom action.
  *
  * If a template path is provided in inputs.template, attempts to read and process the template
@@ -31527,40 +31539,42 @@ const getChangedFiles = async (sha, execOptions) => {
  * @param {string} inputs.customMessage1 - The first custom message.
  * @param {string} inputs.customMessage2 - The second custom message.
  * @param {config} config - The configuration for creating the card.
- * @param {string} commitMessage - The commit message used in the body.
- * @param {string[]} changedFiles - Array of file names that were changed.
+ * @param {Object} commitInfo - The commit information.
+ * @param {string} commitInfo.commitMessage - The commit message.
+ * @param {Array} commitInfo.changedFiles - The list of changed files.
  * @returns {Object} The body object generated from the template or default values.
  * @throws {Error} Throws an error if the template file specified by inputs.template cannot be loaded or parsed.
  */
-const getBody = (inputs, config, commitMessage, changedFiles) => {
+const getBody = (inputs, config, commitInfo) => {
   if (inputs.template) {
     try {
       const templatesContent = require$$1.readFileSync(inputs.template, { encoding: 'utf8' });
-      const processedContent = replaceBodyParameters(config, templatesContent, inputs.customMessage1, inputs.customMessage2, commitMessage, changedFiles);
+      const processedContent = replaceBodyParameters(config, templatesContent, inputs.customMessage1, inputs.customMessage2, commitInfo);
       coreExports.group('Template body', () => coreExports.info(JSON.stringify(processedContent, null, 2)));
       return JSON.parse(processedContent)
     } catch (err) {
       throw new Error(`Failed to load template from ${inputs.template}: ${err.message}`)
     }
   } else {
-    const defaultBody = makeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitMessage, changedFiles);
+    const defaultBody = makeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitInfo);
     coreExports.group('Default body', () => coreExports.info(JSON.stringify(defaultBody, null, 2)));
     return defaultBody
   }
 };
 /**
- * Creates the payload for an Adaptive Card containing commit and file change details.
+ * Creates an adaptive card payload for Microsoft Teams.
  *
- * @param {Object} inputs - The input parameters for creating the card.
- * @param {string[]} inputs.actionTitles - An array of titles for the action buttons.
- * @param {string[]} inputs.actionUrls - An array of URLs corresponding to each action.
- * @param {config} config - The configuration for creating the card.
- * @param {string} commitMessage - The commit message to display in the card body.
- * @param {Array} changedFiles - A list of changed files to be included in the card body.
- * @returns {Object} An object representing the Adaptive Card payload with attachments.
+ * @param {Object} inputs - The input parameters for the card.
+ * @param {Array} inputs.actionTitles - The titles of the actions.
+ * @param {Array} inputs.actionUrls - The URLs of the actions.
+ * @param {Object} config - The configuration object.
+ * @param {Object} commitInfo - The commit information.
+ * @param {string} commitInfo.commitMessage - The commit message.
+ * @param {Array} commitInfo.changedFiles - The list of changed files.
+ * @returns {Object} The adaptive card payload.
  */
-const createAdapterCardPayload = (inputs, config, commitMessage, changedFiles) => {
-  const bodyContent = getBody(inputs, config, commitMessage, changedFiles);
+const createAdapterCardPayload = (inputs, config, commitInfo) => {
+  const bodyContent = getBody(inputs, config, commitInfo);
   const actionsContent = makeAction(inputs.actionTitles, inputs.actionUrls);
 
   return {
@@ -31640,22 +31654,30 @@ async function run() {
     // Get the list of changed files from the latest commit
     const changedFiles = await getChangedFiles(githubExports.context.sha, execOptions);
 
+    // Get the latest author of the commit
+    const author = await getCommitAuthor(execOptions);
+
+    const commitInfo = {
+      commitMessage,
+      changedFiles,
+      author
+    };
+
     coreExports.group('Inputs', () => {
       coreExports.info(`inputs: ${JSON.stringify(inputs, null, 2)}`);
       coreExports.info(`config: ${JSON.stringify(config, null, 2)}`);
-      coreExports.info(`commit message: ${commitMessage}`);
-      coreExports.info(`changed files: ${changedFiles}`);
+      coreExports.info(`commitInfo: ${JSON.stringify(commitInfo, null, 2)}`);
       coreExports.info(`context: ${JSON.stringify(githubExports.context, null, 2)}`);
     });
 
     // Skip notification if the commit message contains any of the ignore keywords
-    if (isSkipNotification(commitMessage, config.notification)) {
+    if (isSkipNotification(commitInfo.commitMessage, config.notification)) {
       coreExports.info('Skipping notification.');
       return
     }
 
     // Create the body and actions of the Adaptive Card
-    const payload = createAdapterCardPayload(inputs, config, commitMessage, changedFiles);
+    const payload = createAdapterCardPayload(inputs, config, commitInfo);
     coreExports.group('Payload', () => coreExports.info(JSON.stringify(payload, null, 2)));
 
     // Send Adaptive Card to webhook-url via POST request
