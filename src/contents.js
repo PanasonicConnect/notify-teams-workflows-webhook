@@ -138,11 +138,10 @@ export const makeAction = (titles, urls) => {
  * @param {config} config - The configuration for creating the card.
  * @param {string} customMessage1 - The first custom message to include in the body.
  * @param {string} customMessage2 - The second custom message to include in the body.
- * @param {string} commitMessage - The commit message to include in the body.
- * @param {Array} changedFiles - The list of changed files to include in the body.
+ * @param {Object} commitInfo - Information about the commit.
  * @returns {Object} The constructed body object with the provided parameters.
  */
-export const makeDefaultBody = (config, customMessage1, customMessage2, commitMessage, changedFiles) => {
+export const makeDefaultBody = (config, customMessage1, customMessage2, commitInfo) => {
   const body = []
   body.push(titleBlock)
   if (customMessage1) {
@@ -175,11 +174,11 @@ export const makeDefaultBody = (config, customMessage1, customMessage2, commitMe
   if (customMessage2) {
     body.push(singleTextBlockCustom2)
   }
-  if (config?.visible?.changed_files && changedFiles) {
+  if (config?.visible?.changed_files && commitInfo.changedFiles) {
     body.push(singleTextBlockChangedFileTitle)
     body.push(singleTextBlockChangedFiles)
   }
-  const replacedBody = replaceBodyParameters(config, JSON.stringify(body), customMessage1, customMessage2, commitMessage, changedFiles)
+  const replacedBody = replaceBodyParameters(config, JSON.stringify(body), customMessage1, customMessage2, commitInfo)
   const parsedBody = JSON.parse(replacedBody)
   return parsedBody
 }
@@ -206,22 +205,23 @@ export const generateChangedFilesString = (config, changedFiles) => {
 }
 
 /**
- * Replaces placeholders in the target string with provided values.
+ * Replaces placeholders in the target string with corresponding values from the provided parameters.
  *
- * @param {config} config - The configuration for creating the card.
- * @param {string} target - The string containing placeholders to be replaced.
+ * @param {Object} config - Configuration object.
+ * @param {string} target - The target string containing placeholders to be replaced.
  * @param {string} customMessage1 - Custom message to replace the {CUSTOM_MESSAGE_1} placeholder.
  * @param {string} customMessage2 - Custom message to replace the {CUSTOM_MESSAGE_2} placeholder.
- * @param {string} commitMessage - Commit message to replace the {COMMIT_MESSAGE} placeholder.
- * @param {Array} changedFiles - The list of changed files to include in the body.
- * @returns {string} - The target string with all placeholders replaced by their corresponding values.
+ * @param {Object} commitInfo - Information about the commit.
+ * @param {string} commitInfo.commitMessage - The commit message to replace the {COMMIT_MESSAGE} placeholder.
+ * @param {Array<string>} commitInfo.changedFiles - List of changed files to generate the {CHANGED_FILES} placeholder.
+ * @returns {string} The target string with all placeholders replaced by their corresponding values.
  */
-export const replaceBodyParameters = (config, target, customMessage1, customMessage2, commitMessage, changedFiles) => {
-  const changedFilesString = generateChangedFilesString(config, changedFiles)
+export const replaceBodyParameters = (config, target, customMessage1, customMessage2, commitInfo) => {
+  const changedFilesString = generateChangedFilesString(config, commitInfo.changedFiles)
 
   return target
     .replace('{GITHUB_RUN_NUMBER}', context.runNumber)
-    .replace('{COMMIT_MESSAGE}', commitMessage)
+    .replace('{COMMIT_MESSAGE}', commitInfo.commitMessage)
     .replace('{CUSTOM_MESSAGE_1}', customMessage1)
     .replace('{GITHUB_REPOSITORY}', context.payload.repository?.name)
     .replace('{BRANCH}', getBranch())

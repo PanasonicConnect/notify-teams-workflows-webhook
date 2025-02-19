@@ -24,8 +24,10 @@ describe('makeDefaultBody', () => {
   it('should create a default body with all parameters', () => {
     const customMessage1 = 'Custom Message 1'
     const customMessage2 = 'Custom Message 2'
-    const commitMessage = 'Initial commit'
-    const changedFiles = ['file1.js', 'file2.js']
+    const commitInfo = {
+      commitMessage: 'Initial commit',
+      changedFiles: ['file1.js', 'file2.js']
+    }
     const config = {
       visible: {
         repository_name: true,
@@ -38,7 +40,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, customMessage1, customMessage2, commitMessage, changedFiles)
+    const body = makeDefaultBody(config, customMessage1, customMessage2, commitInfo)
     console.log(body)
     expect(body).toEqual([
       {
@@ -113,8 +115,10 @@ describe('makeDefaultBody', () => {
   it('should create a default body without custom messages', () => {
     const customMessage1 = ''
     const customMessage2 = ''
-    const commitMessage = 'Initial commit'
-    const changedFiles = ['file1.js', 'file2.js']
+    const commitInfo = {
+      commitMessage: 'Initial commit',
+      changedFiles: ['file1.js', 'file2.js']
+    }
     const config = {
       visible: {
         repository_name: true,
@@ -127,7 +131,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, customMessage1, customMessage2, commitMessage, changedFiles)
+    const body = makeDefaultBody(config, customMessage1, customMessage2, commitInfo)
     expect(body).toEqual([
       {
         type: 'TextBlock',
@@ -188,7 +192,10 @@ describe('makeDefaultBody', () => {
   it('should create a default body without custom messages and changed files', () => {
     const customMessage1 = ''
     const customMessage2 = ''
-    const commitMessage = 'Initial commit'
+    const commitInfo = {
+      commitMessage: 'Initial commit',
+      changedFiles: undefined
+    }
     const config = {
       visible: {
         repository_name: true,
@@ -201,7 +208,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, customMessage1, customMessage2, commitMessage, undefined)
+    const body = makeDefaultBody(config, customMessage1, customMessage2, commitInfo)
     expect(body).toEqual([
       {
         type: 'TextBlock',
@@ -249,8 +256,10 @@ describe('makeDefaultBody', () => {
   it('should create a default body based on config visibility', () => {
     const customMessage1 = 'Custom Message 1'
     const customMessage2 = 'Custom Message 2'
-    const commitMessage = 'Initial commit'
-    const changedFiles = ['file1.js', 'file2.js']
+    const commitInfo = {
+      commitMessage: 'Initial commit',
+      changedFiles: ['file1.js', 'file2.js']
+    }
     const config = {
       visible: {
         repository_name: true,
@@ -263,7 +272,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, customMessage1, customMessage2, commitMessage, changedFiles)
+    const body = makeDefaultBody(config, customMessage1, customMessage2, commitInfo)
 
     expect(body).toEqual([
       {

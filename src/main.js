@@ -75,40 +75,42 @@ const getChangedFiles = async (sha, execOptions) => {
  * @param {string} inputs.customMessage1 - The first custom message.
  * @param {string} inputs.customMessage2 - The second custom message.
  * @param {config} config - The configuration for creating the card.
- * @param {string} commitMessage - The commit message used in the body.
- * @param {string[]} changedFiles - Array of file names that were changed.
+ * @param {Object} commitInfo - The commit information.
+ * @param {string} commitInfo.commitMessage - The commit message.
+ * @param {Array} commitInfo.changedFiles - The list of changed files.
  * @returns {Object} The body object generated from the template or default values.
  * @throws {Error} Throws an error if the template file specified by inputs.template cannot be loaded or parsed.
  */
-const getBody = (inputs, config, commitMessage, changedFiles) => {
+const getBody = (inputs, config, commitInfo) => {
   if (inputs.template) {
     try {
       const templatesContent = fs.readFileSync(inputs.template, { encoding: 'utf8' })
-      const processedContent = replaceBodyParameters(config, templatesContent, inputs.customMessage1, inputs.customMessage2, commitMessage, changedFiles)
+      const processedContent = replaceBodyParameters(config, templatesContent, inputs.customMessage1, inputs.customMessage2, commitInfo)
       core.group('Template body', () => core.info(JSON.stringify(processedContent, null, 2)))
       return JSON.parse(processedContent)
     } catch (err) {
       throw new Error(`Failed to load template from ${inputs.template}: ${err.message}`)
     }
   } else {
-    const defaultBody = makeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitMessage, changedFiles)
+    const defaultBody = makeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitInfo)
     core.group('Default body', () => core.info(JSON.stringify(defaultBody, null, 2)))
     return defaultBody
   }
 }
 /**
- * Creates the payload for an Adaptive Card containing commit and file change details.
+ * Creates an adaptive card payload for Microsoft Teams.
  *
- * @param {Object} inputs - The input parameters for creating the card.
- * @param {string[]} inputs.actionTitles - An array of titles for the action buttons.
- * @param {string[]} inputs.actionUrls - An array of URLs corresponding to each action.
- * @param {config} config - The configuration for creating the card.
- * @param {string} commitMessage - The commit message to display in the card body.
- * @param {Array} changedFiles - A list of changed files to be included in the card body.
- * @returns {Object} An object representing the Adaptive Card payload with attachments.
+ * @param {Object} inputs - The input parameters for the card.
+ * @param {Array} inputs.actionTitles - The titles of the actions.
+ * @param {Array} inputs.actionUrls - The URLs of the actions.
+ * @param {Object} config - The configuration object.
+ * @param {Object} commitInfo - The commit information.
+ * @param {string} commitInfo.commitMessage - The commit message.
+ * @param {Array} commitInfo.changedFiles - The list of changed files.
+ * @returns {Object} The adaptive card payload.
  */
-const createAdapterCardPayload = (inputs, config, commitMessage, changedFiles) => {
-  const bodyContent = getBody(inputs, config, commitMessage, changedFiles)
+const createAdapterCardPayload = (inputs, config, commitInfo) => {
+  const bodyContent = getBody(inputs, config, commitInfo)
   const actionsContent = makeAction(inputs.actionTitles, inputs.actionUrls)
 
   return {
@@ -188,22 +190,27 @@ export async function run() {
     // Get the list of changed files from the latest commit
     const changedFiles = await getChangedFiles(context.sha, execOptions)
 
+    const commitInfo = {
+      commitMessage,
+      changedFiles
+    }
+
     core.group('Inputs', () => {
       core.info(`inputs: ${JSON.stringify(inputs, null, 2)}`)
       core.info(`config: ${JSON.stringify(config, null, 2)}`)
-      core.info(`commit message: ${commitMessage}`)
-      core.info(`changed files: ${changedFiles}`)
+      core.info(`commit message: ${commitInfo.commitMessage}`)
+      core.info(`changed files: ${commitInfo.changedFiles}`)
       core.info(`context: ${JSON.stringify(context, null, 2)}`)
     })
 
     // Skip notification if the commit message contains any of the ignore keywords
-    if (isSkipNotification(commitMessage, config.notification)) {
+    if (isSkipNotification(commitInfo.commitMessage, config.notification)) {
       core.info('Skipping notification.')
       return
     }
 
     // Create the body and actions of the Adaptive Card
-    const payload = createAdapterCardPayload(inputs, config, commitMessage, changedFiles)
+    const payload = createAdapterCardPayload(inputs, config, commitInfo)
     core.group('Payload', () => core.info(JSON.stringify(payload, null, 2)))
 
     // Send Adaptive Card to webhook-url via POST request
