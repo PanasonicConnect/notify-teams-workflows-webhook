@@ -1,22 +1,22 @@
 # Notify Teams Workflows Webhook
 
 [![GitHub Super-Linter](https://github.com/actions/javascript-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
-![CI](https://github.com/actions/javascript-action/actions/workflows/ci.yml/badge.svg)
-![Coverage](./badges/coverage.svg)
+![CI](https://github.com/actions/javascript-action/actions/workflows/ci.yml/badge.svg) ![Coverage](./badges/coverage.svg)
 
 [日本語](./README.md)
 
-This action sends a POST request to the Webhook URL created in the workflows of the specified Teams.
-By default, it sends JSON data containing the following elements:
-* body
-  * Workflow number
-  * Last commit message
-  * Repository name
-  * Branch name
-  * Workflow name
-  * Changed files in the last commit
-* actions
-  * Button to navigate to the GitHub workflow screen
+This action sends a POST request to the Webhook URL created in the workflows of the specified Teams. By default, it sends JSON data containing the following
+elements:
+
+- body
+  - Workflow number
+  - Last commit message
+  - Repository name
+  - Branch name
+  - Workflow name
+  - Changed files in the last commit
+- actions
+  - Button to navigate to the GitHub workflow screen
 
 You can also customize the default display content or send content based on a user-created template file.
 
@@ -91,8 +91,8 @@ You can define the data sent as the body in the adaptive card format sent to the
 
 #### Default template
 
-If the template parameter is not specified, the following template will be used.
-The parts enclosed in `{` and `}` in the template are treated as variables and will be replaced with the values at the time of workflow execution.
+If the template parameter is not specified, the following template will be used. The parts enclosed in `{` and `}` in the template are treated as variables and
+will be replaced with the values at the time of workflow execution.
 
 ```json
 [
@@ -165,8 +165,9 @@ The parts enclosed in `{` and `}` in the template are treated as variables and w
 
 #### Custom template
 
-The template parameter allows the specification of a user-created template file.
-Please refer to [Overview of adaptive cards for Microsoft Teams](https://learn.microsoft.com/en-us/power-automate/overview-adaptive-cards) for more information on template creation.
+The template parameter allows the specification of a user-created template file. Please refer to
+[Overview of adaptive cards for Microsoft Teams](https://learn.microsoft.com/en-us/power-automate/overview-adaptive-cards) for more information on template
+creation.
 
 ```json
 [
@@ -189,24 +190,24 @@ Please refer to [Overview of adaptive cards for Microsoft Teams](https://learn.m
 
 The following variables can be used in the template file.
 
-|Variable Name|Description|
-|---|---|
-|{CUSTOM_MESSAGE_1}|Custom message 1|
-|{CUSTOM_MESSAGE_2}|Custom message 2|
-|{GITHUB_RUN_NUMBER}|Workflow run number|
-|{COMMIT_MESSAGE}|First line of the last commit message|
-|{GITHUB_SHA}|SHA-1 value of the last commit|
-|{CHANGED_FILES}|Changed files in the last commit|
-|{GITHUB_REPOSITORY}|Repository name|
-|{BRANCH}|Branch name|
-|{GITHUB_WORKFLOW}|Workflow name|
-|{GITHUB_EVENT_NAME}|Event name that triggered the workflow|
-|{GITHUB_ACTOR}|Username of the user who triggered the workflow|
+| Variable Name       | Description                                     |
+| ------------------- | ----------------------------------------------- |
+| {CUSTOM_MESSAGE_1}  | Custom message 1                                |
+| {CUSTOM_MESSAGE_2}  | Custom message 2                                |
+| {GITHUB_RUN_NUMBER} | Workflow run number                             |
+| {COMMIT_MESSAGE}    | First line of the last commit message           |
+| {GITHUB_SHA}        | SHA-1 value of the last commit                  |
+| {CHANGED_FILES}     | Changed files in the last commit                |
+| {GITHUB_REPOSITORY} | Repository name                                 |
+| {BRANCH}            | Branch name                                     |
+| {GITHUB_WORKFLOW}   | Workflow name                                   |
+| {GITHUB_EVENT_NAME} | Event name that triggered the workflow          |
+| {GITHUB_ACTOR}      | Username of the user who triggered the workflow |
 
 ### Configuration
 
-By specifying the config parameter, you can customize the content and conditions of the notification.
-Comments in the following json are included for illustrative purposes, but comments cannot be included in the actual json.
+By specifying the config parameter, you can customize the content and conditions of the notification. Comments in the following json are included for
+illustrative purposes, but comments cannot be included in the actual json.
 
 ```json
 {

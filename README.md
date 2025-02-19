@@ -1,26 +1,25 @@
-# Notify teams workflows webhook 
+# Notify teams workflows webhook
 
 [![GitHub Super-Linter](https://github.com/actions/javascript-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
-![CI](https://github.com/actions/javascript-action/actions/workflows/ci.yml/badge.svg)
-![Coverage](./badges/coverage.svg)
+![CI](https://github.com/actions/javascript-action/actions/workflows/ci.yml/badge.svg) ![Coverage](./badges/coverage.svg)
 
 [English](./README-en.md)
 
-このアクションは、指定されたTeamsのworkflowsで作成したWebhook URLにPOSTリクエストを送信します。
-その際、デフォルトでは以下の要素を含むJSONデータを送信します。
-* body
-  * ワークフロー番号
-  * 最終コミットのメッセージ
-  * 最終コミットの変更ファイル
-  * リポジトリ名
-  * ブランチ名
-  * ワークフロー名
-* actions
-  * GitHubのワークフロー画面に遷移するボタン
+このアクションは、指定されたTeamsのworkflowsで作成したWebhook URLにPOSTリクエストを送信します。その際、デフォルトでは以下の要素を含むJSONデータを送信します。
+
+- body
+  - ワークフロー番号
+  - 最終コミットのメッセージ
+  - 最終コミットの変更ファイル
+  - リポジトリ名
+  - ブランチ名
+  - ワークフロー名
+- actions
+  - GitHubのワークフロー画面に遷移するボタン
 
 デフォルトの表示内容を変更したり、ユーザーが作成したテンプレートファイルを元に送信内容をカスタマイズすることもできます。
 
-## What's new 
+## What's new
 
 T.B.D
 
@@ -70,8 +69,7 @@ permissions:
 
 ### Template
 
-Teams workflows webhook URLに送信するアダプティブカード形式のデータのうち、
-bodyとして送信するデータをテンプレートして定義することができます。
+Teams workflows webhook URLに送信するアダプティブカード形式のデータのうち、bodyとして送信するデータをテンプレートして定義することができます。
 
 ```json
 {
@@ -92,9 +90,7 @@ bodyとして送信するデータをテンプレートして定義すること�
 
 #### Default template
 
-templateパラメータを指定しない場合は下記テンプレートが使用されます。
-テンプレート内の`{`と`}`で囲まれた箇所が変数として扱われ、
-ワークフロー実行時の値に置換されて送信されます。
+templateパラメータを指定しない場合は下記テンプレートが使用されます。テンプレート内の`{`と`}`で囲まれた箇所が変数として扱われ、ワークフロー実行時の値に置換されて送信されます。
 
 ```json
 [
@@ -167,8 +163,8 @@ templateパラメータを指定しない場合は下記テンプレートが使
 
 #### Custom template
 
-templateパラメータでは、ユーザーが作成したテンプレートファイルを指定することができます。
-テンプレート作成については[Microsoft Teams 向けアダプティブ カードの概要](https://learn.microsoft.com/ja-jp/power-automate/overview-adaptive-cards) を参考にしてください。
+templateパラメータでは、ユーザーが作成したテンプレートファイルを指定することができます。テンプレート作成については[Microsoft Teams 向けアダプティブ カードの概要](https://learn.microsoft.com/ja-jp/power-automate/overview-adaptive-cards)
+を参考にしてください。
 
 ```json
 [
@@ -191,25 +187,23 @@ templateパラメータでは、ユーザーが作成したテンプレートフ
 
 テンプレートファイル内で使用可能な変数は以下の通りです。
 
-|変数名|説明|
-|---|---|
-|{CUSTOM_MESSAGE_1}|カスタムメッセージ1|
-|{CUSTOM_MESSAGE_2}|カスタムメッセージ2|
-|{GITHUB_RUN_NUMBER}|ワークフロー実行番号|
-|{COMMIT_MESSAGE}|最終コミットのメッセージの最初の行|
-|{GITHUB_SHA}|最終コミットのSHA-1値|
-|{CHANGED_FILES}|最終コミットの変更ファイル|
-|{GITHUB_REPOSITORY}|リポジトリ名|
-|{BRANCH}|ブランチ名|
-|{GITHUB_WORKFLOW}|ワークフロー名|
-|{GITHUB_EVENT_NAME}|ワークフローのトリガーとなったイベント名|
-|{GITHUB_ACTOR}|ワークフローのトリガーを実行したユーザー名|
-
+| 変数名              | 説明                                       |
+| ------------------- | ------------------------------------------ |
+| {CUSTOM_MESSAGE_1}  | カスタムメッセージ1                        |
+| {CUSTOM_MESSAGE_2}  | カスタムメッセージ2                        |
+| {GITHUB_RUN_NUMBER} | ワークフロー実行番号                       |
+| {COMMIT_MESSAGE}    | 最終コミットのメッセージの最初の行         |
+| {GITHUB_SHA}        | 最終コミットのSHA-1値                      |
+| {CHANGED_FILES}     | 最終コミットの変更ファイル                 |
+| {GITHUB_REPOSITORY} | リポジトリ名                               |
+| {BRANCH}            | ブランチ名                                 |
+| {GITHUB_WORKFLOW}   | ワークフロー名                             |
+| {GITHUB_EVENT_NAME} | ワークフローのトリガーとなったイベント名   |
+| {GITHUB_ACTOR}      | ワークフローのトリガーを実行したユーザー名 |
 
 ### Configuration
 
-configパラメータを指定することで、送信内容、条件のカスタマイズを行うことができます。
-以下json内のコメントは説明のために記載していますが、実際のjson内にコメントを記載することはできません。
+configパラメータを指定することで、送信内容、条件のカスタマイズを行うことができます。以下json内のコメントは説明のために記載していますが、実際のjson内にコメントを記載することはできません。
 
 ```json
 {
@@ -256,7 +250,6 @@ configパラメータを指定することで、送信内容、条件のカス�
 バージョン管理にはセマンティック・バージョニングを使用しています。 利用可能なバージョンについては、このリポジトリのタグを参照してください。
 
 ## [Contributing](./CONTRIBUTING.md)
-
 
 ## License
 
