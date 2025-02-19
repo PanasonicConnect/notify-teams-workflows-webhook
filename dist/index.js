@@ -31523,7 +31523,7 @@ const getChangedFiles = async (sha, execOptions) => {
  * @returns {Promise<string>} - A promise that resolves to the author of the most recent commit.
  */
 const getCommitAuthor = async (execOptions) => {
-  const { stdout: author } = await execExports.getExecOutput('git', ['log', '-1', '--pretty=format:"%an"'], execOptions);
+  const { stdout: author } = await execExports.getExecOutput('git', ['log', '-1', '--pretty=format:%an'], execOptions);
   return author.replace(/"/g, '') // Remove quotes from the author name
 };
 /**
