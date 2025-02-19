@@ -225,28 +225,11 @@ By specifying the config parameter, you can customize the content and conditions
 }
 ```
 
-## For developers
+## Versioning
 
-## Initial Setup
+Semantic versioning is used for version control. See the tags in this repository for available versions.
 
-Clone the repository and install the dependencies.
-
-!!! note
-    Use Node.js version 20.x or higher.
-
-1. Install the packages
-
-   ```bash
-   npm install
-   ```
-
-## Update the Action Code
-
-1. Modify the code under [`src/`](./src/).
-   For more details on the GitHub Actions toolkit, see the [documentation](https://github.com/actions/toolkit/blob/main/README.md).
-2. Add tests under [`__tests__/`](./__tests__).
-3. Run the tests and ensure they pass with `npm run test`.
-4. Package the JavaScript and ensure the tests and build succeed with `npm run all`.
+## [Contributing](./CONTRIBUTING.md)
 
 ## License
 

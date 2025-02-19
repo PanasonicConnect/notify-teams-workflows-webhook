@@ -228,28 +228,12 @@ configパラメータを指定することで、送信内容、条件のカス�
 }
 ```
 
-## For developers
+## Versioning
 
-## Initial Setup
+バージョン管理にはセマンティック・バージョニングを使用しています。 利用可能なバージョンについては、このリポジトリのタグを参照してください。
 
-リポジトリをクローンし、依存パッケージをインストールします。
+## [Contributing](./CONTRIBUTING.md)
 
-!!! note
-    Node.jsのバージョンは20.x以上を使用してください。
-
-1. パッケージをインストールする
-
-   ```bash
-   npm install
-   ```
-
-## Update the Action Code
-
-1. [`src/`](./src/)以下のコードを修正してください。
-  GitHub Actions toolkitの詳細については [documentation](https://github.com/actions/toolkit/blob/main/README.md) を確認してください。
-1. [`__tests__/`](./__tests__)にテストを追加してください。
-1. `npm run test` でテストを実行して成功することを確認してください。
-1. `npm run all` でJavaScriptをパッケージ化し、テストとビルドが成功することを確認してください。
 
 ## License
 
