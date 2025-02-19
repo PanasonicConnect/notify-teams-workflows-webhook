@@ -31524,9 +31524,8 @@ const getChangedFiles = async (sha, execOptions) => {
  */
 const getCommitAuthor = async (execOptions) => {
   const { stdout: author } = await execExports.getExecOutput('git', ['log', '-1', '--pretty=format:"%an"'], execOptions);
-  return author
+  return author.replace(/"/g, '') // Remove quotes from the author name
 };
-
 /**
  * Generates the body object for the custom action.
  *
