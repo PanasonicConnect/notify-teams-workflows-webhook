@@ -53,5 +53,10 @@
     "type": "TextBlock",
     "text": "custom message 2: {CUSTOM_MESSAGE_2}",
     "wrap": true
+  },
+  {
+    "type": "TextBlock",
+    "text": "Author: {AUTHOR}",
+    "wrap": true
   }
 ]
