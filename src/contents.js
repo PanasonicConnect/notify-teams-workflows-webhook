@@ -94,6 +94,9 @@ const getWorkflowUrl = () => {
  * @returns {string} The name of the branch.
  */
 const getBranch = () => {
+  if (context.eventName == 'pull_request') {
+    return context.payload.pull_request?.head?.ref
+  }
   // context.ref の "refs/heads/" プレフィックスを除去する
   return context.ref ? context.ref.replace('refs/heads/', '') : ''
 }
@@ -228,7 +231,7 @@ export const replaceBodyParameters = (config, target, customMessage1, customMess
     .replace('{GITHUB_EVENT_NAME}', context.eventName)
     .replace('{GITHUB_WORKFLOW}', context.workflow)
     .replace('{GITHUB_ACTOR}', context.actor)
-    .replace('{GITHUB_SHA}', context.sha)
+    .replace('{GITHUB_SHA}', commitInfo.sha)
     .replace('{CHANGED_FILES}', changedFilesString)
     .replace('{CUSTOM_MESSAGE_2}', customMessage2)
     .replace('{AUTHOR}', commitInfo.author)

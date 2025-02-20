@@ -31317,6 +31317,9 @@ const getWorkflowUrl = () => {
  * @returns {string} The name of the branch.
  */
 const getBranch = () => {
+  if (githubExports.context.eventName == 'pull_request') {
+    return githubExports.context.payload.pull_request?.head?.ref
+  }
   // context.ref の "refs/heads/" プレフィックスを除去する
   return githubExports.context.ref ? githubExports.context.ref.replace('refs/heads/', '') : ''
 };
@@ -31451,7 +31454,7 @@ const replaceBodyParameters = (config, target, customMessage1, customMessage2, c
     .replace('{GITHUB_EVENT_NAME}', githubExports.context.eventName)
     .replace('{GITHUB_WORKFLOW}', githubExports.context.workflow)
     .replace('{GITHUB_ACTOR}', githubExports.context.actor)
-    .replace('{GITHUB_SHA}', githubExports.context.sha)
+    .replace('{GITHUB_SHA}', commitInfo.sha)
     .replace('{CHANGED_FILES}', changedFilesString)
     .replace('{CUSTOM_MESSAGE_2}', customMessage2)
     .replace('{AUTHOR}', commitInfo.author)
@@ -31493,6 +31496,14 @@ const getInputs = () => {
 };
 
 /**
+ * Retrieves the SHA of the current commit or pull request.
+ *
+ * @returns {string} The SHA of the current commit or pull request.
+ */
+const getSha = () => {
+  return githubExports.context.eventName == 'pull_request' ? githubExports.context.payload.pull_request?.head?.sha : githubExports.context.sha
+};
+/**
  * Retrieves the commit message for a specific commit SHA.
  *
  * @param {string} sha - The SHA hash of the commit to check.
@@ -31524,7 +31535,7 @@ const getChangedFiles = async (sha, execOptions) => {
  */
 const getCommitAuthor = async (execOptions) => {
   const { stdout: author } = await execExports.getExecOutput('git', ['log', '-1', '--pretty=format:%an'], execOptions);
-  return author.replace(/\\/g, '') // Remove quotes from the author name
+  return author.replace(/\\/g, '').trim()
 };
 /**
  * Generates the body object for the custom action.
@@ -31647,20 +31658,26 @@ async function run() {
       //silent: !core.isDebug()
     };
 
+    const sha = getSha();
+
     // Get the latest commit message
-    const commitMessage = await getCommitMessage(githubExports.context.sha, execOptions);
+    const commitMessage = await getCommitMessage(sha, execOptions);
 
     // Get the list of changed files from the latest commit
-    const changedFiles = await getChangedFiles(githubExports.context.sha, execOptions);
+    const changedFiles = await getChangedFiles(sha, execOptions);
 
     // Get the latest author of the commit
     const author = await getCommitAuthor(execOptions);
 
     const commitInfo = {
+      sha,
       commitMessage,
       changedFiles,
       author
     };
+
+    // @note: Insert line breaks.The next core.group will be concatenated with the standard output.
+    coreExports.info('');
 
     coreExports.group('Inputs', () => {
       coreExports.info(`inputs: ${JSON.stringify(inputs, null, 2)}`);

@@ -40,6 +40,14 @@ const getInputs = () => {
 }
 
 /**
+ * Retrieves the SHA of the current commit or pull request.
+ *
+ * @returns {string} The SHA of the current commit or pull request.
+ */
+const getSha = () => {
+  return context.eventName == 'pull_request' ? context.payload.pull_request?.head?.sha : context.sha
+}
+/**
  * Retrieves the commit message for a specific commit SHA.
  *
  * @param {string} sha - The SHA hash of the commit to check.
@@ -71,7 +79,7 @@ const getChangedFiles = async (sha, execOptions) => {
  */
 const getCommitAuthor = async (execOptions) => {
   const { stdout: author } = await exec.getExecOutput('git', ['log', '-1', '--pretty=format:%an'], execOptions)
-  return author.replace(/\\/g, '') // Remove quotes from the author name
+  return author.replace(/\\/g, '').trim()
 }
 /**
  * Generates the body object for the custom action.
@@ -194,20 +202,26 @@ export async function run() {
       //silent: !core.isDebug()
     }
 
+    const sha = getSha()
+
     // Get the latest commit message
-    const commitMessage = await getCommitMessage(context.sha, execOptions)
+    const commitMessage = await getCommitMessage(sha, execOptions)
 
     // Get the list of changed files from the latest commit
-    const changedFiles = await getChangedFiles(context.sha, execOptions)
+    const changedFiles = await getChangedFiles(sha, execOptions)
 
     // Get the latest author of the commit
     const author = await getCommitAuthor(execOptions)
 
     const commitInfo = {
+      sha,
       commitMessage,
       changedFiles,
       author
     }
+
+    // @note: Insert line breaks.The next core.group will be concatenated with the standard output.
+    core.info('')
 
     core.group('Inputs', () => {
       core.info(`inputs: ${JSON.stringify(inputs, null, 2)}`)

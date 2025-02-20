@@ -13,6 +13,12 @@ context.runNumber = '123'
 context.payload = {
   repository: {
     name: 'test-repo'
+  },
+  pull_request: {
+    head: {
+      sha: 'abc123',
+      ref: 'feature/branch'
+    }
   }
 }
 context.ref = 'refs/heads/main'
