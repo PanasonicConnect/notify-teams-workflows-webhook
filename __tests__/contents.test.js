@@ -4,37 +4,45 @@ vi.mock('@actions/github', () => {
   return { context }
 })
 
-context.runNumber = '123'
-context.runId = '123456'
-context.payload = {
-  repository: {
-    name: 'test-repo'
-  },
-  pull_request: {
-    head: {
-      sha: 'abc123',
-      ref: 'feature/branch'
+const resetContext = () => {
+  context.runNumber = '123'
+  context.payload = {
+    repository: {
+      name: 'test-repo'
+    },
+    pull_request: {
+      head: {
+        sha: 'abc123',
+        ref: 'feature/branch'
+      }
     }
   }
+  context.ref = 'refs/heads/main'
+  context.eventName = 'push'
+  context.workflow = 'CI'
+  context.actor = 'test-actor'
+  context.sha = 'abc123'
+  context.serverUrl = 'https://github.com'
 }
-context.ref = 'refs/heads/main'
-context.eventName = 'push'
-context.workflow = 'CI'
-context.actor = 'test-actor'
-context.sha = 'abc123'
-context.serverUrl = 'https://github.com'
 
 const { makeDefaultBody, makeAction, generateChangedFilesString } = await import('../src/contents.js')
 
+const defaultCustomMassage = {
+  customMessage1: 'Custom Message 1',
+  customMessage2: 'Custom Message 2'
+}
+
+const defaultCommitInfo = {
+  sha: 'abc123',
+  commitMessage: 'Initial commit',
+  changedFiles: ['file1.js', 'file2.js']
+}
+
 describe('makeDefaultBody', () => {
+  beforeEach(() => {
+    resetContext()
+  })
   it('should create a default body with all parameters', () => {
-    const customMessage1 = 'Custom Message 1'
-    const customMessage2 = 'Custom Message 2'
-    const commitInfo = {
-      sha: 'abc123',
-      commitMessage: 'Initial commit',
-      changedFiles: ['file1.js', 'file2.js']
-    }
     const config = {
       visible: {
         repository_name: true,
@@ -47,7 +55,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, customMessage1, customMessage2, commitInfo)
+    const body = makeDefaultBody(config, defaultCustomMassage.customMessage1, defaultCustomMassage.customMessage2, defaultCommitInfo)
     console.log(body)
     expect(body).toEqual([
       {
@@ -122,11 +130,7 @@ describe('makeDefaultBody', () => {
   it('should create a default body without custom messages', () => {
     const customMessage1 = ''
     const customMessage2 = ''
-    const commitInfo = {
-      sha: 'abc123',
-      commitMessage: 'Initial commit',
-      changedFiles: ['file1.js', 'file2.js']
-    }
+    defaultCommitInfo
     const config = {
       visible: {
         repository_name: true,
@@ -139,7 +143,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, customMessage1, customMessage2, commitInfo)
+    const body = makeDefaultBody(config, customMessage1, customMessage2, defaultCommitInfo)
     expect(body).toEqual([
       {
         type: 'TextBlock',
@@ -198,11 +202,8 @@ describe('makeDefaultBody', () => {
     ])
   })
   it('should create a default body without custom messages and changed files', () => {
-    const customMessage1 = ''
-    const customMessage2 = ''
     const commitInfo = {
-      sha: 'abc123',
-      commitMessage: 'Initial commit',
+      ...defaultCommitInfo,
       changedFiles: undefined
     }
     const config = {
@@ -217,7 +218,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, customMessage1, customMessage2, commitInfo)
+    const body = makeDefaultBody(config, undefined, undefined, commitInfo)
     expect(body).toEqual([
       {
         type: 'TextBlock',
@@ -263,13 +264,6 @@ describe('makeDefaultBody', () => {
   })
 
   it('should create a default body based on config visibility', () => {
-    const customMessage1 = 'Custom Message 1'
-    const customMessage2 = 'Custom Message 2'
-    const commitInfo = {
-      sha: 'abc123',
-      commitMessage: 'Initial commit',
-      changedFiles: ['file1.js', 'file2.js']
-    }
     const config = {
       visible: {
         repository_name: true,
@@ -282,7 +276,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, customMessage1, customMessage2, commitInfo)
+    const body = makeDefaultBody(config, defaultCustomMassage.customMessage1, defaultCustomMassage.customMessage2, defaultCommitInfo)
 
     expect(body).toEqual([
       {
@@ -338,6 +332,46 @@ describe('makeDefaultBody', () => {
 \`file2.js\``,
         size: 'small',
         wrap: false
+      }
+    ])
+  })
+
+  it('Test branch name on pull request event', () => {
+    context.eventName = 'pull_request'
+
+    const config = {
+      visible: {
+        branch_name: true,
+        sha1: true
+      }
+    }
+
+    const body = makeDefaultBody(config, undefined, undefined, defaultCommitInfo)
+
+    expect(body).toEqual([
+      {
+        type: 'TextBlock',
+        text: '#123 Initial commit',
+        id: 'Title',
+        spacing: 'Medium',
+        size: 'large',
+        weight: 'Bolder',
+        color: 'Accent'
+      },
+      {
+        type: 'FactSet',
+        facts: [
+          {
+            title: 'Branch:',
+            value: 'feature/branch'
+          },
+          {
+            title: 'SHA-1:',
+            value: 'abc123'
+          }
+        ],
+        id: 'acFactSet',
+        separator: true
       }
     ])
   })
