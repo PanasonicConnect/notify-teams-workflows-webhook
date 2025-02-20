@@ -9,30 +9,35 @@ vi.mock('@actions/github', () => {
 })
 vi.mock('@actions/exec', () => exec)
 
-context.runNumber = '123'
-context.payload = {
-  repository: {
-    name: 'test-repo'
-  },
-  pull_request: {
-    head: {
-      sha: 'abc123',
-      ref: 'feature/branch'
+const resetContext = () => {
+  context.runNumber = '123'
+  context.payload = {
+    repository: {
+      name: 'test-repo'
+    },
+    pull_request: {
+      head: {
+        sha: 'pr-sha1',
+        ref: 'feature/branch'
+      }
     }
   }
+  context.ref = 'refs/heads/main'
+  context.eventName = 'push'
+  context.workflow = 'CI'
+  context.actor = 'test-actor'
+  context.sha = 'abc123'
+  context.serverUrl = 'https://github.com'
 }
-context.ref = 'refs/heads/main'
-context.eventName = 'push'
-context.workflow = 'CI'
-context.actor = 'test-actor'
-context.sha = 'abc123'
-context.serverUrl = 'https://github.com'
 
 const { run } = await import('../src/main.js')
 
 describe('Custom Action Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+
+    resetContext()
+
     exec.getExecOutput.mockImplementation((commandLine, args, options) => {
       if (args[0] === 'show') {
         return { stdout: 'first line\nsecond line' }
@@ -325,6 +330,55 @@ describe('Custom Action Tests', () => {
       { type: 'TextBlock', text: 'CI', wrap: true },
       { type: 'TextBlock', text: 'test-actor', wrap: true },
       { type: 'TextBlock', text: 'abc123', wrap: true },
+      { type: 'TextBlock', text: '`dummy output`', wrap: true },
+      { type: 'TextBlock', text: 'dummyMessage2', wrap: true },
+      { type: 'TextBlock', text: 'dummy author', wrap: true }
+    ]
+    expect(requestBody?.attachments[0].content.body).toEqual(expectedTemplate)
+  })
+
+  it('Testing at pull request', async () => {
+    context.eventName = 'pull_request'
+
+    core.getInput.mockImplementation((name) => {
+      if (name === 'token') return 'dummyToken'
+      if (name === 'webhook-url') return 'https://dummy.url'
+      if (name === 'template') return './__tests__/assets/template.json'
+      if (name === 'message1') return 'dummyMessage1'
+      if (name === 'message2') return 'dummyMessage2'
+      if (name === 'action-titles') return 'Title1'
+      if (name === 'action-urls') return 'https://url1'
+      if (name === 'config') return './__tests__/assets/config-ignore.json'
+      return ''
+    })
+
+    exec.getExecOutput.mockImplementation((commandLine, args, options) => {
+      if (args[0] === 'show') {
+        return { stdout: 'first line\nsecond line' }
+      }
+      if (args[0] === 'log') {
+        return { stdout: 'dummy author' }
+      }
+      return { stdout: 'dummy output' }
+    })
+
+    await run()
+
+    // Validate that fetch was not called
+    expect(fetch).toHaveBeenCalled()
+    const fetchCall = fetch.mock.calls[0][1]
+    const requestBody = JSON.parse(fetchCall.body)
+
+    const expectedTemplate = [
+      { type: 'TextBlock', text: '123', wrap: true },
+      { type: 'TextBlock', text: 'first line', wrap: true }, // first line\nsecond line -> first line
+      { type: 'TextBlock', text: 'dummyMessage1', wrap: true },
+      { type: 'TextBlock', text: 'test-repo', wrap: true },
+      { type: 'TextBlock', text: 'feature/branch', wrap: true },
+      { type: 'TextBlock', text: 'pull_request', wrap: true }, // push -> pull_request
+      { type: 'TextBlock', text: 'CI', wrap: true },
+      { type: 'TextBlock', text: 'test-actor', wrap: true },
+      { type: 'TextBlock', text: 'pr-sha1', wrap: true }, // abc123 -> pr-sha1
       { type: 'TextBlock', text: '`dummy output`', wrap: true },
       { type: 'TextBlock', text: 'dummyMessage2', wrap: true },
       { type: 'TextBlock', text: 'dummy author', wrap: true }
