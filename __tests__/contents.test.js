@@ -9,6 +9,12 @@ context.runId = '123456'
 context.payload = {
   repository: {
     name: 'test-repo'
+  },
+  pull_request: {
+    head: {
+      sha: 'abc123',
+      ref: 'feature/branch'
+    }
   }
 }
 context.ref = 'refs/heads/main'
@@ -25,6 +31,7 @@ describe('makeDefaultBody', () => {
     const customMessage1 = 'Custom Message 1'
     const customMessage2 = 'Custom Message 2'
     const commitInfo = {
+      sha: 'abc123',
       commitMessage: 'Initial commit',
       changedFiles: ['file1.js', 'file2.js']
     }
@@ -116,6 +123,7 @@ describe('makeDefaultBody', () => {
     const customMessage1 = ''
     const customMessage2 = ''
     const commitInfo = {
+      sha: 'abc123',
       commitMessage: 'Initial commit',
       changedFiles: ['file1.js', 'file2.js']
     }
@@ -193,6 +201,7 @@ describe('makeDefaultBody', () => {
     const customMessage1 = ''
     const customMessage2 = ''
     const commitInfo = {
+      sha: 'abc123',
       commitMessage: 'Initial commit',
       changedFiles: undefined
     }
@@ -257,6 +266,7 @@ describe('makeDefaultBody', () => {
     const customMessage1 = 'Custom Message 1'
     const customMessage2 = 'Custom Message 2'
     const commitInfo = {
+      sha: 'abc123',
       commitMessage: 'Initial commit',
       changedFiles: ['file1.js', 'file2.js']
     }
