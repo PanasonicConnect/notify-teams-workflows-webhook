@@ -144,7 +144,7 @@ export const makeAction = (titles, urls) => {
  * @param {Object} commitInfo - Information about the commit.
  * @returns {Object} The constructed body object with the provided parameters.
  */
-export const makeDefaultBody = (config, customMessage1, customMessage2, commitInfo) => {
+export const makeCodeDefaultBody = (config, customMessage1, customMessage2, commitInfo) => {
   const body = []
   body.push(titleBlock)
   if (customMessage1) {
