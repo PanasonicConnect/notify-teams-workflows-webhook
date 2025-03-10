@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import { context } from '@actions/github'
 import * as exec from '@actions/exec'
 import fs from 'fs'
-import { makeCodeDefaultBody, makeAction, replaceBodyParameters } from './contents'
+import { makeCodeDefaultBody, makeIssueDefaultBody, makeAction, replaceBodyParameters } from './contents'
 
 const DEFAULT_CONFIG = {
   visible: {

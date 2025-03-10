@@ -31302,6 +31302,32 @@ const singleTextBlockChangedFiles = {
   wrap: false
 };
 
+const issueTitleBlock = {
+  type: 'TextBlock',
+  text: '{ISSUE_TITLE}',
+  id: 'Title',
+  spacing: 'Medium',
+  size: 'large',
+  weight: 'Bolder',
+  color: 'Accent'
+};
+const issueFactBlockLabels = {
+  title: 'Labels:',
+  value: '{ISSUE_LABELS}',
+  size: 'small',
+  wrap: false
+};
+const issueFactBlockMilestone = {
+  title: 'MileStone:',
+  value: '{ISSUE_MILESTONE}'
+};
+const issueTextBlockBody = {
+  type: 'TextBlock',
+  text: '{ISSUE_BODY}',
+  size: 'small',
+  wrap: false
+};
+
 /**
  * Constructs the URL for the current GitHub Actions workflow run.
  *
@@ -31414,6 +31440,45 @@ const makeCodeDefaultBody = (config, customMessage1, customMessage2, commitInfo)
     body.push(singleTextBlockChangedFiles);
   }
   const replacedBody = replaceBodyParameters(config, JSON.stringify(body), customMessage1, customMessage2, commitInfo);
+  const parsedBody = JSON.parse(replacedBody);
+  return parsedBody
+};
+
+/**
+ * Generates the default body for an issue notification.
+ *
+ * @param {Object} config - Configuration object for visibility settings.
+ * @param {boolean} config.visible.repository_name - Whether to include the repository name.
+ * @param {boolean} config.visible.branch_name - Whether to include the branch name.
+ * @param {boolean} config.visible.workflow_name - Whether to include the workflow name.
+ * @param {boolean} config.visible.event - Whether to include the event.
+ * @param {boolean} config.visible.actor - Whether to include the actor.
+ * @param {boolean} config.visible.sha1 - Whether to include the SHA1.
+ * @param {boolean} config.visible.changed_files - Whether to include changed files.
+ * @param {string} customMessage1 - Custom message to be included in the body.
+ * @param {string} customMessage2 - Another custom message to be included in the body.
+ * @returns {Object} The parsed body of the issue notification.
+ */
+const makeIssueDefaultBody = (config, customMessage1, customMessage2) => {
+  const body = [];
+  body.push(issueTitleBlock);
+
+  if (customMessage1) {
+    body.push(singleTextBlockCustom1);
+  }
+  // create fact set
+  const fact = JSON.parse(JSON.stringify(factBlock));
+  fact.facts.push(issueFactBlockLabels);
+  fact.facts.push(issueFactBlockMilestone);
+  body.push(fact);
+
+  body.push(issueTextBlockBody);
+
+  if (customMessage2) {
+    body.push(singleTextBlockCustom2);
+  }
+
+  const replacedBody = replaceBodyParameters(config, JSON.stringify(body), customMessage1, customMessage2, undefined);
   const parsedBody = JSON.parse(replacedBody);
   return parsedBody
 };
