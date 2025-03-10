@@ -31233,6 +31233,7 @@ var githubExports = requireGithub();
 var execExports = requireExec();
 
 const DEFAULT_MAX_CHANGED_FILES = 10;
+const DEFAULT_MAX_ISSUE_BODY = 200;
 
 const titleBlock = {
   type: 'TextBlock',
@@ -31467,12 +31468,22 @@ const makeIssueDefaultBody = (config, customMessage1, customMessage2) => {
     body.push(singleTextBlockCustom1);
   }
   // create fact set
-  const fact = JSON.parse(JSON.stringify(factBlock));
-  fact.facts.push(issueFactBlockLabels);
-  fact.facts.push(issueFactBlockMilestone);
-  body.push(fact);
-
-  body.push(issueTextBlockBody);
+  const hasLabel = githubExports.context.payload?.issue?.labels?.length > 0;
+  const hasMilestone = githubExports.context.payload?.issue?.milestone?.title;
+  if (hasLabel || hasMilestone) {
+    const fact = JSON.parse(JSON.stringify(factBlock)); // copy
+    if (hasLabel) {
+      fact.facts.push(issueFactBlockLabels);
+    }
+    if (hasMilestone) {
+      fact.facts.push(issueFactBlockMilestone);
+    }
+    body.push(fact);
+  }
+  // body
+  if (githubExports.context.payload?.issue?.body) {
+    body.push(issueTextBlockBody);
+  }
 
   if (customMessage2) {
     body.push(singleTextBlockCustom2);
@@ -31505,6 +31516,25 @@ const generateChangedFilesString = (config, changedFiles) => {
 };
 
 /**
+ * Creates a truncated issue body based on the provided configuration.
+ *
+ * @param {Object} config - Configuration object.
+ * @param {Object} config.issueBodyLength - Configuration for issue body length.
+ * @param {number} config.issueBodyLength.max - Maximum length of the issue body.
+ * @param {string} body - The original issue body.
+ * @returns {string} The truncated issue body with an ellipsis if it exceeds the maximum length.
+ */
+const makeIssueBody = (config, body) => {
+  const maxIssueBodyLength = config?.issueBodyLength?.max || DEFAULT_MAX_ISSUE_BODY;
+  console.log(body, maxIssueBodyLength);
+  const displayIssueBody = body?.substring(0, maxIssueBodyLength);
+  if (body?.length > maxIssueBodyLength) {
+    displayIssueBody.push('...');
+  }
+  return displayIssueBody
+};
+
+/**
  * Replaces placeholders in the target string with corresponding values from the provided parameters.
  *
  * @param {Object} config - Configuration object.
@@ -31519,6 +31549,8 @@ const generateChangedFilesString = (config, changedFiles) => {
 const replaceBodyParameters = (config, target, customMessage1, customMessage2, commitInfo) => {
   const changedFilesString = generateChangedFilesString(config, commitInfo?.changedFiles);
   const labelsString = githubExports.context.payload?.issue?.labels?.map((l) => l.name).join(', ');
+  const displayIssueBody = makeIssueBody(config, githubExports.context.payload?.issue?.body);
+
   return target
     .replace('{GITHUB_RUN_NUMBER}', githubExports.context.runNumber)
     .replace('{COMMIT_MESSAGE}', commitInfo?.commitMessage)
@@ -31535,7 +31567,7 @@ const replaceBodyParameters = (config, target, customMessage1, customMessage2, c
     .replace('{ISSUE_TITLE}', githubExports.context.payload?.issue?.title)
     .replace('{ISSUE_LABELS}', labelsString)
     .replace('{ISSUE_MILESTONE}', githubExports.context.payload?.issue?.milestone?.title)
-    .replace('{ISSUE_BODY}', githubExports.context.payload?.issue?.body)
+    .replace('{ISSUE_BODY}', displayIssueBody)
 };
 
 const DEFAULT_CONFIG = {
