@@ -31536,6 +31536,7 @@ const getCommitMessage = async (sha, execOptions) => {
  * @returns {Promise<string[]>} A promise that resolves to an array of changed file paths.
  */
 const getChangedFiles = async (sha, execOptions) => {
+  await execExports.getExecOutput('git', ['config', '--global', 'core.quotepath', 'false'], execOptions);
   const { stdout: changedFilesStdout } = await execExports.getExecOutput('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', `${sha}^1`, sha], execOptions);
   return changedFilesStdout.trim().split('\n')
 };
