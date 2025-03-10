@@ -15,6 +15,13 @@ const resetContext = () => {
         sha: 'abc123',
         ref: 'feature/branch'
       }
+    },
+    issue: {
+      title: 'IssueTitle',
+      body: 'IssueBody', // todo 改行は？
+      labels: [{ name: 'IssueLabel1' }, { name: 'IssueLabel2' }],
+      milestone: { title: 'IssueMilestone' },
+      html_url: 'https;//github.com/test-user/test-repo/issues/1'
     }
   }
   context.ref = 'refs/heads/main'
@@ -25,7 +32,7 @@ const resetContext = () => {
   context.serverUrl = 'https://github.com'
 }
 
-const { makeDefaultBody, makeAction, generateChangedFilesString } = await import('../src/contents.js')
+const { makeCodeDefaultBody, makeIssueDefaultBody, makeAction, generateChangedFilesString } = await import('../src/contents.js')
 
 const defaultCustomMassage = {
   customMessage1: 'Custom Message 1',
@@ -38,7 +45,7 @@ const defaultCommitInfo = {
   changedFiles: ['file1.js', 'file2.js']
 }
 
-describe('makeDefaultBody', () => {
+describe('makeCodeDefaultBody', () => {
   beforeEach(() => {
     resetContext()
   })
@@ -55,7 +62,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, defaultCustomMassage.customMessage1, defaultCustomMassage.customMessage2, defaultCommitInfo)
+    const body = makeCodeDefaultBody(config, defaultCustomMassage.customMessage1, defaultCustomMassage.customMessage2, defaultCommitInfo)
     console.log(body)
     expect(body).toEqual([
       {
@@ -143,7 +150,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, customMessage1, customMessage2, defaultCommitInfo)
+    const body = makeCodeDefaultBody(config, customMessage1, customMessage2, defaultCommitInfo)
     expect(body).toEqual([
       {
         type: 'TextBlock',
@@ -218,7 +225,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, undefined, undefined, commitInfo)
+    const body = makeCodeDefaultBody(config, undefined, undefined, commitInfo)
     expect(body).toEqual([
       {
         type: 'TextBlock',
@@ -276,7 +283,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, defaultCustomMassage.customMessage1, defaultCustomMassage.customMessage2, defaultCommitInfo)
+    const body = makeCodeDefaultBody(config, defaultCustomMassage.customMessage1, defaultCustomMassage.customMessage2, defaultCommitInfo)
 
     expect(body).toEqual([
       {
@@ -346,7 +353,7 @@ describe('makeDefaultBody', () => {
       }
     }
 
-    const body = makeDefaultBody(config, undefined, undefined, defaultCommitInfo)
+    const body = makeCodeDefaultBody(config, undefined, undefined, defaultCommitInfo)
 
     expect(body).toEqual([
       {
@@ -377,11 +384,202 @@ describe('makeDefaultBody', () => {
   })
 })
 
+describe('makeIssueDefaultBody', () => {
+  beforeEach(() => {
+    resetContext()
+  })
+
+  it('should create a default issue body with all parameters', () => {
+    const config = {
+      visible: {
+        repository_name: true,
+        branch_name: true,
+        workflow_name: true,
+        event: true,
+        actor: true,
+        sha1: true,
+        changed_files: true
+      }
+    }
+
+    const body = makeIssueDefaultBody(config, defaultCustomMassage.customMessage1, defaultCustomMassage.customMessage2)
+    expect(body).toEqual([
+      {
+        type: 'TextBlock',
+        text: 'IssueTitle',
+        id: 'Title',
+        spacing: 'Medium',
+        size: 'large',
+        weight: 'Bolder',
+        color: 'Accent'
+      },
+      {
+        type: 'TextBlock',
+        text: 'Custom Message 1',
+        separator: true,
+        wrap: true
+      },
+      {
+        type: 'FactSet',
+        facts: [
+          {
+            title: 'Labels:',
+            value: 'IssueLabel1, IssueLabel2',
+            size: 'small',
+            wrap: false
+          },
+          {
+            title: 'MileStone:',
+            value: 'IssueMilestone'
+          }
+        ],
+        id: 'acFactSet',
+        separator: true
+      },
+      {
+        type: 'TextBlock',
+        text: 'IssueBody',
+        size: 'small',
+        wrap: false
+      },
+      {
+        type: 'TextBlock',
+        text: 'Custom Message 2',
+        separator: true,
+        wrap: true
+      }
+    ])
+  })
+
+  it('should create a default issue body without custom messages', () => {
+    const customMessage1 = ''
+    const customMessage2 = ''
+    const config = {
+      visible: {
+        repository_name: true,
+        branch_name: true,
+        workflow_name: true,
+        event: true,
+        actor: true,
+        sha1: true,
+        changed_files: true
+      }
+    }
+
+    const body = makeIssueDefaultBody(config, customMessage1, customMessage2)
+    expect(body).toEqual([
+      {
+        type: 'TextBlock',
+        text: 'IssueTitle',
+        id: 'Title',
+        spacing: 'Medium',
+        size: 'large',
+        weight: 'Bolder',
+        color: 'Accent'
+      },
+      {
+        type: 'FactSet',
+        facts: [
+          {
+            title: 'Labels:',
+            value: 'IssueLabel1, IssueLabel2',
+            size: 'small',
+            wrap: false
+          },
+          {
+            title: 'MileStone:',
+            value: 'IssueMilestone'
+          }
+        ],
+        id: 'acFactSet',
+        separator: true
+      },
+      {
+        type: 'TextBlock',
+        text: 'IssueBody',
+        size: 'small',
+        wrap: false
+      }
+    ])
+  })
+
+  it('should create a default issue body based on config visibility', () => {
+    const config = {
+      visible: {
+        repository_name: true,
+        branch_name: false,
+        workflow_name: true,
+        event: false,
+        actor: true,
+        sha1: false,
+        changed_files: true
+      }
+    }
+
+    const body = makeIssueDefaultBody(config, defaultCustomMassage.customMessage1, defaultCustomMassage.customMessage2)
+    expect(body).toEqual([
+      {
+        type: 'TextBlock',
+        text: 'IssueTitle',
+        id: 'Title',
+        spacing: 'Medium',
+        size: 'large',
+        weight: 'Bolder',
+        color: 'Accent'
+      },
+      {
+        type: 'TextBlock',
+        text: 'Custom Message 1',
+        separator: true,
+        wrap: true
+      },
+      {
+        type: 'FactSet',
+        facts: [
+          {
+            title: 'Labels:',
+            value: 'IssueLabel1, IssueLabel2',
+            size: 'small',
+            wrap: false
+          },
+          {
+            title: 'MileStone:',
+            value: 'IssueMilestone'
+          }
+        ],
+        id: 'acFactSet',
+        separator: true
+      },
+      {
+        type: 'TextBlock',
+        text: 'IssueBody',
+        size: 'small',
+        wrap: false
+      },
+      {
+        type: 'TextBlock',
+        text: 'Custom Message 2',
+        separator: true,
+        wrap: true
+      }
+    ])
+  })
+})
+
 describe('makeAction', () => {
   beforeEach(() => {
     // Setup context values that are used by getWorkflowUrl
     context.serverUrl = 'https://github.com'
-    context.payload = { repository: { name: 'test-repo', html_url: 'https://github.com/test-repo' } }
+    context.payload = {
+      repository: { name: 'test-repo', html_url: 'https://github.com/test-repo' },
+      issue: {
+        title: 'IssueTitle',
+        body: 'IssueBody', // todo 改行は？
+        labels: [{ name: 'IssueLabel1' }, { name: 'IssueLabel2' }],
+        milestone: { title: 'IssueMilestone' },
+        html_url: 'https;//github.com/test-user/test-repo/issues/1'
+      }
+    }
     context.runNumber = '123'
     context.runId = '123456'
     // Other context values, though not used by makeAction directly
@@ -399,6 +597,17 @@ describe('makeAction', () => {
       type: 'Action.OpenUrl',
       title: 'View Workflow',
       url: 'https://github.com/test-repo/actions/runs/123456'
+    })
+  })
+
+  test('returns default action when titles and urls are empty by issue event', () => {
+    context.eventName = 'issues'
+    const actions = makeAction([], [])
+    expect(actions).toHaveLength(1)
+    expect(actions[0]).toEqual({
+      type: 'Action.OpenUrl',
+      title: 'View Issue',
+      url: 'https;//github.com/test-user/test-repo/issues/1'
     })
   })
 

@@ -262,7 +262,15 @@ describe('Custom Action Tests', () => {
     })
 
     // Mock the commit message to include the ignore keyword
-    exec.getExecOutput.mockImplementation(() => ({ stdout: 'typo: fixed a typo' }))
+    exec.getExecOutput.mockImplementation((commandLine, args, options) => {
+      if (args[0] === 'show') {
+        return { stdout: 'typo: fixed a typo' }
+      }
+      if (args[0] === 'log') {
+        return { stdout: 'dummy author' }
+      }
+      return { stdout: 'dummy output' }
+    })
 
     await run()
 
@@ -283,7 +291,15 @@ describe('Custom Action Tests', () => {
     })
 
     // Mock the commit message to include the ignore keyword
-    exec.getExecOutput.mockImplementation(() => ({ stdout: 'fixed a typo' }))
+    exec.getExecOutput.mockImplementation((commandLine, args, options) => {
+      if (args[0] === 'show') {
+        return { stdout: 'fixed a typo' }
+      }
+      if (args[0] === 'log') {
+        return { stdout: 'dummy author' }
+      }
+      return { stdout: 'dummy output' }
+    })
 
     await run()
 

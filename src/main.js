@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import { context } from '@actions/github'
 import * as exec from '@actions/exec'
 import fs from 'fs'
-import { makeDefaultBody, makeAction, replaceBodyParameters } from './contents'
+import { makeCodeDefaultBody, makeAction, replaceBodyParameters } from './contents'
 
 const DEFAULT_CONFIG = {
   visible: {
@@ -110,7 +110,10 @@ const getBody = (inputs, config, commitInfo) => {
       throw new Error(`Failed to load template from ${inputs.template}: ${err.message}`)
     }
   } else {
-    const defaultBody = makeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitInfo)
+    const defaultBody =
+      context.eventName == 'issues'
+        ? makeIssueDefaultBody(config, inputs.customMessage1, inputs.customMessage2)
+        : makeCodeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitInfo)
     core.group('Default body', () => core.info(JSON.stringify(defaultBody, null, 2)))
     return defaultBody
   }
@@ -185,7 +188,37 @@ const isSkipNotification = (commitMessage, notification) => {
   if (!Array.isArray(ignoreKeywords)) {
     return false
   }
-  return ignoreKeywords.some((keyword) => commitMessage.includes(keyword))
+  return ignoreKeywords.some((keyword) => commitMessage?.includes(keyword))
+}
+
+/**
+ * Generates an object containing information about the latest commit.
+ *
+ * @param {Object} execOptions - Options to be used for executing commands.
+ * @returns {Promise<Object>} An object containing the SHA, commit message, list of changed files, and author of the latest commit.
+ * @property {string} sha - The SHA of the latest commit.
+ * @property {string} commitMessage - The message of the latest commit.
+ * @property {Array<string>} changedFiles - The list of files changed in the latest commit.
+ * @property {string} author - The author of the latest commit.
+ */
+const makeCommitInfo = async (execOptions) => {
+  const sha = getSha()
+
+  // Get the latest commit message
+  const commitMessage = await getCommitMessage(sha, execOptions)
+
+  // Get the list of changed files from the latest commit
+  const changedFiles = await getChangedFiles(sha, execOptions)
+
+  // Get the latest author of the commit
+  const author = await getCommitAuthor(execOptions)
+
+  return {
+    sha,
+    commitMessage,
+    changedFiles,
+    author
+  }
 }
 
 export async function run() {
@@ -202,24 +235,8 @@ export async function run() {
       //silent: !core.isDebug()
     }
 
-    const sha = getSha()
-
-    // Get the latest commit message
-    const commitMessage = await getCommitMessage(sha, execOptions)
-
-    // Get the list of changed files from the latest commit
-    const changedFiles = await getChangedFiles(sha, execOptions)
-
-    // Get the latest author of the commit
-    const author = await getCommitAuthor(execOptions)
-
-    const commitInfo = {
-      sha,
-      commitMessage,
-      changedFiles,
-      author
-    }
-
+    // make commit information
+    const commitInfo = context.eventName == 'issues' ? {} : await makeCommitInfo(execOptions)
     // @note: Insert line breaks.The next core.group will be concatenated with the standard output.
     core.info('')
 
