@@ -31573,8 +31573,9 @@ const getBody = (inputs, config, commitInfo) => {
     try {
       const templatesContent = require$$1.readFileSync(inputs.template, { encoding: 'utf8' });
       const processedContent = replaceBodyParameters(config, templatesContent, inputs.customMessage1, inputs.customMessage2, commitInfo);
-      coreExports.group('Template body', () => coreExports.info(JSON.stringify(processedContent, null, 2)));
-      return JSON.parse(processedContent)
+      const processedObject = JSON.parse(processedContent);
+      coreExports.group('Template body', () => coreExports.info(JSON.stringify(processedObject, null, 2)));
+      return processedObject
     } catch (err) {
       throw new Error(`Failed to load template from ${inputs.template}: ${err.message}`)
     }
