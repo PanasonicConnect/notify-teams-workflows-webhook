@@ -1,62 +1,42 @@
 [
   {
     "type": "TextBlock",
-    "text": "github run number: {GITHUB_RUN_NUMBER}",
+    "text": "#{GITHUB_RUN_NUMBER} {COMMIT_MESSAGE}",
+    "id": "Title",
+    "spacing": "Medium",
+    "size": "large",
+    "weight": "Bolder",
+    "color": "Accent",
     "wrap": true
   },
   {
     "type": "TextBlock",
-    "text": "commit message: {COMMIT_MESSAGE}",
+    "text": "{CUSTOM_MESSAGE_1}",
+    "separator": true,
     "wrap": true
   },
   {
     "type": "TextBlock",
-    "text": "custom message 1: {CUSTOM_MESSAGE_1}",
+    "text": "**Author:** ",
+    "separator": true,
     "wrap": true
   },
   {
     "type": "TextBlock",
-    "text": "github repository: {GITHUB_REPOSITORY}",
+    "text": "`{AUTHOR}`",
+    "size": "small",
+    "wrap": false
+  },
+  {
+    "type": "TextBlock",
+    "text": "**Changed files:**",
+    "separator": true,
     "wrap": true
   },
   {
     "type": "TextBlock",
-    "text": "github branch {BRANCH}",
-    "wrap": true
-  },
-  {
-    "type": "TextBlock",
-    "text": "github event name: {GITHUB_EVENT_NAME}",
-    "wrap": true
-  },
-  {
-    "type": "TextBlock",
-    "text": "github workflow: {GITHUB_WORKFLOW}",
-    "wrap": true
-  },
-  {
-    "type": "TextBlock",
-    "text": "github actor: {GITHUB_ACTOR}",
-    "wrap": true
-  },
-  {
-    "type": "TextBlock",
-    "text": "github workflow SHA: {GITHUB_SHA}",
-    "wrap": true
-  },
-  {
-    "type": "TextBlock",
-    "text": "changed files: {CHANGED_FILES}",
-    "wrap": true
-  },
-  {
-    "type": "TextBlock",
-    "text": "custom message 2: {CUSTOM_MESSAGE_2}",
-    "wrap": true
-  },
-  {
-    "type": "TextBlock",
-    "text": "Author: {AUTHOR}",
-    "wrap": true
+    "text": "{CHANGED_FILES}",
+    "size": "small",
+    "wrap": false
   }
 ]
