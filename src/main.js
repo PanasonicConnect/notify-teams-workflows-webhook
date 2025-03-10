@@ -110,7 +110,10 @@ const getBody = (inputs, config, commitInfo) => {
       throw new Error(`Failed to load template from ${inputs.template}: ${err.message}`)
     }
   } else {
-    const defaultBody = makeCodeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitInfo)
+    const defaultBody =
+      context.eventName == 'issues'
+        ? makeIssueDefaultBody(config, inputs.customMessage1, inputs.customMessage2)
+        : makeCodeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitInfo)
     core.group('Default body', () => core.info(JSON.stringify(defaultBody, null, 2)))
     return defaultBody
   }
@@ -185,7 +188,7 @@ const isSkipNotification = (commitMessage, notification) => {
   if (!Array.isArray(ignoreKeywords)) {
     return false
   }
-  return ignoreKeywords.some((keyword) => commitMessage.includes(keyword))
+  return ignoreKeywords.some((keyword) => commitMessage?.includes(keyword))
 }
 
 /**
@@ -233,8 +236,7 @@ export async function run() {
     }
 
     // make commit information
-    const commitInfo = context.eventName == 'issues' ? {} : makeCommitInfo(execOptions)
-
+    const commitInfo = context.eventName == 'issues' ? {} : await makeCommitInfo(execOptions)
     // @note: Insert line breaks.The next core.group will be concatenated with the standard output.
     core.info('')
 

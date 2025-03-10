@@ -31338,12 +31338,21 @@ const makeAction = (titles, urls) => {
 
   // If no action parameters are provided, return the default action to view the workflow.
   if ((titles.length == 0 && urls.length == 0) || (titles.length == 1 && urls.length == 1 && !titles[0] && !urls[0])) {
-    actions.push({
-      type: 'Action.OpenUrl',
-      title: 'View Workflow',
-      url: getWorkflowUrl()
-    });
-    return actions
+    if (githubExports.context.eventName == 'issues') {
+      actions.push({
+        type: 'Action.OpenUrl',
+        title: 'View Issue',
+        url: githubExports.context?.payload?.issue?.html_url
+      });
+      return actions
+    } else {
+      actions.push({
+        type: 'Action.OpenUrl',
+        title: 'View Workflow',
+        url: getWorkflowUrl()
+      });
+      return actions
+    }
   }
   // Create an action for each parameter provided.
   for (let i = 0; i < titles.length; i++) {
@@ -31367,7 +31376,7 @@ const makeAction = (titles, urls) => {
  * @param {Object} commitInfo - Information about the commit.
  * @returns {Object} The constructed body object with the provided parameters.
  */
-const makeDefaultBody = (config, customMessage1, customMessage2, commitInfo) => {
+const makeCodeDefaultBody = (config, customMessage1, customMessage2, commitInfo) => {
   const body = [];
   body.push(titleBlock);
   if (customMessage1) {
@@ -31443,21 +31452,25 @@ const generateChangedFilesString = (config, changedFiles) => {
  * @returns {string} The target string with all placeholders replaced by their corresponding values.
  */
 const replaceBodyParameters = (config, target, customMessage1, customMessage2, commitInfo) => {
-  const changedFilesString = generateChangedFilesString(config, commitInfo.changedFiles);
-
+  const changedFilesString = generateChangedFilesString(config, commitInfo?.changedFiles);
+  const labelsString = githubExports.context.payload?.issue?.labels?.map((l) => l.name).join(', ');
   return target
     .replace('{GITHUB_RUN_NUMBER}', githubExports.context.runNumber)
-    .replace('{COMMIT_MESSAGE}', commitInfo.commitMessage)
+    .replace('{COMMIT_MESSAGE}', commitInfo?.commitMessage)
     .replace('{CUSTOM_MESSAGE_1}', customMessage1)
     .replace('{GITHUB_REPOSITORY}', githubExports.context.payload.repository?.name)
     .replace('{BRANCH}', getBranch())
     .replace('{GITHUB_EVENT_NAME}', githubExports.context.eventName)
     .replace('{GITHUB_WORKFLOW}', githubExports.context.workflow)
     .replace('{GITHUB_ACTOR}', githubExports.context.actor)
-    .replace('{GITHUB_SHA}', commitInfo.sha)
+    .replace('{GITHUB_SHA}', commitInfo?.sha)
     .replace('{CHANGED_FILES}', changedFilesString)
     .replace('{CUSTOM_MESSAGE_2}', customMessage2)
-    .replace('{AUTHOR}', commitInfo.author)
+    .replace('{AUTHOR}', commitInfo?.author)
+    .replace('{ISSUE_TITLE}', githubExports.context.payload?.issue?.title)
+    .replace('{ISSUE_LABELS}', labelsString)
+    .replace('{ISSUE_MILESTONE}', githubExports.context.payload?.issue?.milestone?.title)
+    .replace('{ISSUE_BODY}', githubExports.context.payload?.issue?.body)
 };
 
 const DEFAULT_CONFIG = {
@@ -31566,7 +31579,10 @@ const getBody = (inputs, config, commitInfo) => {
       throw new Error(`Failed to load template from ${inputs.template}: ${err.message}`)
     }
   } else {
-    const defaultBody = makeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitInfo);
+    const defaultBody =
+      githubExports.context.eventName == 'issues'
+        ? makeIssueDefaultBody(config, inputs.customMessage1, inputs.customMessage2)
+        : makeCodeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitInfo);
     coreExports.group('Default body', () => coreExports.info(JSON.stringify(defaultBody, null, 2)));
     return defaultBody
   }
@@ -31641,7 +31657,37 @@ const isSkipNotification = (commitMessage, notification) => {
   if (!Array.isArray(ignoreKeywords)) {
     return false
   }
-  return ignoreKeywords.some((keyword) => commitMessage.includes(keyword))
+  return ignoreKeywords.some((keyword) => commitMessage?.includes(keyword))
+};
+
+/**
+ * Generates an object containing information about the latest commit.
+ *
+ * @param {Object} execOptions - Options to be used for executing commands.
+ * @returns {Promise<Object>} An object containing the SHA, commit message, list of changed files, and author of the latest commit.
+ * @property {string} sha - The SHA of the latest commit.
+ * @property {string} commitMessage - The message of the latest commit.
+ * @property {Array<string>} changedFiles - The list of files changed in the latest commit.
+ * @property {string} author - The author of the latest commit.
+ */
+const makeCommitInfo = async (execOptions) => {
+  const sha = getSha();
+
+  // Get the latest commit message
+  const commitMessage = await getCommitMessage(sha, execOptions);
+
+  // Get the list of changed files from the latest commit
+  const changedFiles = await getChangedFiles(sha, execOptions);
+
+  // Get the latest author of the commit
+  const author = await getCommitAuthor(execOptions);
+
+  return {
+    sha,
+    commitMessage,
+    changedFiles,
+    author
+  }
 };
 
 async function run() {
@@ -31658,24 +31704,8 @@ async function run() {
       //silent: !core.isDebug()
     };
 
-    const sha = getSha();
-
-    // Get the latest commit message
-    const commitMessage = await getCommitMessage(sha, execOptions);
-
-    // Get the list of changed files from the latest commit
-    const changedFiles = await getChangedFiles(sha, execOptions);
-
-    // Get the latest author of the commit
-    const author = await getCommitAuthor(execOptions);
-
-    const commitInfo = {
-      sha,
-      commitMessage,
-      changedFiles,
-      author
-    };
-
+    // make commit information
+    const commitInfo = githubExports.context.eventName == 'issues' ? {} : await makeCommitInfo(execOptions);
     // @note: Insert line breaks.The next core.group will be concatenated with the standard output.
     coreExports.info('');
 

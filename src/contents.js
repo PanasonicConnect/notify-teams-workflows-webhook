@@ -70,6 +70,31 @@ const singleTextBlockChangedFiles = {
   wrap: false
 }
 
+const issueTitleBlock = {
+  type: 'TextBlock',
+  text: '{ISSUE_TITLE}',
+  id: 'Title',
+  spacing: 'Medium',
+  size: 'large',
+  weight: 'Bolder',
+  color: 'Accent'
+}
+const issueFactBlockLabels = {
+  title: 'Labels:',
+  value: '{ISSUE_LABELS}',
+  size: 'small',
+  wrap: false
+}
+const issueFactBlockMilestone = {
+  title: 'MileStone:',
+  value: '{ISSUE_MILESTONE}'
+}
+const issueTextBlockBody = {
+  type: 'TextBlock',
+  text: '{ISSUE_BODY}',
+  size: 'small',
+  wrap: false
+}
 /**
  * Retrieves the status from the job context.
  *
@@ -115,12 +140,21 @@ export const makeAction = (titles, urls) => {
 
   // If no action parameters are provided, return the default action to view the workflow.
   if ((titles.length == 0 && urls.length == 0) || (titles.length == 1 && urls.length == 1 && !titles[0] && !urls[0])) {
-    actions.push({
-      type: 'Action.OpenUrl',
-      title: 'View Workflow',
-      url: getWorkflowUrl()
-    })
-    return actions
+    if (context.eventName == 'issues') {
+      actions.push({
+        type: 'Action.OpenUrl',
+        title: 'View Issue',
+        url: context?.payload?.issue?.html_url
+      })
+      return actions
+    } else {
+      actions.push({
+        type: 'Action.OpenUrl',
+        title: 'View Workflow',
+        url: getWorkflowUrl()
+      })
+      return actions
+    }
   }
   // Create an action for each parameter provided.
   for (let i = 0; i < titles.length; i++) {
@@ -187,6 +221,45 @@ export const makeCodeDefaultBody = (config, customMessage1, customMessage2, comm
 }
 
 /**
+ * Generates the default body for an issue notification.
+ *
+ * @param {Object} config - Configuration object for visibility settings.
+ * @param {boolean} config.visible.repository_name - Whether to include the repository name.
+ * @param {boolean} config.visible.branch_name - Whether to include the branch name.
+ * @param {boolean} config.visible.workflow_name - Whether to include the workflow name.
+ * @param {boolean} config.visible.event - Whether to include the event.
+ * @param {boolean} config.visible.actor - Whether to include the actor.
+ * @param {boolean} config.visible.sha1 - Whether to include the SHA1.
+ * @param {boolean} config.visible.changed_files - Whether to include changed files.
+ * @param {string} customMessage1 - Custom message to be included in the body.
+ * @param {string} customMessage2 - Another custom message to be included in the body.
+ * @returns {Object} The parsed body of the issue notification.
+ */
+export const makeIssueDefaultBody = (config, customMessage1, customMessage2) => {
+  const body = []
+  body.push(issueTitleBlock)
+
+  if (customMessage1) {
+    body.push(singleTextBlockCustom1)
+  }
+  // create fact set
+  const fact = JSON.parse(JSON.stringify(factBlock))
+  fact.facts.push(issueFactBlockLabels)
+  fact.facts.push(issueFactBlockMilestone)
+  body.push(fact)
+
+  body.push(issueTextBlockBody)
+
+  if (customMessage2) {
+    body.push(singleTextBlockCustom2)
+  }
+
+  const replacedBody = replaceBodyParameters(config, JSON.stringify(body), customMessage1, customMessage2, undefined)
+  const parsedBody = JSON.parse(replacedBody)
+  return parsedBody
+}
+
+/**
  * Generates a string representation of the changed files.
  *
  * @param {Object} config - The configuration object.
@@ -220,19 +293,23 @@ export const generateChangedFilesString = (config, changedFiles) => {
  * @returns {string} The target string with all placeholders replaced by their corresponding values.
  */
 export const replaceBodyParameters = (config, target, customMessage1, customMessage2, commitInfo) => {
-  const changedFilesString = generateChangedFilesString(config, commitInfo.changedFiles)
-
+  const changedFilesString = generateChangedFilesString(config, commitInfo?.changedFiles)
+  const labelsString = context.payload?.issue?.labels?.map((l) => l.name).join(', ')
   return target
     .replace('{GITHUB_RUN_NUMBER}', context.runNumber)
-    .replace('{COMMIT_MESSAGE}', commitInfo.commitMessage)
+    .replace('{COMMIT_MESSAGE}', commitInfo?.commitMessage)
     .replace('{CUSTOM_MESSAGE_1}', customMessage1)
     .replace('{GITHUB_REPOSITORY}', context.payload.repository?.name)
     .replace('{BRANCH}', getBranch())
     .replace('{GITHUB_EVENT_NAME}', context.eventName)
     .replace('{GITHUB_WORKFLOW}', context.workflow)
     .replace('{GITHUB_ACTOR}', context.actor)
-    .replace('{GITHUB_SHA}', commitInfo.sha)
+    .replace('{GITHUB_SHA}', commitInfo?.sha)
     .replace('{CHANGED_FILES}', changedFilesString)
     .replace('{CUSTOM_MESSAGE_2}', customMessage2)
-    .replace('{AUTHOR}', commitInfo.author)
+    .replace('{AUTHOR}', commitInfo?.author)
+    .replace('{ISSUE_TITLE}', context.payload?.issue?.title)
+    .replace('{ISSUE_LABELS}', labelsString)
+    .replace('{ISSUE_MILESTONE}', context.payload?.issue?.milestone?.title)
+    .replace('{ISSUE_BODY}', context.payload?.issue?.body)
 }
