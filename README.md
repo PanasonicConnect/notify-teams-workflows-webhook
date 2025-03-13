@@ -39,7 +39,7 @@ jobs:
         with:
           fetch-depth: 2
       - name: notify
-        uses: PanasonicConnect/notify-teams-workflows-webhook@main
+        uses: PanasonicConnect/notify-teams-workflows-webhook@v1
         with:
           webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
 ```
@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: notify test
-        uses: PanasonicConnect/notify-teams-workflows-webhook@main
+        uses: PanasonicConnect/notify-teams-workflows-webhook@v1
         with:
           webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
           message1: Notify new issue！\n\nClick View Issue button.
@@ -102,7 +102,7 @@ jobs:
         with:
           fetch-depth: 2
       - name: notify
-        uses: PanasonicConnect/notify-teams-workflows-webhook@main
+        uses: PanasonicConnect/notify-teams-workflows-webhook@v1
         with:
           webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
           message1: notification message 1\n\nsample
@@ -160,7 +160,7 @@ jobs:
 最小の設定
 
 ```yaml
-- uses: PanasonicConnect/notify-teams-workflows-webhook
+- uses: PanasonicConnect/notify-teams-workflows-webhook@v1
   with:
     webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
 ```
