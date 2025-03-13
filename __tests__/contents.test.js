@@ -18,7 +18,7 @@ const resetContext = () => {
     },
     issue: {
       title: 'IssueTitle',
-      body: 'IssueBody', // todo 改行は？
+      body: 'IssueBody',
       labels: [{ name: 'IssueLabel1' }, { name: 'IssueLabel2' }],
       milestone: { title: 'IssueMilestone' },
       html_url: 'https;//github.com/test-user/test-repo/issues/1'
@@ -389,18 +389,8 @@ describe('makeIssueDefaultBody', () => {
     resetContext()
   })
 
-  it('should create a default issue body with all parameters', () => {
-    const config = {
-      visible: {
-        repository_name: true,
-        branch_name: true,
-        workflow_name: true,
-        event: true,
-        actor: true,
-        sha1: true,
-        changed_files: true
-      }
-    }
+  it('create a default issue body with all parameters', () => {
+    const config = {}
 
     const body = makeIssueDefaultBody(config, defaultCustomMassage.customMessage1, defaultCustomMassage.customMessage2)
     expect(body).toEqual([
@@ -454,17 +444,7 @@ describe('makeIssueDefaultBody', () => {
   it('should create a default issue body without custom messages', () => {
     const customMessage1 = ''
     const customMessage2 = ''
-    const config = {
-      visible: {
-        repository_name: true,
-        branch_name: true,
-        workflow_name: true,
-        event: true,
-        actor: true,
-        sha1: true,
-        changed_files: true
-      }
-    }
+    const config = {}
 
     const body = makeIssueDefaultBody(config, customMessage1, customMessage2)
     expect(body).toEqual([
@@ -503,18 +483,14 @@ describe('makeIssueDefaultBody', () => {
     ])
   })
 
-  it('should create a default issue body based on config visibility', () => {
-    const config = {
-      visible: {
-        repository_name: true,
-        branch_name: false,
-        workflow_name: true,
-        event: false,
-        actor: true,
-        sha1: false,
-        changed_files: true
-      }
-    }
+  it('should create a default issue body based on multi line body restricted default max lines', () => {
+    const config = {}
+    context.payload.issue.body = `IssueBody1
+IssueBody2
+IssueBody3
+IssueBody4
+IssueBody5
+IssueBody6`
 
     const body = makeIssueDefaultBody(config, defaultCustomMassage.customMessage1, defaultCustomMassage.customMessage2)
     expect(body).toEqual([
@@ -552,7 +528,83 @@ describe('makeIssueDefaultBody', () => {
       },
       {
         type: 'TextBlock',
-        text: 'IssueBody',
+        text: `IssueBody1
+
+IssueBody2
+
+IssueBody3
+
+IssueBody4
+
+IssueBody5
+
+...`,
+        size: 'small',
+        wrap: false
+      },
+      {
+        type: 'TextBlock',
+        text: 'Custom Message 2',
+        separator: true,
+        wrap: true
+      }
+    ])
+  })
+  it('should create a default issue body based on multi line body restricted config issue.maxLines', () => {
+    const config = {
+      issue: {
+        maxLines: 3
+      }
+    }
+    context.payload.issue.body = `IssueBody1
+IssueBody2
+IssueBody3
+IssueBody4
+IssueBody5`
+
+    const body = makeIssueDefaultBody(config, defaultCustomMassage.customMessage1, defaultCustomMassage.customMessage2)
+    expect(body).toEqual([
+      {
+        type: 'TextBlock',
+        text: 'IssueTitle',
+        id: 'Title',
+        spacing: 'Medium',
+        size: 'large',
+        weight: 'Bolder',
+        color: 'Accent'
+      },
+      {
+        type: 'TextBlock',
+        text: 'Custom Message 1',
+        separator: true,
+        wrap: true
+      },
+      {
+        type: 'FactSet',
+        facts: [
+          {
+            title: 'Labels:',
+            value: 'IssueLabel1, IssueLabel2',
+            size: 'small',
+            wrap: false
+          },
+          {
+            title: 'MileStone:',
+            value: 'IssueMilestone'
+          }
+        ],
+        id: 'acFactSet',
+        separator: true
+      },
+      {
+        type: 'TextBlock',
+        text: `IssueBody1
+
+IssueBody2
+
+IssueBody3
+
+...`,
         size: 'small',
         wrap: false
       },

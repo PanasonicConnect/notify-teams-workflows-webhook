@@ -2,7 +2,7 @@ import { context } from '@actions/github'
 import * as core from '@actions/core'
 
 const DEFAULT_MAX_CHANGED_FILES = 10
-const DEFAULT_MAX_ISSUE_BODY = 200
+const DEFAULT_MAX_ISSUE_BODY_LINES = 5
 
 const titleBlock = {
   type: 'TextBlock',
@@ -96,14 +96,6 @@ const issueTextBlockBody = {
   text: '{ISSUE_BODY}',
   size: 'small',
   wrap: false
-}
-/**
- * Retrieves the status from the job context.
- *
- * @returns {string} The status of the job.
- */
-const getStatus = () => {
-  return JSON.parse(context.job).status
 }
 
 /**
@@ -302,12 +294,15 @@ export const generateChangedFilesString = (config, changedFiles) => {
  * @returns {string} The truncated issue body with an ellipsis if it exceeds the maximum length.
  */
 export const makeIssueBody = (config, body) => {
-  const maxIssueBodyLength = config?.issueBodyLength?.max || DEFAULT_MAX_ISSUE_BODY
-  const displayIssueBody = body?.substring(0, maxIssueBodyLength)
-  if (body?.length > maxIssueBodyLength) {
-    displayIssueBody.push('...')
+  if (!body) return undefined
+
+  const maxIssueBodyLines = config?.issue?.maxLines || DEFAULT_MAX_ISSUE_BODY_LINES // max lines
+  const bodyLines = body.split(/\r?\n/) // get lines (remove new line code)
+  const displayBodyLines = bodyLines.slice(0, maxIssueBodyLines) // Get up to the maximum number of rows
+  if (bodyLines.length > maxIssueBodyLines) {
+    displayBodyLines.push('...') // Add an ellipsis if the body exceeds the maximum number of lines
   }
-  return displayIssueBody
+  return displayBodyLines.join('\\n\\n')
 }
 
 /**
