@@ -21,7 +21,7 @@
 - actions
   - GitHubのワークフロー画面に遷移するボタン
 
-![](./assets/sample-pr.png)
+![sample pull-request notification](./assets/sample-pr.png)
 
 <details>
 <summary>呼び出し例</summary>
@@ -56,7 +56,7 @@ jobs:
 - actions
   - Issueの詳細画面に遷移するボタン
 
-![](./assets/sample-issue.png)
+![sample issue notification](./assets/sample-issue.png)
 
 <details>
 <summary>呼び出し例</summary>
@@ -84,7 +84,7 @@ jobs:
 
 デフォルトの表示内容を変更したり、ユーザーが作成したテンプレートファイルを元に送信内容をカスタマイズすることもできます。
 
-![](./assets/sample-pr-all.png)
+![sample configured notification](./assets/sample-pr-all.png)
 
 <details>
 <summary>呼び出し例</summary>
@@ -159,7 +159,7 @@ jobs:
 
 最小の設定
 
-```
+```yaml
 - uses: PanasonicConnect/notify-teams-workflows-webhook
   with:
     webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
