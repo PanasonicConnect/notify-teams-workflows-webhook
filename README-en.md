@@ -5,26 +5,123 @@
 
 [日本語](./README.md)
 
+## Summary
+
 This action sends a POST request to the Webhook URL created in the workflows of the specified Teams. By default, it sends JSON data containing the following
 elements:
+
+### When creating a pull request or executing a push
 
 - body
   - Workflow number
   - Last commit message
+  - Last commit change file
   - Repository name
-  - Branch name
+  - branch name
   - Workflow name
-  - Changed files in the last commit
 - actions
   - Button to navigate to the GitHub workflow screen
 
-You can also customize the default display content or send content based on a user-created template file.
+![](./assets/sample-pr.png)
 
-## What's new
+<details>
+<summary>Example of call</summary>
 
-T.B.D
+```yaml
+name: pr-and-push
+on:
+  pull_request:
+    types: [opened]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: notify
+        uses: PanasonicConnect/notify-teams-workflows-webhook@main
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+```
+
+</details>
+
+### When creating an issue
+
+- body
+  - Issue title
+  - Labels set in Issue
+  - Milestones set for the Issue
+  - Issue text
+- actions
+  - Button to navigate to the Issue details page
+
+![](./assets/sample-issue.png)
+
+<details>
+<summary>Example of call</summary>
+
+```yaml
+name: issue sample
+on:
+  issues:
+    types: [opened]
+jobs:
+  add-issue:
+    name: Add issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: notify test
+        uses: PanasonicConnect/notify-teams-workflows-webhook@main
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          message1: Notify new issue！\n\nClick View Issue button.
+```
+
+</details>
+
+### Other
+
+You can also change the default display content or customize the submission content based on a user-created template file.
+
+![](./assets/sample-pr-all.png)
+
+<details>
+<summary>Example of call</summary>
+
+```yaml
+name: pr-and-push
+on:
+  pull_request:
+    types: [opened]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: notify
+        uses: PanasonicConnect/notify-teams-workflows-webhook@main
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          message1: notification message 1\n\nsample
+          message2: notification message 2
+          config: './.github/notify-config.json'
+          action-titles: |
+            google
+            github
+          action-urls: |
+            https://www.google.co.jp/
+            https://github.com/
+```
+
+</details>
 
 ## Usage
+
+Please obtain the Teams Workflows Webhook URL in advance and set it in the repository.
 
 ### Workflows
 
@@ -36,7 +133,7 @@ T.B.D
 - uses: PanasonicConnect/notify-teams-workflows-webhook
   with:
     # Specify the Workflows Webhook URL for the Teams notification channel
-    webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
+    webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
     # Specify the path to the template file (.json) if using a custom template
     # default: none
     # example: .github/config/notify-template.json
@@ -59,6 +156,14 @@ T.B.D
     # default: URL of the workflow execution history screen that executed this action
     # example: ['https://github-workflow-url', 'https://github-pages-url']
     action-urls: []
+```
+
+Minimum Settings
+
+```
+- uses: PanasonicConnect/notify-teams-workflows-webhook
+  with:
+    webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
 ```
 
 ### Permission
@@ -204,6 +309,10 @@ The following variables can be used in the template file.
 | {GITHUB_WORKFLOW}   | Workflow name                                   |
 | {GITHUB_EVENT_NAME} | Event name that triggered the workflow          |
 | {GITHUB_ACTOR}      | Username of the user who triggered the workflow |
+| {ISSUE_TITLE}       | Issue title.                                    |
+| {ISSUE_LABELS}      | Labels set in Issue.                            |
+| {ISSUE_MILESTONE}   | Milestones set for the Issue.                   |
+| {ISSUE_BODY}        | Issue text.                                     |
 
 ### Configuration
 
@@ -246,6 +355,11 @@ illustrative purposes, but comments cannot be included in the actual json.
     // Specify the maximum number of changed files to display
     // default: 10
     "max": 10
+  },
+  "issue": {
+    // Specifies the maximum number of lines to display in the Issue body
+    // default: 5
+    "maxLines": 5
   }
 }
 ```

@@ -5,7 +5,11 @@
 
 [English](./README-en.md)
 
+## Summary
+
 このアクションは、指定されたTeamsのworkflowsで作成したWebhook URLにPOSTリクエストを送信します。その際、デフォルトでは以下の要素を含むJSONデータを送信します。
+
+### Pull Request作成やpush実行時
 
 - body
   - ワークフロー番号
@@ -17,13 +21,106 @@
 - actions
   - GitHubのワークフロー画面に遷移するボタン
 
+![](./assets/sample-pr.png)
+
+<details>
+<summary>呼び出し例</summary>
+
+```yaml
+name: pr-and-push
+on:
+  pull_request:
+    types: [opened]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: notify
+        uses: PanasonicConnect/notify-teams-workflows-webhook@main
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+```
+
+</details>
+
+### Issue作成時
+
+- body
+  - Issueタイトル
+  - Issueに設定されたラベル
+  - Issueに設定されたマイルストーン
+  - Issue本文
+- actions
+  - Issueの詳細画面に遷移するボタン
+
+![](./assets/sample-issue.png)
+
+<details>
+<summary>呼び出し例</summary>
+
+```yaml
+name: issue sample
+on:
+  issues:
+    types: [opened]
+jobs:
+  add-issue:
+    name: Add issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: notify test
+        uses: PanasonicConnect/notify-teams-workflows-webhook@main
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          message1: Notify new issue！\n\nClick View Issue button.
+```
+
+</details>
+
+### その他
+
 デフォルトの表示内容を変更したり、ユーザーが作成したテンプレートファイルを元に送信内容をカスタマイズすることもできます。
 
-## What's new
+![](./assets/sample-pr-all.png)
 
-T.B.D
+<details>
+<summary>呼び出し例</summary>
+
+```yaml
+name: pr-and-push
+on:
+  pull_request:
+    types: [opened]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: notify
+        uses: PanasonicConnect/notify-teams-workflows-webhook@main
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          message1: notification message 1\n\nsample
+          message2: notification message 2
+          config: './.github/notify-config.json'
+          action-titles: |
+            google
+            github
+          action-urls: |
+            https://www.google.co.jp/
+            https://github.com/
+```
+
+</details>
 
 ## Usage
+
+予めTeamsのWorkflows Webhook URLを取得して、リポジトリに設定しておいてください。
 
 ### Workflows
 
@@ -35,7 +132,7 @@ T.B.D
 - uses: PanasonicConnect/notify-teams-workflows-webhook
   with:
     # Teamsの通知先チャネルのWorkflows Webhook URLを指定してください
-    webhook-url: ${{ secrets.TEST_WEBHOOK_URL }}
+    webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
     # 送信内容のテンプレートファイル(.json)を使用する場合はパスを指定してください
     # default: 指定なし
     # example: .github/config/notify-template.json
@@ -58,6 +155,14 @@ T.B.D
     # default: 本アクションを実行したワークフロー実行履歴画面のURL
     # example: ['https://github-workflow-url', 'https://github-pages-url']
     action-urls: []
+```
+
+最小の設定
+
+```
+- uses: PanasonicConnect/notify-teams-workflows-webhook
+  with:
+    webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
 ```
 
 ### Permission
@@ -201,6 +306,10 @@ templateパラメータでは、ユーザーが作成したテンプレートフ
 | {GITHUB_WORKFLOW}   | ワークフロー名                             |
 | {GITHUB_EVENT_NAME} | ワークフローのトリガーとなったイベント名   |
 | {GITHUB_ACTOR}      | ワークフローのトリガーを実行したユーザー名 |
+| {ISSUE_TITLE}       | Issueのタイトル                            |
+| {ISSUE_LABELS}      | Issueに設定されたラべル                    |
+| {ISSUE_MILESTONE}   | Issueに設定されたマイルストーン            |
+| {ISSUE_BODY}        | Issueの本文                                |
 
 ### Configuration
 
@@ -242,6 +351,11 @@ configパラメータを指定することで、送信内容、条件のカス�
     // 表示する変更ファイルの最大数を指定します
     // default: 10
     "max": 10
+  },
+  "issue": {
+    // Issue本文の表示する最大行数を指定します
+    // default: 5
+    "maxLines": 5
   }
 }
 ```
