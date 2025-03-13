@@ -31526,7 +31526,6 @@ const generateChangedFilesString = (config, changedFiles) => {
  */
 const makeIssueBody = (config, body) => {
   const maxIssueBodyLength = config?.issueBodyLength?.max || DEFAULT_MAX_ISSUE_BODY;
-  console.log(body, maxIssueBodyLength);
   const displayIssueBody = body?.substring(0, maxIssueBodyLength);
   if (body?.length > maxIssueBodyLength) {
     displayIssueBody.push('...');
@@ -31551,7 +31550,7 @@ const replaceBodyParameters = (config, target, customMessage1, customMessage2, c
   const labelsString = githubExports.context.payload?.issue?.labels?.map((l) => l.name).join(', ');
   const displayIssueBody = makeIssueBody(config, githubExports.context.payload?.issue?.body);
 
-  return target
+  const replacesStr = target
     .replace('{GITHUB_RUN_NUMBER}', githubExports.context.runNumber)
     .replace('{COMMIT_MESSAGE}', commitInfo?.commitMessage)
     .replace('{CUSTOM_MESSAGE_1}', customMessage1)
@@ -31567,7 +31566,10 @@ const replaceBodyParameters = (config, target, customMessage1, customMessage2, c
     .replace('{ISSUE_TITLE}', githubExports.context.payload?.issue?.title)
     .replace('{ISSUE_LABELS}', labelsString)
     .replace('{ISSUE_MILESTONE}', githubExports.context.payload?.issue?.milestone?.title)
-    .replace('{ISSUE_BODY}', displayIssueBody)
+    .replace('{ISSUE_BODY}', displayIssueBody);
+
+  coreExports.group('Replaced data', () => coreExports.info(replacesStr));
+  return replacesStr
 };
 
 const DEFAULT_CONFIG = {

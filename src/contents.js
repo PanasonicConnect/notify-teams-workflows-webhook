@@ -1,4 +1,5 @@
 import { context } from '@actions/github'
+import * as core from '@actions/core'
 
 const DEFAULT_MAX_CHANGED_FILES = 10
 const DEFAULT_MAX_ISSUE_BODY = 200
@@ -302,7 +303,6 @@ export const generateChangedFilesString = (config, changedFiles) => {
  */
 export const makeIssueBody = (config, body) => {
   const maxIssueBodyLength = config?.issueBodyLength?.max || DEFAULT_MAX_ISSUE_BODY
-  console.log(body, maxIssueBodyLength)
   const displayIssueBody = body?.substring(0, maxIssueBodyLength)
   if (body?.length > maxIssueBodyLength) {
     displayIssueBody.push('...')
@@ -327,7 +327,7 @@ export const replaceBodyParameters = (config, target, customMessage1, customMess
   const labelsString = context.payload?.issue?.labels?.map((l) => l.name).join(', ')
   const displayIssueBody = makeIssueBody(config, context.payload?.issue?.body)
 
-  return target
+  const replacesStr = target
     .replace('{GITHUB_RUN_NUMBER}', context.runNumber)
     .replace('{COMMIT_MESSAGE}', commitInfo?.commitMessage)
     .replace('{CUSTOM_MESSAGE_1}', customMessage1)
@@ -344,4 +344,7 @@ export const replaceBodyParameters = (config, target, customMessage1, customMess
     .replace('{ISSUE_LABELS}', labelsString)
     .replace('{ISSUE_MILESTONE}', context.payload?.issue?.milestone?.title)
     .replace('{ISSUE_BODY}', displayIssueBody)
+
+  core.group('Replaced data', () => core.info(replacesStr))
+  return replacesStr
 }
