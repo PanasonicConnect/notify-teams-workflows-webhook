@@ -22,7 +22,7 @@ elements:
 - actions
   - Button to navigate to the GitHub workflow screen
 
-![](./assets/sample-pr.png)
+![sample pull-request notification](./assets/sample-pr.png)
 
 <details>
 <summary>Example of call</summary>
@@ -57,7 +57,7 @@ jobs:
 - actions
   - Button to navigate to the Issue details page
 
-![](./assets/sample-issue.png)
+![sample issue notification](./assets/sample-issue.png)
 
 <details>
 <summary>Example of call</summary>
@@ -85,7 +85,7 @@ jobs:
 
 You can also change the default display content or customize the submission content based on a user-created template file.
 
-![](./assets/sample-pr-all.png)
+![sample configured notification](./assets/sample-pr-all.png)
 
 <details>
 <summary>Example of call</summary>
@@ -160,7 +160,7 @@ Please obtain the Teams Workflows Webhook URL in advance and set it in the repos
 
 Minimum Settings
 
-```
+```yaml
 - uses: PanasonicConnect/notify-teams-workflows-webhook
   with:
     webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
