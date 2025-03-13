@@ -95,6 +95,7 @@ const issueTextBlockBody = {
   type: 'TextBlock',
   text: '{ISSUE_BODY}',
   size: 'small',
+  separator: true,
   wrap: false
 }
 
@@ -297,10 +298,20 @@ export const makeIssueBody = (config, body) => {
   if (!body) return undefined
 
   const maxIssueBodyLines = config?.issue?.maxLines || DEFAULT_MAX_ISSUE_BODY_LINES // max lines
-  const bodyLines = body.split(/\r?\n/) // get lines (remove new line code)
-  const displayBodyLines = bodyLines.slice(0, maxIssueBodyLines) // Get up to the maximum number of rows
+
+  // get lines (remove new line code)
+  const bodyLines = body.split(/\r?\n/)
+
+  // Get up to the maximum number of rows
+  let displayBodyLines = bodyLines.slice(0, maxIssueBodyLines)
+
+  // Remove leading and trailing spaces and heading markers
+  // for Teams Bug? headlines are not correctly represented.
+  displayBodyLines = displayBodyLines.map((line) => line.replace(/^#+\s+/, '').trim())
+
+  // Add an ellipsis if the body exceeds the maximum number of lines
   if (bodyLines.length > maxIssueBodyLines) {
-    displayBodyLines.push('...') // Add an ellipsis if the body exceeds the maximum number of lines
+    displayBodyLines.push('...')
   }
   return displayBodyLines.join('\\n\\n')
 }

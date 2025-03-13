@@ -430,6 +430,7 @@ describe('makeIssueDefaultBody', () => {
         type: 'TextBlock',
         text: 'IssueBody',
         size: 'small',
+        separator: true,
         wrap: false
       },
       {
@@ -478,6 +479,7 @@ describe('makeIssueDefaultBody', () => {
         type: 'TextBlock',
         text: 'IssueBody',
         size: 'small',
+        separator: true,
         wrap: false
       }
     ])
@@ -485,9 +487,9 @@ describe('makeIssueDefaultBody', () => {
 
   it('should create a default issue body based on multi line body restricted default max lines', () => {
     const config = {}
-    context.payload.issue.body = `IssueBody1
-IssueBody2
-IssueBody3
+    context.payload.issue.body = `# IssueBody1
+## IssueBody2
+### IssueBody3
 IssueBody4
 IssueBody5
 IssueBody6`
@@ -540,6 +542,7 @@ IssueBody5
 
 ...`,
         size: 'small',
+        separator: true,
         wrap: false
       },
       {
@@ -606,6 +609,7 @@ IssueBody3
 
 ...`,
         size: 'small',
+        separator: true,
         wrap: false
       },
       {
