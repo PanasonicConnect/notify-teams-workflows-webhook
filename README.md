@@ -5,9 +5,39 @@
 
 [English](./README-en.md)
 
+---
+
+- [Notify teams workflows webhook](#notify-teams-workflows-webhook)
+  - [Summary](#summary)
+    - [Pull Request作成やpush実行時](#pull-request作成やpush実行時)
+    - [Issue作成時](#issue作成時)
+    - [その他](#その他)
+  - [Usage](#usage)
+    - [Workflows](#workflows)
+    - [Permission](#permission)
+    - [Template](#template)
+      - [Default template](#default-template)
+      - [Custom template](#custom-template)
+      - [Variables](#variables)
+    - [Configuration](#configuration)
+    - [Users](#users)
+  - [Versioning](#versioning)
+  - [Contributing](#contributing)
+  - [License](#license)
+
+---
+
 ## Summary
 
-このアクションは、指定されたTeamsのworkflowsで作成したWebhook URLにPOSTリクエストを送信します。その際、デフォルトでは以下の要素を含むJSONデータを送信します。
+このアクションは、指定されたTeamsのworkflowsで作成したWebhook URLにPOSTリクエストを送信します
+主な提供機能は下記の通りです。
+- 通知内容のテンプレートファイル指定 (アダプティブカード形式のbodyをカスタマイズ可能です)
+- Pull RequestやIssue等の表示情報を変数で提供
+- 任意のURLに遷移するボタンの指定
+- 通知メッセージ内にTeamsユーザーに対するメンションの指定
+- 特定のキーワードを含むコミットメッセージについて通知を無視する設定
+
+デフォルトでは以下の要素を含むJSONデータを送信します。
 
 ### Pull Request作成やpush実行時
 
@@ -141,6 +171,10 @@ jobs:
     # default: 指定なし
     # example: .github/config/notify-config.json
     config: ''
+    # ユーザー定義ファイル(.json)を使用する場合はパスを指定してください
+    # default: 指定なし
+    # example: .github/config/notify-users.json
+    users: ''
     # カスタムメッセージ1を送信する場合は以下のパラメータを指定してください
     # default: 指定なし
     message1: ''
@@ -358,6 +392,35 @@ configパラメータを指定することで、送信内容、条件のカス�
     "maxLines": 5
   }
 }
+```
+
+### Users
+
+usersパラメータを指定することで、メンションを行うことができます。
+以下json内のコメントは説明のために記載していますが、実際のjson内にコメントを記載することはできません。
+
+```json
+[
+  {
+    "alias": "Admin", // メッセージ内で利用するエイリアス名を指定してください
+    "displayName": "Tech Lead", // Teams上で表示される名前を指定してください
+    "id": "userName1@domain" // Teams上でのユーザーIDを指定してください
+  },
+  {
+    "alias": "Admin2",
+    "displayName": "DevOps Engineer",
+    "id": "userName2@domain"
+  }
+]
+```
+
+メンション付きの通知を行う際は、メッセージ内にエイリアス名を`<at></at>`で囲んで記述してください。
+
+```yaml
+- uses: PanasonicConnect/notify-teams-workflows-webhook@v1
+  with:
+    webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+    message1: notification for <at>Admin</at> <at>Admin2</at>
 ```
 
 ## Versioning

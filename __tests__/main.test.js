@@ -401,4 +401,61 @@ describe('Custom Action Tests', () => {
     ]
     expect(requestBody?.attachments[0].content.body).toEqual(expectedTemplate)
   })
+
+  it('Mention Testing', async () => {
+    core.getInput.mockImplementation((name) => {
+      if (name === 'webhook-url') return 'https://dummy.url'
+      if (name === 'template') return './__tests__/assets/template.json'
+      if (name === 'message1') return '<at>Admin</at>'
+      if (name === 'message2') return '<at>Admin2</at>'
+      if (name === 'action-titles') return 'Title1'
+      if (name === 'action-urls') return 'https://url1'
+      if (name === 'config') return ''
+      if (name === 'users') return './__tests__/assets/users.json'
+      return ''
+    })
+
+    await run()
+
+    // Validate that fetch was called
+    expect(fetch).toHaveBeenCalled()
+    const fetchCall = fetch.mock.calls[0][1]
+    const requestBody = JSON.parse(fetchCall.body)
+
+    const expectedTemplate = [
+      { type: 'TextBlock', text: '123', wrap: true },
+      { type: 'TextBlock', text: 'first line', wrap: true }, // first line\nsecond line -> first line
+      { type: 'TextBlock', text: '<at>Admin</at>', wrap: true },
+      { type: 'TextBlock', text: 'test-repo', wrap: true },
+      { type: 'TextBlock', text: 'main', wrap: true },
+      { type: 'TextBlock', text: 'push', wrap: true }, // push -> pull_request
+      { type: 'TextBlock', text: 'CI', wrap: true },
+      { type: 'TextBlock', text: 'test-actor', wrap: true },
+      { type: 'TextBlock', text: 'abc123', wrap: true }, // abc123 -> pr-sha1
+      { type: 'TextBlock', text: '`dummy output`', wrap: true },
+      { type: 'TextBlock', text: '<at>Admin2</at>', wrap: true },
+      { type: 'TextBlock', text: 'dummy author', wrap: true }
+    ]
+    expect(requestBody?.attachments[0].content.body).toEqual(expectedTemplate)
+
+    const expectedEntities = [
+      {
+        type: 'mention',
+        text: '<at>Admin</at>',
+        mentioned: {
+          id: 'userName1@domain',
+          name: 'Tech Lead'
+        }
+      },
+      {
+        type: 'mention',
+        text: '<at>Admin2</at>',
+        mentioned: {
+          id: 'userName2@domain',
+          name: 'DevOps Engineer'
+        }
+      }
+    ]
+    expect(requestBody?.attachments[0].content?.msteams?.entities).toEqual(expectedEntities)
+  })
 })

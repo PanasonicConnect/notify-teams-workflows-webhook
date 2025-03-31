@@ -16,6 +16,9 @@ inputs:
   config:
     description: 'Path to the configuration file'
     required: false
+  users:
+    description: 'Path to the user file for mention'
+    required: false
   message1:
     description: 'Custom message to include in the payload'
     required: false

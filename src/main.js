@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import { context } from '@actions/github'
 import * as exec from '@actions/exec'
 import fs from 'fs'
-import { makeCodeDefaultBody, makeIssueDefaultBody, makeAction, replaceBodyParameters } from './contents'
+import { makeCodeDefaultBody, makeIssueDefaultBody, makeAction, makeEntities, replaceBodyParameters } from './contents'
 
 const DEFAULT_CONFIG = {
   visible: {
@@ -32,11 +32,37 @@ const getInputs = () => {
     webhookUrl: core.getInput('webhook-url'),
     template: core.getInput('template'),
     config: core.getInput('config'),
+    users: core.getInput('users'),
     customMessage1: core.getInput('message1'),
     customMessage2: core.getInput('message2'),
     actionTitles: core.getInput('action-titles')?.split('\n') || [],
     actionUrls: core.getInput('action-urls')?.split('\n') || []
   }
+}
+
+/**
+ * Reads and parses a JSON file containing an array of user objects, validating its structure.
+ *
+ * @param {string} usersFilePath - The file path to the JSON file containing user data.
+ * @returns {Object[]} An array of user objects, each containing `id`, `displayName`, and `alias`.
+ * @throws {Error} If the file path is not provided.
+ * @throws {Error} If the file content is not an array of objects.
+ * @throws {Error} If any user object is missing `id`, `displayName`, or `alias` properties.
+ */
+const getUsers = (usersFilePath) => {
+  if (!usersFilePath) {
+    return []
+  }
+  const users = JSON.parse(fs.readFileSync(usersFilePath, { encoding: 'utf8' }))
+  if (!Array.isArray(users)) {
+    throw new Error('users file: The users file must contain an array of objects.')
+  }
+  for (const user of users) {
+    if (!user.id || !user.displayName || !user.alias) {
+      throw new Error('users file: Each user object must contain an id, displayName, and alias.')
+    }
+  }
+  return users
 }
 
 /**
@@ -120,21 +146,22 @@ const getBody = (inputs, config, commitInfo) => {
     return defaultBody
   }
 }
+
 /**
- * Creates an adaptive card payload for Microsoft Teams.
+ * Creates the payload for an Adaptive Card to be used in Microsoft Teams.
  *
- * @param {Object} inputs - The input parameters for the card.
- * @param {Array} inputs.actionTitles - The titles of the actions.
- * @param {Array} inputs.actionUrls - The URLs of the actions.
- * @param {Object} config - The configuration object.
- * @param {Object} commitInfo - The commit information.
- * @param {string} commitInfo.commitMessage - The commit message.
- * @param {Array} commitInfo.changedFiles - The list of changed files.
- * @returns {Object} The adaptive card payload.
+ * @param {Object} inputs - The input data for the card.
+ * @param {Object} inputs.actionTitles - Titles for the actions in the card.
+ * @param {Object} inputs.actionUrls - URLs for the actions in the card.
+ * @param {Object} config - Configuration data for the card.
+ * @param {Array} users - An array of user objects to include in the card's entities.
+ * @param {Object} commitInfo - Information about the commit to include in the card.
+ * @returns {Object} The payload for the Adaptive Card.
  */
-const createAdapterCardPayload = (inputs, config, commitInfo) => {
+const createAdapterCardPayload = (inputs, config, users, commitInfo) => {
   const bodyContent = getBody(inputs, config, commitInfo)
   const actionsContent = makeAction(inputs.actionTitles, inputs.actionUrls)
+  const entities = makeEntities(users)
 
   return {
     attachments: [
@@ -145,7 +172,12 @@ const createAdapterCardPayload = (inputs, config, commitInfo) => {
           type: 'AdaptiveCard',
           version: '1.2',
           body: bodyContent,
-          actions: actionsContent
+          actions: actionsContent,
+          $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
+          version: '1.4',
+          msteams: {
+            entities: entities
+          }
         }
       }
     ]
@@ -231,6 +263,9 @@ export async function run() {
     // Read the contents of the config file
     const config = inputs.config ? JSON.parse(fs.readFileSync(inputs.config, { encoding: 'utf8' })) : DEFAULT_CONFIG
 
+    // Read the contents of the mention target list
+    const users = getUsers(inputs.users)
+
     // Retrieve basic information from GitHub Actions context
     const execOptions = {
       ignoreReturnCode: true
@@ -256,7 +291,7 @@ export async function run() {
     }
 
     // Create the body and actions of the Adaptive Card
-    const payload = createAdapterCardPayload(inputs, config, commitInfo)
+    const payload = createAdapterCardPayload(inputs, config, users, commitInfo)
     core.group('Payload', () => core.info(JSON.stringify(payload, null, 2)))
 
     // Send Adaptive Card to webhook-url via POST request
@@ -264,6 +299,7 @@ export async function run() {
 
     core.group('Result', () => core.info('Message sent successfully.'))
   } catch (error) {
+    console.log(error.message)
     if (error instanceof Error) core.setFailed(error.message)
   }
 }

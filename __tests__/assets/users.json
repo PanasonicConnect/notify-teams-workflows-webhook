@@ -1,0 +1,12 @@
+[
+  {
+    "alias": "Admin",
+    "displayName": "Tech Lead",
+    "id": "userName1@domain"
+  },
+  {
+    "alias": "Admin2",
+    "displayName": "DevOps Engineer",
+    "id": "userName2@domain"
+  }
+]
