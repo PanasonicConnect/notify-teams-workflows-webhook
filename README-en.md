@@ -5,10 +5,39 @@
 
 [日本語](./README.md)
 
+---
+
+- [Notify Teams Workflows Webhook](#notify-teams-workflows-webhook)
+  - [Summary](#summary)
+    - [When creating a pull request or executing a push](#when-creating-a-pull-request-or-executing-a-push)
+    - [When creating an issue](#when-creating-an-issue)
+    - [Other](#other)
+  - [Usage](#usage)
+    - [Workflows](#workflows)
+    - [Permission](#permission)
+    - [Template](#template)
+      - [Default template](#default-template)
+      - [Custom template](#custom-template)
+      - [Variables](#variables)
+    - [Configuration](#configuration)
+    - [Users](#users)
+  - [Versioning](#versioning)
+  - [Contributing](#contributing)
+  - [License](#license)
+
+---
+
 ## Summary
 
-This action sends a POST request to the Webhook URL created in the workflows of the specified Teams. By default, it sends JSON data containing the following
-elements:
+This action sends a POST request to the Webhook URL created in the workflows of the specified Teams. The main functions provided are as follows.
+
+- Template file specification of notification content (adaptive card format body can be customized)
+- Provide pull requests, issues, and other display information as variables
+- Designation of button to go to an arbitrary URL
+- Specify Mention for Teams users in the notification message.
+- Ignore notifications for commit messages containing specific keywords.
+
+By default, it sends JSON data containing the following elements:
 
 ### When creating a pull request or executing a push
 
@@ -142,6 +171,10 @@ Please obtain the Teams Workflows Webhook URL in advance and set it in the repos
     # default: none
     # example: .github/config/notify-config.json
     config: ''
+    # Specify the path to the user definition file (.json), if using mention
+    # default: none
+    # example: .github/config/notify-users.json
+    users: ''
     # Specify the parameter for sending custom message 1
     # default: none
     message1: ''
@@ -362,6 +395,35 @@ illustrative purposes, but comments cannot be included in the actual json.
     "maxLines": 5
   }
 }
+```
+
+### Users
+
+Mention can be made by specifying the users parameter. Comments in the following json are included for illustrative purposes, but comments cannot be included in
+the actual json.
+
+```json
+[
+  {
+    "alias": "Admin", // Specify the alias name to be used in the message
+    "displayName": "Tech Lead", // Specify the name as it appears on Teams
+    "id": "userName1@domain" // Specify your user ID on Teams
+  },
+  {
+    "alias": "Admin2",
+    "displayName": "DevOps Engineer",
+    "id": "userName2@domain"
+  }
+]
+```
+
+When notifying with a mentions, please enclose the alias name in the message with `<at></at>`.
+
+```yaml
+- uses: PanasonicConnect/notify-teams-workflows-webhook@v1
+  with:
+    webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+    message1: notification for <at>Admin</at> <at>Admin2</at>
 ```
 
 ## Versioning

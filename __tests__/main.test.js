@@ -52,7 +52,6 @@ describe('Custom Action Tests', () => {
 
   it('sends correct adaptive card payload when no template is provided', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return ''
       if (name === 'message1') return 'dummyMessage1'
@@ -86,7 +85,6 @@ describe('Custom Action Tests', () => {
 
   it('sends correct adaptive card payload when no template is provided and multi action urls', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return ''
       if (name === 'message1') return 'dummyMessage1'
@@ -127,7 +125,6 @@ describe('Custom Action Tests', () => {
 
   it('sends adaptive card payload using template', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return './__tests__/assets/template.json' // test
       if (name === 'message1') return 'dummyMessage1'
@@ -202,7 +199,6 @@ describe('Custom Action Tests', () => {
 
   it('calls core.setFailed when template file cannot be opened', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return './nonexistent/template.json' // test
       if (name === 'message1') return 'dummyMessage1'
@@ -218,7 +214,6 @@ describe('Custom Action Tests', () => {
 
   it('calls core.setFailed when config file cannot be opened', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return ''
       if (name === 'config') return './nonexistent/config.json' // test
@@ -235,7 +230,6 @@ describe('Custom Action Tests', () => {
   it('calls core.setFailed when webhook responds with non-ok status', async () => {
     global.fetch.mockImplementationOnce(() => Promise.resolve({ ok: false, statusText: 'Internal Server Error' }))
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return ''
       if (name === 'message1') return 'dummyMessage1'
@@ -250,7 +244,6 @@ describe('Custom Action Tests', () => {
 
   it('does not send notification if commit message contains ignore keyword', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return ''
       if (name === 'message1') return 'dummyMessage1'
@@ -279,7 +272,6 @@ describe('Custom Action Tests', () => {
   })
   it('Notify if the Notify Ignore keyword is set but not included in the commit message', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return ''
       if (name === 'message1') return 'dummyMessage1'
@@ -308,7 +300,6 @@ describe('Custom Action Tests', () => {
   })
   it('If the commit message is multi-line, only the first line is used', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return './__tests__/assets/template.json'
       if (name === 'message1') return 'dummyMessage1'
@@ -317,16 +308,6 @@ describe('Custom Action Tests', () => {
       if (name === 'action-urls') return 'https://url1'
       if (name === 'config') return './__tests__/assets/config-ignore.json'
       return ''
-    })
-
-    exec.getExecOutput.mockImplementation((commandLine, args, options) => {
-      if (args[0] === 'show') {
-        return { stdout: 'first line\nsecond line' }
-      }
-      if (args[0] === 'log') {
-        return { stdout: 'dummy author' }
-      }
-      return { stdout: 'dummy output' }
     })
 
     await run()
@@ -357,7 +338,6 @@ describe('Custom Action Tests', () => {
     context.eventName = 'pull_request'
 
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return './__tests__/assets/template.json'
       if (name === 'message1') return 'dummyMessage1'
@@ -366,16 +346,6 @@ describe('Custom Action Tests', () => {
       if (name === 'action-urls') return 'https://url1'
       if (name === 'config') return './__tests__/assets/config-ignore.json'
       return ''
-    })
-
-    exec.getExecOutput.mockImplementation((commandLine, args, options) => {
-      if (args[0] === 'show') {
-        return { stdout: 'first line\nsecond line' }
-      }
-      if (args[0] === 'log') {
-        return { stdout: 'dummy author' }
-      }
-      return { stdout: 'dummy output' }
     })
 
     await run()
@@ -400,5 +370,62 @@ describe('Custom Action Tests', () => {
       { type: 'TextBlock', text: 'dummy author', wrap: true }
     ]
     expect(requestBody?.attachments[0].content.body).toEqual(expectedTemplate)
+  })
+
+  it('Mention Testing', async () => {
+    core.getInput.mockImplementation((name) => {
+      if (name === 'webhook-url') return 'https://dummy.url'
+      if (name === 'template') return './__tests__/assets/template.json'
+      if (name === 'message1') return '<at>Admin</at>'
+      if (name === 'message2') return '<at>Admin2</at>'
+      if (name === 'action-titles') return 'Title1'
+      if (name === 'action-urls') return 'https://url1'
+      if (name === 'config') return ''
+      if (name === 'users') return './__tests__/assets/users.json'
+      return ''
+    })
+
+    await run()
+
+    // Validate that fetch was called
+    expect(fetch).toHaveBeenCalled()
+    const fetchCall = fetch.mock.calls[0][1]
+    const requestBody = JSON.parse(fetchCall.body)
+
+    const expectedTemplate = [
+      { type: 'TextBlock', text: '123', wrap: true },
+      { type: 'TextBlock', text: 'first line', wrap: true }, // first line\nsecond line -> first line
+      { type: 'TextBlock', text: '<at>Admin</at>', wrap: true },
+      { type: 'TextBlock', text: 'test-repo', wrap: true },
+      { type: 'TextBlock', text: 'main', wrap: true },
+      { type: 'TextBlock', text: 'push', wrap: true }, // push -> pull_request
+      { type: 'TextBlock', text: 'CI', wrap: true },
+      { type: 'TextBlock', text: 'test-actor', wrap: true },
+      { type: 'TextBlock', text: 'abc123', wrap: true }, // abc123 -> pr-sha1
+      { type: 'TextBlock', text: '`dummy output`', wrap: true },
+      { type: 'TextBlock', text: '<at>Admin2</at>', wrap: true },
+      { type: 'TextBlock', text: 'dummy author', wrap: true }
+    ]
+    expect(requestBody?.attachments[0].content.body).toEqual(expectedTemplate)
+
+    const expectedEntities = [
+      {
+        type: 'mention',
+        text: '<at>Admin</at>',
+        mentioned: {
+          id: 'userName1@domain',
+          name: 'Tech Lead'
+        }
+      },
+      {
+        type: 'mention',
+        text: '<at>Admin2</at>',
+        mentioned: {
+          id: 'userName2@domain',
+          name: 'DevOps Engineer'
+        }
+      }
+    ]
+    expect(requestBody?.attachments[0].content?.msteams?.entities).toEqual(expectedEntities)
   })
 })

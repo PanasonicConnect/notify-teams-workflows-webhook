@@ -1,11 +1,11 @@
 import require$$0 from 'os';
 import require$$0$1 from 'crypto';
-import require$$1 from 'fs';
-import require$$1$5 from 'path';
+import fs from 'fs';
+import require$$1$4 from 'path';
 import require$$2$1 from 'http';
 import require$$3$1 from 'https';
 import require$$0$4 from 'net';
-import require$$1$1 from 'tls';
+import require$$1 from 'tls';
 import require$$4$1 from 'events';
 import require$$0$3 from 'assert';
 import require$$0$2 from 'util';
@@ -14,14 +14,14 @@ import require$$7 from 'buffer';
 import require$$8 from 'querystring';
 import require$$14 from 'stream/web';
 import require$$0$7 from 'node:stream';
-import require$$1$2 from 'node:util';
+import require$$1$1 from 'node:util';
 import require$$0$6 from 'node:events';
 import require$$0$8 from 'worker_threads';
 import require$$2$2 from 'perf_hooks';
 import require$$5 from 'util/types';
 import require$$4$2 from 'async_hooks';
-import require$$1$3 from 'console';
-import require$$1$4 from 'url';
+import require$$1$2 from 'console';
+import require$$1$3 from 'url';
 import require$$3$2 from 'zlib';
 import require$$6 from 'string_decoder';
 import require$$0$9 from 'diagnostics_channel';
@@ -251,7 +251,7 @@ function requireFileCommand () {
 	// We use any as a valid input type
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	const crypto = __importStar(require$$0$1);
-	const fs = __importStar(require$$1);
+	const fs$1 = __importStar(fs);
 	const os = __importStar(require$$0);
 	const utils_1 = requireUtils$3();
 	function issueFileCommand(command, message) {
@@ -259,10 +259,10 @@ function requireFileCommand () {
 	    if (!filePath) {
 	        throw new Error(`Unable to find environment variable for file command ${command}`);
 	    }
-	    if (!fs.existsSync(filePath)) {
+	    if (!fs$1.existsSync(filePath)) {
 	        throw new Error(`Missing file at path: ${filePath}`);
 	    }
-	    fs.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os.EOL}`, {
+	    fs$1.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os.EOL}`, {
 	        encoding: 'utf8'
 	    });
 	}
@@ -401,7 +401,7 @@ var hasRequiredTunnel$1;
 function requireTunnel$1 () {
 	if (hasRequiredTunnel$1) return tunnel$1;
 	hasRequiredTunnel$1 = 1;
-	var tls = require$$1$1;
+	var tls = require$$1;
 	var http = require$$2$1;
 	var https = require$$3$1;
 	var events = require$$4$1;
@@ -1783,7 +1783,7 @@ function requireSbmh () {
 	 * by Hongli Lai at: https://github.com/FooBarWidget/boyer-moore-horspool
 	 */
 	const EventEmitter = require$$0$6.EventEmitter;
-	const inherits = require$$1$2.inherits;
+	const inherits = require$$1$1.inherits;
 
 	function SBMH (needle) {
 	  if (typeof needle === 'string') {
@@ -1992,7 +1992,7 @@ function requirePartStream () {
 	if (hasRequiredPartStream) return PartStream_1;
 	hasRequiredPartStream = 1;
 
-	const inherits = require$$1$2.inherits;
+	const inherits = require$$1$1.inherits;
 	const ReadableStream = require$$0$7.Readable;
 
 	function PartStream (opts) {
@@ -2038,7 +2038,7 @@ function requireHeaderParser () {
 	hasRequiredHeaderParser = 1;
 
 	const EventEmitter = require$$0$6.EventEmitter;
-	const inherits = require$$1$2.inherits;
+	const inherits = require$$1$1.inherits;
 	const getLimit = requireGetLimit();
 
 	const StreamSearch = requireSbmh();
@@ -2146,7 +2146,7 @@ function requireDicer () {
 	hasRequiredDicer = 1;
 
 	const WritableStream = require$$0$7.Writable;
-	const inherits = require$$1$2.inherits;
+	const inherits = require$$1$1.inherits;
 
 	const StreamSearch = requireSbmh();
 
@@ -2723,7 +2723,7 @@ function requireMultipart () {
 	//     -- this will require modifications to utils.parseParams
 
 	const { Readable } = require$$0$7;
-	const { inherits } = require$$1$2;
+	const { inherits } = require$$1$1;
 
 	const Dicer = requireDicer();
 
@@ -3289,7 +3289,7 @@ function requireMain () {
 	hasRequiredMain = 1;
 
 	const WritableStream = require$$0$7.Writable;
-	const { inherits } = require$$1$2;
+	const { inherits } = require$$1$1;
 	const Dicer = requireDicer();
 
 	const MultipartParser = requireMultipart();
@@ -8113,7 +8113,7 @@ function requireConnect () {
 	    let socket;
 	    if (protocol === 'https:') {
 	      if (!tls) {
-	        tls = require$$1$1;
+	        tls = require$$1;
 	      }
 	      servername = servername || options.servername || util.getServerName(host) || null;
 
@@ -14123,7 +14123,7 @@ function requirePendingInterceptorsFormatter () {
 	hasRequiredPendingInterceptorsFormatter = 1;
 
 	const { Transform } = require$$0$5;
-	const { Console } = require$$1$3;
+	const { Console } = require$$1$2;
 
 	/**
 	 * Gets the output of `console.table(…)` as a string.
@@ -14350,7 +14350,7 @@ function requireProxyAgent () {
 	hasRequiredProxyAgent = 1;
 
 	const { kProxy, kClose, kDestroy, kInterceptors } = requireSymbols$4();
-	const { URL } = require$$1$4;
+	const { URL } = require$$1$3;
 	const Agent = requireAgent();
 	const Pool = requirePool();
 	const DispatcherBase = requireDispatcherBase();
@@ -25229,7 +25229,7 @@ function requireSummary () {
 		Object.defineProperty(exports, "__esModule", { value: true });
 		exports.summary = exports.markdownSummary = exports.SUMMARY_DOCS_URL = exports.SUMMARY_ENV_VAR = void 0;
 		const os_1 = require$$0;
-		const fs_1 = require$$1;
+		const fs_1 = fs;
 		const { access, appendFile, writeFile } = fs_1.promises;
 		exports.SUMMARY_ENV_VAR = 'GITHUB_STEP_SUMMARY';
 		exports.SUMMARY_DOCS_URL = 'https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary';
@@ -25535,7 +25535,7 @@ function requirePathUtils () {
 	};
 	Object.defineProperty(pathUtils, "__esModule", { value: true });
 	pathUtils.toPlatformPath = pathUtils.toWin32Path = pathUtils.toPosixPath = void 0;
-	const path = __importStar(require$$1$5);
+	const path = __importStar(require$$1$4);
 	/**
 	 * toPosixPath converts the given path to the posix form. On Windows, \\ will be
 	 * replaced with /.
@@ -25621,16 +25621,16 @@ function requireIoUtil () {
 		var _a;
 		Object.defineProperty(exports, "__esModule", { value: true });
 		exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.READONLY = exports.UV_FS_O_EXLOCK = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rm = exports.rename = exports.readlink = exports.readdir = exports.open = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
-		const fs = __importStar(require$$1);
-		const path = __importStar(require$$1$5);
-		_a = fs.promises
+		const fs$1 = __importStar(fs);
+		const path = __importStar(require$$1$4);
+		_a = fs$1.promises
 		// export const {open} = 'fs'
 		, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.open = _a.open, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rm = _a.rm, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
 		// export const {open} = 'fs'
 		exports.IS_WINDOWS = process.platform === 'win32';
 		// See https://github.com/nodejs/node/blob/d0153aee367422d0858105abec186da4dff0a0c5/deps/uv/include/uv/win.h#L691
 		exports.UV_FS_O_EXLOCK = 0x10000000;
-		exports.READONLY = fs.constants.O_RDONLY;
+		exports.READONLY = fs$1.constants.O_RDONLY;
 		function exists(fsPath) {
 		    return __awaiter(this, void 0, void 0, function* () {
 		        try {
@@ -25812,7 +25812,7 @@ function requireIo () {
 	Object.defineProperty(io, "__esModule", { value: true });
 	io.findInPath = io.which = io.mkdirP = io.rmRF = io.mv = io.cp = void 0;
 	const assert_1 = require$$0$3;
-	const path = __importStar(require$$1$5);
+	const path = __importStar(require$$1$4);
 	const ioUtil = __importStar(requireIoUtil());
 	/**
 	 * Copies a file or folder.
@@ -26120,7 +26120,7 @@ function requireToolrunner () {
 	const os = __importStar(require$$0);
 	const events = __importStar(require$$4$1);
 	const child = __importStar(require$$2$3);
-	const path = __importStar(require$$1$5);
+	const path = __importStar(require$$1$4);
 	const io = __importStar(requireIo());
 	const ioUtil = __importStar(requireIoUtil());
 	const timers_1 = require$$6$1;
@@ -26964,7 +26964,7 @@ function requireCore () {
 		const file_command_1 = requireFileCommand();
 		const utils_1 = requireUtils$3();
 		const os = __importStar(require$$0);
-		const path = __importStar(require$$1$5);
+		const path = __importStar(require$$1$4);
 		const oidc_utils_1 = requireOidcUtils();
 		/**
 		 * The code to exit an action
@@ -27286,7 +27286,7 @@ function requireContext () {
 	hasRequiredContext = 1;
 	Object.defineProperty(context, "__esModule", { value: true });
 	context.Context = void 0;
-	const fs_1 = require$$1;
+	const fs_1 = fs;
 	const os_1 = require$$0;
 	class Context {
 	    /**
@@ -31395,6 +31395,29 @@ const makeAction = (titles, urls) => {
   }
   return actions
 };
+
+/**
+ * Generates an array of entity objects for mentioning users in a message.
+ *
+ * @param {Array<Object>} users - An array of user objects.
+ * @param {string} users[].alias - The alias of the user to be displayed in the mention.
+ * @param {string} users[].displayName - The display name of the user.
+ * @param {string} users[].id - The unique identifier of the user.
+ * @returns {Array<Object>} An array of entity objects, each containing mention details.
+ */
+const makeEntities = (users) => {
+  return users.map((user) => {
+    return {
+      type: 'mention',
+      text: `<at>${user.alias}</at>`,
+      mentioned: {
+        id: user.id,
+        name: user.displayName
+      }
+    }
+  })
+};
+
 /**
  * Creates a default body for a message with optional custom messages and commit details.
  *
@@ -31614,11 +31637,37 @@ const getInputs = () => {
     webhookUrl: coreExports.getInput('webhook-url'),
     template: coreExports.getInput('template'),
     config: coreExports.getInput('config'),
+    users: coreExports.getInput('users'),
     customMessage1: coreExports.getInput('message1'),
     customMessage2: coreExports.getInput('message2'),
     actionTitles: coreExports.getInput('action-titles')?.split('\n') || [],
     actionUrls: coreExports.getInput('action-urls')?.split('\n') || []
   }
+};
+
+/**
+ * Reads and parses a JSON file containing an array of user objects, validating its structure.
+ *
+ * @param {string} usersFilePath - The file path to the JSON file containing user data.
+ * @returns {Object[]} An array of user objects, each containing `id`, `displayName`, and `alias`.
+ * @throws {Error} If the file path is not provided.
+ * @throws {Error} If the file content is not an array of objects.
+ * @throws {Error} If any user object is missing `id`, `displayName`, or `alias` properties.
+ */
+const getUsers = (usersFilePath) => {
+  if (!usersFilePath) {
+    return []
+  }
+  const users = JSON.parse(fs.readFileSync(usersFilePath, { encoding: 'utf8' }));
+  if (!Array.isArray(users)) {
+    throw new Error('users file: The users file must contain an array of objects.')
+  }
+  for (const user of users) {
+    if (!user.id || !user.displayName || !user.alias) {
+      throw new Error('users file: Each user object must contain an id, displayName, and alias.')
+    }
+  }
+  return users
 };
 
 /**
@@ -31685,7 +31734,7 @@ const getCommitAuthor = async (execOptions) => {
 const getBody = (inputs, config, commitInfo) => {
   if (inputs.template) {
     try {
-      const templatesContent = require$$1.readFileSync(inputs.template, { encoding: 'utf8' });
+      const templatesContent = fs.readFileSync(inputs.template, { encoding: 'utf8' });
       const processedContent = replaceBodyParameters(config, templatesContent, inputs.customMessage1, inputs.customMessage2, commitInfo);
       const processedObject = JSON.parse(processedContent);
       coreExports.group('Template body', () => coreExports.info(JSON.stringify(processedObject, null, 2)));
@@ -31702,21 +31751,22 @@ const getBody = (inputs, config, commitInfo) => {
     return defaultBody
   }
 };
+
 /**
- * Creates an adaptive card payload for Microsoft Teams.
+ * Creates the payload for an Adaptive Card to be used in Microsoft Teams.
  *
- * @param {Object} inputs - The input parameters for the card.
- * @param {Array} inputs.actionTitles - The titles of the actions.
- * @param {Array} inputs.actionUrls - The URLs of the actions.
- * @param {Object} config - The configuration object.
- * @param {Object} commitInfo - The commit information.
- * @param {string} commitInfo.commitMessage - The commit message.
- * @param {Array} commitInfo.changedFiles - The list of changed files.
- * @returns {Object} The adaptive card payload.
+ * @param {Object} inputs - The input data for the card.
+ * @param {Object} inputs.actionTitles - Titles for the actions in the card.
+ * @param {Object} inputs.actionUrls - URLs for the actions in the card.
+ * @param {Object} config - Configuration data for the card.
+ * @param {Array} users - An array of user objects to include in the card's entities.
+ * @param {Object} commitInfo - Information about the commit to include in the card.
+ * @returns {Object} The payload for the Adaptive Card.
  */
-const createAdapterCardPayload = (inputs, config, commitInfo) => {
+const createAdapterCardPayload = (inputs, config, users, commitInfo) => {
   const bodyContent = getBody(inputs, config, commitInfo);
   const actionsContent = makeAction(inputs.actionTitles, inputs.actionUrls);
+  const entities = makeEntities(users);
 
   return {
     attachments: [
@@ -31727,7 +31777,12 @@ const createAdapterCardPayload = (inputs, config, commitInfo) => {
           type: 'AdaptiveCard',
           version: '1.2',
           body: bodyContent,
-          actions: actionsContent
+          actions: actionsContent,
+          $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
+          version: '1.4',
+          msteams: {
+            entities: entities
+          }
         }
       }
     ]
@@ -31811,7 +31866,10 @@ async function run() {
     const inputs = getInputs();
 
     // Read the contents of the config file
-    const config = inputs.config ? JSON.parse(require$$1.readFileSync(inputs.config, { encoding: 'utf8' })) : DEFAULT_CONFIG;
+    const config = inputs.config ? JSON.parse(fs.readFileSync(inputs.config, { encoding: 'utf8' })) : DEFAULT_CONFIG;
+
+    // Read the contents of the mention target list
+    const users = getUsers(inputs.users);
 
     // Retrieve basic information from GitHub Actions context
     const execOptions = {
@@ -31838,7 +31896,7 @@ async function run() {
     }
 
     // Create the body and actions of the Adaptive Card
-    const payload = createAdapterCardPayload(inputs, config, commitInfo);
+    const payload = createAdapterCardPayload(inputs, config, users, commitInfo);
     coreExports.group('Payload', () => coreExports.info(JSON.stringify(payload, null, 2)));
 
     // Send Adaptive Card to webhook-url via POST request
@@ -31846,6 +31904,7 @@ async function run() {
 
     coreExports.group('Result', () => coreExports.info('Message sent successfully.'));
   } catch (error) {
+    console.log(error.message);
     if (error instanceof Error) coreExports.setFailed(error.message);
   }
 }

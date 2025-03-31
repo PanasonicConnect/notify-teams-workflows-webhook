@@ -32,7 +32,7 @@ const resetContext = () => {
   context.serverUrl = 'https://github.com'
 }
 
-const { makeCodeDefaultBody, makeIssueDefaultBody, makeAction, generateChangedFilesString } = await import('../src/contents.js')
+const { makeCodeDefaultBody, makeIssueDefaultBody, makeAction, makeEntities, generateChangedFilesString } = await import('../src/contents.js')
 
 const defaultCustomMassage = {
   customMessage1: 'Custom Message 1',
@@ -712,5 +712,27 @@ describe('generateChangedFilesString', () => {
     expect(result).toBe(
       '`file1.txt`\\n\\n`file2.txt`\\n\\n`file3.txt`\\n\\n`file4.txt`\\n\\n`file5.txt`\\n\\n`file6.txt`\\n\\n`file7.txt`\\n\\n`file8.txt`\\n\\n`file9.txt`\\n\\n`file10.txt`\\n\\n...'
     )
+  })
+})
+
+describe('makeEntities', () => {
+  it('should return an empty array when users is empty', () => {
+    const users = []
+    const result = makeEntities(users)
+    expect(result).toEqual([])
+  })
+
+  it('should return entities for multiple users', () => {
+    const users = [
+      { alias: 'user1', displayName: 'display name1', id: 'user1@domain' },
+      { alias: 'user2', displayName: 'display name2', id: 'user2@domain' },
+      { alias: 'user3', displayName: 'display name3', id: 'user3@domain' }
+    ]
+    const result = makeEntities(users)
+    expect(result).toEqual([
+      { type: 'mention', text: '<at>user1</at>', mentioned: { id: 'user1@domain', name: 'display name1' } },
+      { type: 'mention', text: '<at>user2</at>', mentioned: { id: 'user2@domain', name: 'display name2' } },
+      { type: 'mention', text: '<at>user3</at>', mentioned: { id: 'user3@domain', name: 'display name3' } }
+    ])
   })
 })

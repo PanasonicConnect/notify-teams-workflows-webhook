@@ -164,6 +164,29 @@ export const makeAction = (titles, urls) => {
   }
   return actions
 }
+
+/**
+ * Generates an array of entity objects for mentioning users in a message.
+ *
+ * @param {Array<Object>} users - An array of user objects.
+ * @param {string} users[].alias - The alias of the user to be displayed in the mention.
+ * @param {string} users[].displayName - The display name of the user.
+ * @param {string} users[].id - The unique identifier of the user.
+ * @returns {Array<Object>} An array of entity objects, each containing mention details.
+ */
+export const makeEntities = (users) => {
+  return users.map((user) => {
+    return {
+      type: 'mention',
+      text: `<at>${user.alias}</at>`,
+      mentioned: {
+        id: user.id,
+        name: user.displayName
+      }
+    }
+  })
+}
+
 /**
  * Creates a default body for a message with optional custom messages and commit details.
  *
