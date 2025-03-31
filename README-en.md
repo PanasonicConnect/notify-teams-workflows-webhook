@@ -29,8 +29,8 @@
 
 ## Summary
 
-This action sends a POST request to the Webhook URL created in the workflows of the specified Teams. 
-The main functions provided are as follows.
+This action sends a POST request to the Webhook URL created in the workflows of the specified Teams. The main functions provided are as follows.
+
 - Template file specification of notification content (adaptive card format body can be customized)
 - Provide pull requests, issues, and other display information as variables
 - Designation of button to go to an arbitrary URL
@@ -399,9 +399,8 @@ illustrative purposes, but comments cannot be included in the actual json.
 
 ### Users
 
-Mention can be made by specifying the users parameter.
-Comments in the following json are included for
-illustrative purposes, but comments cannot be included in the actual json.
+Mention can be made by specifying the users parameter. Comments in the following json are included for illustrative purposes, but comments cannot be included in
+the actual json.
 
 ```json
 [
