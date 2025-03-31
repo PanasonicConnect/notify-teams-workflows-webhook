@@ -52,7 +52,6 @@ describe('Custom Action Tests', () => {
 
   it('sends correct adaptive card payload when no template is provided', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return ''
       if (name === 'message1') return 'dummyMessage1'
@@ -86,7 +85,6 @@ describe('Custom Action Tests', () => {
 
   it('sends correct adaptive card payload when no template is provided and multi action urls', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return ''
       if (name === 'message1') return 'dummyMessage1'
@@ -127,7 +125,6 @@ describe('Custom Action Tests', () => {
 
   it('sends adaptive card payload using template', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return './__tests__/assets/template.json' // test
       if (name === 'message1') return 'dummyMessage1'
@@ -202,7 +199,6 @@ describe('Custom Action Tests', () => {
 
   it('calls core.setFailed when template file cannot be opened', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return './nonexistent/template.json' // test
       if (name === 'message1') return 'dummyMessage1'
@@ -218,7 +214,6 @@ describe('Custom Action Tests', () => {
 
   it('calls core.setFailed when config file cannot be opened', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return ''
       if (name === 'config') return './nonexistent/config.json' // test
@@ -235,7 +230,6 @@ describe('Custom Action Tests', () => {
   it('calls core.setFailed when webhook responds with non-ok status', async () => {
     global.fetch.mockImplementationOnce(() => Promise.resolve({ ok: false, statusText: 'Internal Server Error' }))
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return ''
       if (name === 'message1') return 'dummyMessage1'
@@ -250,7 +244,6 @@ describe('Custom Action Tests', () => {
 
   it('does not send notification if commit message contains ignore keyword', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return ''
       if (name === 'message1') return 'dummyMessage1'
@@ -279,7 +272,6 @@ describe('Custom Action Tests', () => {
   })
   it('Notify if the Notify Ignore keyword is set but not included in the commit message', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return ''
       if (name === 'message1') return 'dummyMessage1'
@@ -308,7 +300,6 @@ describe('Custom Action Tests', () => {
   })
   it('If the commit message is multi-line, only the first line is used', async () => {
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return './__tests__/assets/template.json'
       if (name === 'message1') return 'dummyMessage1'
@@ -317,16 +308,6 @@ describe('Custom Action Tests', () => {
       if (name === 'action-urls') return 'https://url1'
       if (name === 'config') return './__tests__/assets/config-ignore.json'
       return ''
-    })
-
-    exec.getExecOutput.mockImplementation((commandLine, args, options) => {
-      if (args[0] === 'show') {
-        return { stdout: 'first line\nsecond line' }
-      }
-      if (args[0] === 'log') {
-        return { stdout: 'dummy author' }
-      }
-      return { stdout: 'dummy output' }
     })
 
     await run()
@@ -357,7 +338,6 @@ describe('Custom Action Tests', () => {
     context.eventName = 'pull_request'
 
     core.getInput.mockImplementation((name) => {
-      if (name === 'token') return 'dummyToken'
       if (name === 'webhook-url') return 'https://dummy.url'
       if (name === 'template') return './__tests__/assets/template.json'
       if (name === 'message1') return 'dummyMessage1'
@@ -366,16 +346,6 @@ describe('Custom Action Tests', () => {
       if (name === 'action-urls') return 'https://url1'
       if (name === 'config') return './__tests__/assets/config-ignore.json'
       return ''
-    })
-
-    exec.getExecOutput.mockImplementation((commandLine, args, options) => {
-      if (args[0] === 'show') {
-        return { stdout: 'first line\nsecond line' }
-      }
-      if (args[0] === 'log') {
-        return { stdout: 'dummy author' }
-      }
-      return { stdout: 'dummy output' }
     })
 
     await run()
