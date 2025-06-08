@@ -389,6 +389,14 @@ illustrative purposes, but comments cannot be included in the actual json.
     // default: 10
     "max": 10
   },
+  "filter": {
+    // Filter changed files to notify by specific file extensions
+    // Only files with the specified extensions will be included in notifications
+    // No filtering is applied if empty array or not specified
+    // default: not specified
+    // example: [".js", ".ts", ".json"]
+    "extension": []
+  },
   "issue": {
     // Specifies the maximum number of lines to display in the Issue body
     // default: 5
