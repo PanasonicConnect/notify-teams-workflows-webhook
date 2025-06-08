@@ -799,6 +799,103 @@ describe('generateChangedFilesString', () => {
     const result = generateChangedFilesString(config, changedFiles)
     expect(result).toBe('`file1.js`\\n\\n`.eslintrc.js`')
   })
+
+  describe('mkdocs link generation', () => {
+    it('converts markdown files to links when mkdocs config is provided', () => {
+      const config = {
+        mkdocs: {
+          baseUrl: 'https://example.com',
+          rootDir: 'docs'
+        }
+      }
+      const changedFiles = ['docs/test/sample.md', 'src/main.js']
+      const result = generateChangedFilesString(config, changedFiles)
+      expect(result).toBe('[`docs/test/sample.md`](https://example.com/test/sample)\\n\\n`src/main.js`')
+    })
+
+    it('converts markdown files to links without rootDir prefix removal', () => {
+      const config = {
+        mkdocs: {
+          baseUrl: 'https://example.com',
+          rootDir: 'docs'
+        }
+      }
+      const changedFiles = ['other/sample.md', 'docs/guide.md']
+      const result = generateChangedFilesString(config, changedFiles)
+      expect(result).toBe('`other/sample.md`\\n\\n[`docs/guide.md`](https://example.com/guide)')
+    })
+
+    it('handles base URL with trailing slash', () => {
+      const config = {
+        mkdocs: {
+          baseUrl: 'https://example.com/',
+          rootDir: 'docs'
+        }
+      }
+      const changedFiles = ['docs/index.md']
+      const result = generateChangedFilesString(config, changedFiles)
+      expect(result).toBe('[`docs/index.md`](https://example.com/index)')
+    })
+
+    it('handles files without rootDir configuration', () => {
+      const config = {
+        mkdocs: {
+          baseUrl: 'https://example.com'
+        }
+      }
+      const changedFiles = ['README.md', 'src/main.js']
+      const result = generateChangedFilesString(config, changedFiles)
+      expect(result).toBe('[`README.md`](https://example.com/README)\\n\\n`src/main.js`')
+    })
+
+    it('does not convert non-markdown files to links', () => {
+      const config = {
+        mkdocs: {
+          baseUrl: 'https://example.com',
+          rootDir: 'docs'
+        }
+      }
+      const changedFiles = ['docs/config.yml', 'docs/style.css', 'docs/guide.md']
+      const result = generateChangedFilesString(config, changedFiles)
+      expect(result).toBe('`docs/config.yml`\\n\\n`docs/style.css`\\n\\n[`docs/guide.md`](https://example.com/guide)')
+    })
+
+    it('handles nested markdown files correctly', () => {
+      const config = {
+        mkdocs: {
+          baseUrl: 'https://example.com',
+          rootDir: 'docs'
+        }
+      }
+      const changedFiles = ['docs/api/v1/endpoints.md', 'docs/tutorials/getting-started.md']
+      const result = generateChangedFilesString(config, changedFiles)
+      expect(result).toBe(
+        '[`docs/api/v1/endpoints.md`](https://example.com/api/v1/endpoints)\\n\\n[`docs/tutorials/getting-started.md`](https://example.com/tutorials/getting-started)'
+      )
+    })
+
+    it('works without mkdocs configuration', () => {
+      const config = {}
+      const changedFiles = ['docs/guide.md', 'src/main.js']
+      const result = generateChangedFilesString(config, changedFiles)
+      expect(result).toBe('`docs/guide.md`\\n\\n`src/main.js`')
+    })
+
+    it('combines with extension filtering', () => {
+      const config = {
+        filter: {
+          extension: ['.md']
+        },
+        mkdocs: {
+          baseUrl: 'https://example.com',
+          rootDir: 'docs'
+        }
+      }
+      const changedFiles = ['docs/guide.md', 'src/main.js', 'docs/api.md']
+      const result = generateChangedFilesString(config, changedFiles)
+      expect(result).toBe('[`docs/guide.md`](https://example.com/guide)\\n\\n[`docs/api.md`](https://example.com/api)')
+    })
+  })
 })
 
 describe('makeEntities', () => {
