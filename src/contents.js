@@ -1,5 +1,6 @@
 import { context } from '@actions/github'
 import * as core from '@actions/core'
+import path from 'path'
 
 const DEFAULT_MAX_CHANGED_FILES = 10
 const DEFAULT_MAX_ISSUE_BODY_LINES = 5
@@ -293,6 +294,8 @@ export const makeIssueDefaultBody = (config, customMessage1, customMessage2) => 
  * @param {Object} config - The configuration object.
  * @param {Object} config.changedFile - Configuration for changed files.
  * @param {number} config.changedFile.max - The maximum number of files to display.
+ * @param {Object} config.filter - Configuration for filtering files.
+ * @param {string[]} config.filter.extension - Array of file extensions to filter (e.g., ['.js', '.ts']).
  * @param {string[]} changedFiles - An array of changed file paths.
  * @returns {string} A formatted string of changed files, limited by the max number specified in the config.
  */
@@ -300,12 +303,33 @@ export const generateChangedFilesString = (config, changedFiles) => {
   if (!Array.isArray(changedFiles)) {
     return ''
   }
+
+  // Filter files by extension if specified
+  let filteredFiles = changedFiles
+  const extensionFilter = config?.filter?.extension
+  if (Array.isArray(extensionFilter) && extensionFilter.length > 0) {
+    filteredFiles = changedFiles.filter((file) => {
+      const fileExtension = getFileExtension(file)
+      return extensionFilter.includes(fileExtension)
+    })
+  }
+
   const maxFiles = config?.changedFile?.max || DEFAULT_MAX_CHANGED_FILES
-  const displayedFiles = changedFiles.slice(0, maxFiles).map((file) => `\`${file}\``)
-  if (changedFiles.length > maxFiles) {
+  const displayedFiles = filteredFiles.slice(0, maxFiles).map((file) => `\`${file}\``)
+  if (filteredFiles.length > maxFiles) {
     displayedFiles.push('...')
   }
   return displayedFiles.join('\\n\\n')
+}
+
+/**
+ * Extracts the file extension from a file path.
+ *
+ * @param {string} filePath - The file path.
+ * @returns {string} The file extension including the dot (e.g., '.js', '.ts').
+ */
+const getFileExtension = (filePath) => {
+  return path.extname(filePath)
 }
 
 /**

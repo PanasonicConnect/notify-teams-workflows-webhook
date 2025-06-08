@@ -713,6 +713,92 @@ describe('generateChangedFilesString', () => {
       '`file1.txt`\\n\\n`file2.txt`\\n\\n`file3.txt`\\n\\n`file4.txt`\\n\\n`file5.txt`\\n\\n`file6.txt`\\n\\n`file7.txt`\\n\\n`file8.txt`\\n\\n`file9.txt`\\n\\n`file10.txt`\\n\\n...'
     )
   })
+
+  it('filters files by extension when extension filter is specified', () => {
+    const config = {
+      filter: {
+        extension: ['.js', '.ts']
+      },
+      changedFile: {
+        max: 10
+      }
+    }
+    const changedFiles = ['file1.js', 'file2.ts', 'file3.txt', 'file4.js', 'file5.md', 'file6.ts']
+    const result = generateChangedFilesString(config, changedFiles)
+    expect(result).toBe('`file1.js`\\n\\n`file2.ts`\\n\\n`file4.js`\\n\\n`file6.ts`')
+  })
+
+  it('does not filter files when extension filter is empty array', () => {
+    const config = {
+      filter: {
+        extension: []
+      },
+      changedFile: {
+        max: 3
+      }
+    }
+    const changedFiles = ['file1.js', 'file2.txt', 'file3.md']
+    const result = generateChangedFilesString(config, changedFiles)
+    expect(result).toBe('`file1.js`\\n\\n`file2.txt`\\n\\n`file3.md`')
+  })
+
+  it('does not filter files when extension filter is not specified', () => {
+    const config = {
+      changedFile: {
+        max: 3
+      }
+    }
+    const changedFiles = ['file1.js', 'file2.txt', 'file3.md']
+    const result = generateChangedFilesString(config, changedFiles)
+    expect(result).toBe('`file1.js`\\n\\n`file2.txt`\\n\\n`file3.md`')
+  })
+
+  it('filters files and applies max limit correctly', () => {
+    const config = {
+      filter: {
+        extension: ['.js']
+      },
+      changedFile: {
+        max: 2
+      }
+    }
+    const changedFiles = ['file1.js', 'file2.txt', 'file3.js', 'file4.js', 'file5.md']
+    const result = generateChangedFilesString(config, changedFiles)
+    expect(result).toBe('`file1.js`\\n\\n`file3.js`\\n\\n...')
+  })
+
+  it('handles files without extension correctly', () => {
+    const config = {
+      filter: {
+        extension: ['.js', '.ts']
+      }
+    }
+    const changedFiles = ['Dockerfile', 'README', 'file1.js', 'Makefile', 'file2.ts']
+    const result = generateChangedFilesString(config, changedFiles)
+    expect(result).toBe('`file1.js`\\n\\n`file2.ts`')
+  })
+
+  it('returns empty string when all files are filtered out', () => {
+    const config = {
+      filter: {
+        extension: ['.py']
+      }
+    }
+    const changedFiles = ['file1.js', 'file2.txt', 'file3.md']
+    const result = generateChangedFilesString(config, changedFiles)
+    expect(result).toBe('')
+  })
+
+  it('handles dotfiles correctly', () => {
+    const config = {
+      filter: {
+        extension: ['.js']
+      }
+    }
+    const changedFiles = ['.gitignore', '.env', 'file1.js', '.eslintrc.js']
+    const result = generateChangedFilesString(config, changedFiles)
+    expect(result).toBe('`file1.js`\\n\\n`.eslintrc.js`')
+  })
 })
 
 describe('makeEntities', () => {
