@@ -31560,11 +31560,7 @@ const generateChangedFilesString = (config, changedFiles) => {
  * @returns {string} The file extension including the dot (e.g., '.js', '.ts').
  */
 const getFileExtension = (filePath) => {
-  const lastDotIndex = filePath.lastIndexOf('.');
-  if (lastDotIndex === -1 || lastDotIndex === filePath.length - 1) {
-    return ''
-  }
-  return filePath.substring(lastDotIndex)
+  return require$$1$4.extname(filePath)
 };
 
 /**
