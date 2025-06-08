@@ -1,5 +1,6 @@
 import { context } from '@actions/github'
 import * as core from '@actions/core'
+import path from 'path'
 
 const DEFAULT_MAX_CHANGED_FILES = 10
 const DEFAULT_MAX_ISSUE_BODY_LINES = 5
@@ -328,11 +329,7 @@ export const generateChangedFilesString = (config, changedFiles) => {
  * @returns {string} The file extension including the dot (e.g., '.js', '.ts').
  */
 const getFileExtension = (filePath) => {
-  const lastDotIndex = filePath.lastIndexOf('.')
-  if (lastDotIndex === -1 || lastDotIndex === filePath.length - 1) {
-    return ''
-  }
-  return filePath.substring(lastDotIndex)
+  return path.extname(filePath)
 }
 
 /**
