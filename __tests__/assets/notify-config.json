@@ -13,5 +13,9 @@
   },
   "changedFile": {
     "max": 10
+  },
+  "mkdocs": {
+    "baseUrl": "https://example.com",
+    "rootDir": "docs"
   }
 }

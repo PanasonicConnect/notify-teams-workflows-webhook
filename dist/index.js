@@ -31525,6 +31525,11 @@ const makeIssueDefaultBody = (config, customMessage1, customMessage2) => {
  * @param {Object} config - The configuration object.
  * @param {Object} config.changedFile - Configuration for changed files.
  * @param {number} config.changedFile.max - The maximum number of files to display.
+ * @param {Object} config.filter - Configuration for filtering files.
+ * @param {string[]} config.filter.extension - Array of file extensions to filter (e.g., ['.js', '.ts']).
+ * @param {Object} config.mkdocs - Configuration for mkdocs link generation.
+ * @param {string} config.mkdocs.baseUrl - Base URL for mkdocs site.
+ * @param {string} config.mkdocs.rootDir - Root directory for mkdocs source files.
  * @param {string[]} changedFiles - An array of changed file paths.
  * @returns {string} A formatted string of changed files, limited by the max number specified in the config.
  */
@@ -31532,12 +31537,106 @@ const generateChangedFilesString = (config, changedFiles) => {
   if (!Array.isArray(changedFiles)) {
     return ''
   }
+
+  // Filter files by extension if specified
+  let filteredFiles = changedFiles;
+  const extensionFilter = config?.filter?.extension;
+  if (Array.isArray(extensionFilter) && extensionFilter.length > 0) {
+    filteredFiles = changedFiles.filter((file) => {
+      const fileExtension = getFileExtension(file);
+      return extensionFilter.includes(fileExtension)
+    });
+  }
+
   const maxFiles = config?.changedFile?.max || DEFAULT_MAX_CHANGED_FILES;
-  const displayedFiles = changedFiles.slice(0, maxFiles).map((file) => `\`${file}\``);
-  if (changedFiles.length > maxFiles) {
+  const displayedFiles = filteredFiles.slice(0, maxFiles).map((file) => {
+    // Check if mkdocs configuration is provided and file should be converted to link
+    if (config?.mkdocs?.baseUrl && shouldConvertToLink(file, config.mkdocs)) {
+      const linkUrl = generateMkdocsUrl(file, config.mkdocs);
+      return `[\`${file}\`](${linkUrl})`
+    }
+    return `\`${file}\``
+  });
+  if (filteredFiles.length > maxFiles) {
     displayedFiles.push('...');
   }
   return displayedFiles.join('\\n\\n')
+};
+
+/**
+ * Extracts the file extension from a file path.
+ *
+ * @param {string} filePath - The file path.
+ * @returns {string} The file extension including the dot (e.g., '.js', '.ts').
+ */
+const getFileExtension = (filePath) => {
+  return require$$1$4.extname(filePath)
+};
+
+/**
+ * Determines if a file should be converted to a mkdocs link.
+ *
+ * @param {string} filePath - The file path.
+ * @param {Object} mkdocsConfig - The mkdocs configuration.
+ * @param {string} mkdocsConfig.rootDir - The root directory for mkdocs source files.
+ * @returns {boolean} True if the file should be converted to a link.
+ */
+const shouldConvertToLink = (filePath, mkdocsConfig) => {
+  // Check if file is a markdown file
+  if (getFileExtension(filePath) !== '.md') {
+    return false
+  }
+
+  // Check if file is within the mkdocs root directory
+  const rootDir = mkdocsConfig.rootDir;
+  if (rootDir) {
+    // Normalize path separators for cross-platform compatibility
+    const normalizedFilePath = filePath.replace(/\\/g, '/');
+    const normalizedRootDir = rootDir.replace(/\\/g, '/');
+
+    if (!normalizedFilePath.startsWith(normalizedRootDir + '/') && normalizedFilePath !== normalizedRootDir) {
+      return false
+    }
+  }
+
+  return true
+};
+
+/**
+ * Generates a mkdocs URL for a given file path.
+ *
+ * @param {string} filePath - The file path.
+ * @param {Object} mkdocsConfig - The mkdocs configuration.
+ * @param {string} mkdocsConfig.baseUrl - The base URL for the mkdocs site.
+ * @param {string} mkdocsConfig.rootDir - The root directory for mkdocs source files.
+ * @returns {string} The generated URL.
+ */
+const generateMkdocsUrl = (filePath, mkdocsConfig) => {
+  const { baseUrl, rootDir } = mkdocsConfig;
+
+  // Normalize path separators for cross-platform compatibility
+  const normalizedFilePath = filePath.replace(/\\/g, '/');
+  const normalizedRootDir = rootDir ? rootDir.replace(/\\/g, '/') : '';
+
+  // Remove the root directory prefix from the file path
+  let relativePath = normalizedFilePath;
+  if (normalizedRootDir) {
+    const rootDirWithSep = normalizedRootDir + '/';
+    if (normalizedFilePath.startsWith(rootDirWithSep)) {
+      relativePath = normalizedFilePath.substring(rootDirWithSep.length);
+    } else if (normalizedFilePath === normalizedRootDir) {
+      relativePath = '';
+    }
+  }
+
+  // Remove the .md extension
+  if (relativePath.endsWith('.md')) {
+    relativePath = relativePath.substring(0, relativePath.length - 3);
+  }
+
+  // Construct the URL
+  const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  return relativePath ? `${cleanBaseUrl}/${relativePath}` : cleanBaseUrl
 };
 
 /**
