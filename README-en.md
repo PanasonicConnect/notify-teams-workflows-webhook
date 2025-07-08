@@ -21,6 +21,10 @@
       - [Variables](#variables)
     - [Configuration](#configuration)
     - [Users](#users)
+    - [MkDocs](#mkdocs)
+      - [baseUrl](#baseurl)
+      - [rootDir](#rootdir)
+      - [Link Generation Mechanism](#link-generation-mechanism)
   - [Versioning](#versioning)
   - [Contributing](#contributing)
   - [License](#license)
@@ -401,6 +405,17 @@ illustrative purposes, but comments cannot be included in the actual json.
     // Specifies the maximum number of lines to display in the Issue body
     // default: 5
     "maxLines": 5
+  },
+  "mkdocs": {
+    // Configuration for generating links to static sites built with MkDocs
+    // Specify the base URL of the site
+    // default: not specified
+    // example: "https://your-site.github.io/your-repo"
+    "baseUrl": "",
+    // Specify the directory containing the documents to be built for the site pages
+    // default: not specified
+    // example: "docs"
+    "rootDir": ""
   }
 }
 ```
@@ -433,6 +448,41 @@ When notifying with a mentions, please enclose the alias name in the message wit
     webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
     message1: notification for <at>Admin</at> <at>Admin2</at>
 ```
+
+### MkDocs
+
+By configuring the MkDocs option, you can display changed files as links to static sites built with MkDocs. When this option is specified, the changed file
+paths displayed in `{CHANGED_FILES}` will be output as links to the deployed site.
+
+```json
+{
+  "mkdocs": {
+    "baseUrl": "https://your-site.github.io/your-repo",
+    "rootDir": "docs"
+  }
+}
+```
+
+#### baseUrl
+
+Specify the base URL of the site. Set the URL of the site deployed on GitHub Pages or other hosting services.
+
+#### rootDir
+
+Specify the directory containing the documents to be built for the site pages. Typically, specify the `docs` directory of your MkDocs project.
+
+#### Link Generation Mechanism
+
+When changed files are within the directory specified by `rootDir`, site URLs are generated based on those file paths.
+
+Example:
+
+- `baseUrl`: `https://your-site.github.io/your-repo`
+- `rootDir`: `docs`
+- Changed file: `docs/getting-started.md`
+- Generated link: `https://your-site.github.io/your-repo/getting-started/`
+
+By using this option, you can provide direct links to the relevant pages when notifying about document changes.
 
 ## Versioning
 

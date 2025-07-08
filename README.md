@@ -21,6 +21,10 @@
       - [Variables](#variables)
     - [Configuration](#configuration)
     - [Users](#users)
+    - [MkDocs](#mkdocs)
+      - [baseUrl](#baseurl)
+      - [rootDir](#rootdir)
+      - [リンク生成の仕組み](#リンク生成の仕組み)
   - [Versioning](#versioning)
   - [Contributing](#contributing)
   - [License](#license)
@@ -398,6 +402,17 @@ configパラメータを指定することで、送信内容、条件のカス�
     // Issue本文の表示する最大行数を指定します
     // default: 5
     "maxLines": 5
+  },
+  "mkdocs": {
+    // MkDocsで構築された静的サイトへのリンクを生成するための設定
+    // サイトのベースURLを指定してください
+    // default: 指定なし
+    // example: "https://your-site.github.io/your-repo"
+    "baseUrl": "",
+    // サイトのページのビルド対象のドキュメントが含まれるディレクトリを指定してください
+    // default: 指定なし
+    // example: "docs"
+    "rootDir": ""
   }
 }
 ```
@@ -429,6 +444,40 @@ usersパラメータを指定することで、メンションを行うことが
     webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
     message1: notification for <at>Admin</at> <at>Admin2</at>
 ```
+
+### MkDocs
+
+MkDocsオプションを設定することで、変更ファイルをMkDocsで構築された静的サイトへのリンクとして表示できます。このオプションを指定すると、`{CHANGED_FILES}`で表示される変更ファイルのパスが、デプロイ先のサイトへのリンクとして出力されます。
+
+```json
+{
+  "mkdocs": {
+    "baseUrl": "https://your-site.github.io/your-repo",
+    "rootDir": "docs"
+  }
+}
+```
+
+#### baseUrl
+
+サイトのベースURLを指定してください。GitHub Pagesやその他のホスティングサービスでデプロイされたサイトのURLを設定します。
+
+#### rootDir
+
+サイトのページのビルド対象のドキュメントが含まれるディレクトリを指定してください。通常はMkDocsプロジェクトの`docs`ディレクトリを指定します。
+
+#### リンク生成の仕組み
+
+変更ファイルが`rootDir`で指定されたディレクトリ内にある場合、そのファイルパスを元にサイトのURLが生成されます。
+
+例：
+
+- `baseUrl`: `https://your-site.github.io/your-repo`
+- `rootDir`: `docs`
+- 変更ファイル: `docs/getting-started.md`
+- 生成されるリンク: `https://your-site.github.io/your-repo/getting-started/`
+
+このオプションを使用することで、ドキュメントの変更を通知する際に、該当するページに直接アクセスできるリンクを提供できます。
 
 ## Versioning
 
