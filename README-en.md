@@ -214,7 +214,7 @@ permissions:
 
 You can define the data sent as the body in the adaptive card format sent to the Teams workflows webhook URL as a template.
 
-```json
+```JSON
 {
   "attachments": [
     {
@@ -236,7 +236,7 @@ You can define the data sent as the body in the adaptive card format sent to the
 If the template parameter is not specified, the following template will be used. The parts enclosed in `{` and `}` in the template are treated as variables and
 will be replaced with the values at the time of workflow execution.
 
-```json
+```JSON
 [
   {
     "type": "TextBlock",
@@ -311,7 +311,7 @@ The template parameter allows the specification of a user-created template file.
 [Overview of adaptive cards for Microsoft Teams](https://learn.microsoft.com/en-us/power-automate/overview-adaptive-cards) for more information on template
 creation.
 
-```json
+```JSON
 [
   {
     "type": "TextBlock",
@@ -356,7 +356,7 @@ The following variables can be used in the template file.
 By specifying the config parameter, you can customize the content and conditions of the notification. Comments in the following json are included for
 illustrative purposes, but comments cannot be included in the actual json.
 
-```json
+```JSON
 {
   // Specify whether to display each item of the Default Template
   "visible": {
@@ -425,7 +425,7 @@ illustrative purposes, but comments cannot be included in the actual json.
 Mention can be made by specifying the users parameter. Comments in the following json are included for illustrative purposes, but comments cannot be included in
 the actual json.
 
-```json
+```JSON
 [
   {
     "alias": "Admin", // Specify the alias name to be used in the message
@@ -454,7 +454,7 @@ When notifying with a mentions, please enclose the alias name in the message wit
 By configuring the MkDocs option, you can display changed files as links to static sites built with MkDocs. When this option is specified, the changed file
 paths displayed in `{CHANGED_FILES}` will be output as links to the deployed site.
 
-```json
+```JSON
 {
   "mkdocs": {
     "baseUrl": "https://your-site.github.io/your-repo",

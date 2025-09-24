@@ -214,7 +214,7 @@ permissions:
 
 Teams workflows webhook URLに送信するアダプティブカード形式のデータのうち、bodyとして送信するデータをテンプレートして定義することができます。
 
-```json
+```JSON
 {
   "attachments": [
     {
@@ -235,7 +235,7 @@ Teams workflows webhook URLに送信するアダプティブカード形式の�
 
 templateパラメータを指定しない場合は下記テンプレートが使用されます。テンプレート内の`{`と`}`で囲まれた箇所が変数として扱われ、ワークフロー実行時の値に置換されて送信されます。
 
-```json
+```JSON
 [
   {
     "type": "TextBlock",
@@ -309,7 +309,7 @@ templateパラメータを指定しない場合は下記テンプレートが使
 templateパラメータでは、ユーザーが作成したテンプレートファイルを指定することができます。テンプレート作成については[Microsoft Teams 向けアダプティブ カードの概要](https://learn.microsoft.com/ja-jp/power-automate/overview-adaptive-cards)
 を参考にしてください。
 
-```json
+```JSON
 [
   {
     "type": "TextBlock",
@@ -353,7 +353,7 @@ templateパラメータでは、ユーザーが作成したテンプレートフ
 
 configパラメータを指定することで、送信内容、条件のカスタマイズを行うことができます。以下json内のコメントは説明のために記載していますが、実際のjson内にコメントを記載することはできません。
 
-```json
+```JSON
 {
   // Default Templateの各項目を表示するかどうかを指定します
   "visible": {
@@ -421,7 +421,7 @@ configパラメータを指定することで、送信内容、条件のカス�
 
 usersパラメータを指定することで、メンションを行うことができます。以下json内のコメントは説明のために記載していますが、実際のjson内にコメントを記載することはできません。
 
-```json
+```JSON
 [
   {
     "alias": "Admin", // メッセージ内で利用するエイリアス名を指定してください
@@ -449,7 +449,7 @@ usersパラメータを指定することで、メンションを行うことが
 
 MkDocsオプションを設定することで、変更ファイルをMkDocsで構築された静的サイトへのリンクとして表示できます。このオプションを指定すると、`{CHANGED_FILES}`で表示される変更ファイルのパスが、デプロイ先のサイトへのリンクとして出力されます。
 
-```json
+```JSON
 {
   "mkdocs": {
     "baseUrl": "https://your-site.github.io/your-repo",
