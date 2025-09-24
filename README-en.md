@@ -353,8 +353,8 @@ The following variables can be used in the template file.
 
 ### Configuration
 
-By specifying the config parameter, you can customize the content and conditions of the notification. Comments in the following json are included for
-illustrative purposes, but comments cannot be included in the actual json.
+By specifying the config parameter, you can customize the content and conditions of the notification. Comments in the following JSON are included for
+illustrative purposes, but comments cannot be included in the actual JSON.
 
 ```JSON
 {
@@ -422,8 +422,8 @@ illustrative purposes, but comments cannot be included in the actual json.
 
 ### Users
 
-Mention can be made by specifying the users parameter. Comments in the following json are included for illustrative purposes, but comments cannot be included in
-the actual json.
+Mention can be made by specifying the users parameter. Comments in the following JSON are included for illustrative purposes, but comments cannot be included in
+the actual JSON.
 
 ```JSON
 [
