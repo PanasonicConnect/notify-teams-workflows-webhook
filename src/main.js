@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import { context } from '@actions/github'
 import * as exec from '@actions/exec'
-import fs from 'fs'
+import fs from 'node:fs'
 import { makeCodeDefaultBody, makeIssueDefaultBody, makeAction, makeEntities, replaceBodyParameters } from './contents'
 
 const DEFAULT_CONFIG = {
@@ -71,7 +71,7 @@ const getUsers = (usersFilePath) => {
  * @returns {string} The SHA of the current commit or pull request.
  */
 const getSha = () => {
-  return context.eventName == 'pull_request' ? context.payload.pull_request?.head?.sha : context.sha
+  return context.eventName === 'pull_request' ? context.payload.pull_request?.head?.sha : context.sha
 }
 /**
  * Retrieves the commit message for a specific commit SHA.
@@ -142,7 +142,7 @@ const getBody = (inputs, config, commitInfo) => {
     }
   } else {
     const defaultBody =
-      context.eventName == 'issues'
+      context.eventName === 'issues'
         ? makeIssueDefaultBody(config, inputs.customMessage1, inputs.customMessage2)
         : makeCodeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitInfo)
     core.group('Default body', () => core.info(JSON.stringify(defaultBody, null, 2)))
@@ -174,13 +174,11 @@ const createAdapterCardPayload = (inputs, config, users, commitInfo) => {
       {
         contentType: 'application/vnd.microsoft.card.adaptive',
         content: {
-          $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+          $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
           type: 'AdaptiveCard',
-          version: '1.2',
+          version: '1.4',
           body: bodyContent,
           actions: actionsContent,
-          $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
-          version: '1.4',
           msteams: {
             entities: entities
           }
@@ -279,7 +277,7 @@ export async function run() {
     }
 
     // make commit information
-    const commitInfo = context.eventName == 'issues' ? {} : await makeCommitInfo(execOptions)
+    const commitInfo = context.eventName === 'issues' ? {} : await makeCommitInfo(execOptions)
     // @note: Insert line breaks.The next core.group will be concatenated with the standard output.
     core.info('')
 

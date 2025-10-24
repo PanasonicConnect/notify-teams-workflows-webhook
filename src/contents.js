@@ -1,6 +1,6 @@
 import { context } from '@actions/github'
 import * as core from '@actions/core'
-import path from 'path'
+import path from 'node:path'
 
 const DEFAULT_MAX_CHANGED_FILES = 10
 const DEFAULT_MAX_ISSUE_BODY_LINES = 5
@@ -115,7 +115,7 @@ const getWorkflowUrl = () => {
  * @returns {string} The name of the branch.
  */
 const getBranch = () => {
-  if (context.eventName == 'pull_request') {
+  if (context.eventName === 'pull_request') {
     return context.payload.pull_request?.head?.ref
   }
   // context.ref の "refs/heads/" プレフィックスを除去する
@@ -130,13 +130,13 @@ const getBranch = () => {
  */
 export const makeAction = (titles, urls) => {
   const actions = []
-  if (titles.length != urls.length) {
+  if (titles.length !== urls.length) {
     throw new Error(`Action titles and URLs must have the same length. Titles: ${titles.length}, URLs: ${urls.length}`)
   }
 
   // If no action parameters are provided, return the default action to view the workflow.
-  if ((titles.length == 0 && urls.length == 0) || (titles.length == 1 && urls.length == 1 && !titles[0] && !urls[0])) {
-    if (context.eventName == 'issues') {
+  if ((titles.length === 0 && urls.length === 0) || (titles.length === 1 && urls.length === 1 && !titles[0] && !urls[0])) {
+    if (context.eventName === 'issues') {
       actions.push({
         type: 'Action.OpenUrl',
         title: 'View Issue',
@@ -367,7 +367,7 @@ const shouldConvertToLink = (filePath, mkdocsConfig) => {
     const normalizedFilePath = filePath.replace(/\\/g, '/')
     const normalizedRootDir = rootDir.replace(/\\/g, '/')
 
-    if (!normalizedFilePath.startsWith(normalizedRootDir + '/') && normalizedFilePath !== normalizedRootDir) {
+    if (!normalizedFilePath.startsWith(`${normalizedRootDir}/`) && normalizedFilePath !== normalizedRootDir) {
       return false
     }
   }
@@ -394,7 +394,7 @@ const generateMkdocsUrl = (filePath, mkdocsConfig) => {
   // Remove the root directory prefix from the file path
   let relativePath = normalizedFilePath
   if (normalizedRootDir) {
-    const rootDirWithSep = normalizedRootDir + '/'
+    const rootDirWithSep = `${normalizedRootDir}/`
     if (normalizedFilePath.startsWith(rootDirWithSep)) {
       relativePath = normalizedFilePath.substring(rootDirWithSep.length)
     } else if (normalizedFilePath === normalizedRootDir) {
