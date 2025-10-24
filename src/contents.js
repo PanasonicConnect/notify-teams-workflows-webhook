@@ -1,6 +1,6 @@
 import { context } from '@actions/github'
 import * as core from '@actions/core'
-import path from 'path'
+import path from 'node:path'
 
 const DEFAULT_MAX_CHANGED_FILES = 10
 const DEFAULT_MAX_ISSUE_BODY_LINES = 5
@@ -115,7 +115,7 @@ const getWorkflowUrl = () => {
  * @returns {string} The name of the branch.
  */
 const getBranch = () => {
-  if (context.eventName == 'pull_request') {
+  if (context.eventName === 'pull_request') {
     return context.payload.pull_request?.head?.ref
   }
   // context.ref の "refs/heads/" プレフィックスを除去する
@@ -130,13 +130,13 @@ const getBranch = () => {
  */
 export const makeAction = (titles, urls) => {
   const actions = []
-  if (titles.length != urls.length) {
+  if (titles.length !== urls.length) {
     throw new Error(`Action titles and URLs must have the same length. Titles: ${titles.length}, URLs: ${urls.length}`)
   }
 
   // If no action parameters are provided, return the default action to view the workflow.
-  if ((titles.length == 0 && urls.length == 0) || (titles.length == 1 && urls.length == 1 && !titles[0] && !urls[0])) {
-    if (context.eventName == 'issues') {
+  if ((titles.length === 0 && urls.length === 0) || (titles.length === 1 && urls.length === 1 && !titles[0] && !urls[0])) {
+    if (context.eventName === 'issues') {
       actions.push({
         type: 'Action.OpenUrl',
         title: 'View Issue',
@@ -300,7 +300,7 @@ export const makeIssueDefaultBody = (config, customMessage1, customMessage2) => 
  * @param {string} config.mkdocs.baseUrl - Base URL for mkdocs site.
  * @param {string} config.mkdocs.rootDir - Root directory for mkdocs source files.
  * @param {string[]} changedFiles - An array of changed file paths.
- * @returns {string} A formatted string of changed files, limited by the max number specified in the config.
+ * @returns {string|undefined} A formatted string of changed files, limited by the max number specified in the config. Returns undefined if no files match the filter or the input is not an array.
  */
 export const generateChangedFilesString = (config, changedFiles) => {
   if (!Array.isArray(changedFiles)) {
@@ -315,6 +315,10 @@ export const generateChangedFilesString = (config, changedFiles) => {
       const fileExtension = getFileExtension(file)
       return extensionFilter.includes(fileExtension)
     })
+    // If there are changed files but none match the filter, return undefined
+    if (changedFiles.length > 0 && filteredFiles.length === 0) {
+      return undefined
+    }
   }
 
   const maxFiles = config?.changedFile?.max || DEFAULT_MAX_CHANGED_FILES
@@ -363,7 +367,7 @@ const shouldConvertToLink = (filePath, mkdocsConfig) => {
     const normalizedFilePath = filePath.replace(/\\/g, '/')
     const normalizedRootDir = rootDir.replace(/\\/g, '/')
 
-    if (!normalizedFilePath.startsWith(normalizedRootDir + '/') && normalizedFilePath !== normalizedRootDir) {
+    if (!normalizedFilePath.startsWith(`${normalizedRootDir}/`) && normalizedFilePath !== normalizedRootDir) {
       return false
     }
   }
@@ -390,7 +394,7 @@ const generateMkdocsUrl = (filePath, mkdocsConfig) => {
   // Remove the root directory prefix from the file path
   let relativePath = normalizedFilePath
   if (normalizedRootDir) {
-    const rootDirWithSep = normalizedRootDir + '/'
+    const rootDirWithSep = `${normalizedRootDir}/`
     if (normalizedFilePath.startsWith(rootDirWithSep)) {
       relativePath = normalizedFilePath.substring(rootDirWithSep.length)
     } else if (normalizedFilePath === normalizedRootDir) {
@@ -449,10 +453,13 @@ export const makeIssueBody = (config, body) => {
  * @param {Object} commitInfo - Information about the commit.
  * @param {string} commitInfo.commitMessage - The commit message to replace the {COMMIT_MESSAGE} placeholder.
  * @param {Array<string>} commitInfo.changedFiles - List of changed files to generate the {CHANGED_FILES} placeholder.
- * @returns {string} The target string with all placeholders replaced by their corresponding values.
+ * @returns {string|undefined} The target string with all placeholders replaced by their corresponding values, or undefined if changed files string is undefined.
  */
 export const replaceBodyParameters = (config, target, customMessage1, customMessage2, commitInfo) => {
   const changedFilesString = generateChangedFilesString(config, commitInfo?.changedFiles)
+  if (changedFilesString === undefined) {
+    return undefined
+  }
   const labelsString = context.payload?.issue?.labels?.map((l) => l.name).join(', ')
   const displayIssueBody = makeIssueBody(config, context.payload?.issue?.body)
 

@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import { context } from '@actions/github'
 import * as exec from '@actions/exec'
-import fs from 'fs'
+import fs from 'node:fs'
 import { makeCodeDefaultBody, makeIssueDefaultBody, makeAction, makeEntities, replaceBodyParameters } from './contents'
 
 const DEFAULT_CONFIG = {
@@ -71,7 +71,7 @@ const getUsers = (usersFilePath) => {
  * @returns {string} The SHA of the current commit or pull request.
  */
 const getSha = () => {
-  return context.eventName == 'pull_request' ? context.payload.pull_request?.head?.sha : context.sha
+  return context.eventName === 'pull_request' ? context.payload.pull_request?.head?.sha : context.sha
 }
 /**
  * Retrieves the commit message for a specific commit SHA.
@@ -123,7 +123,7 @@ const getCommitAuthor = async (execOptions) => {
  * @param {Object} commitInfo - The commit information.
  * @param {string} commitInfo.commitMessage - The commit message.
  * @param {Array} commitInfo.changedFiles - The list of changed files.
- * @returns {Object} The body object generated from the template or default values.
+ * @returns {Object|undefined} The body object generated from the template or default values, or undefined if template processing results in undefined.
  * @throws {Error} Throws an error if the template file specified by inputs.template cannot be loaded or parsed.
  */
 const getBody = (inputs, config, commitInfo) => {
@@ -131,6 +131,9 @@ const getBody = (inputs, config, commitInfo) => {
     try {
       const templatesContent = fs.readFileSync(inputs.template, { encoding: 'utf8' })
       const processedContent = replaceBodyParameters(config, templatesContent, inputs.customMessage1, inputs.customMessage2, commitInfo)
+      if (processedContent === undefined) {
+        return undefined
+      }
       const processedObject = JSON.parse(processedContent)
       core.group('Template body', () => core.info(JSON.stringify(processedObject, null, 2)))
       return processedObject
@@ -139,7 +142,7 @@ const getBody = (inputs, config, commitInfo) => {
     }
   } else {
     const defaultBody =
-      context.eventName == 'issues'
+      context.eventName === 'issues'
         ? makeIssueDefaultBody(config, inputs.customMessage1, inputs.customMessage2)
         : makeCodeDefaultBody(config, inputs.customMessage1, inputs.customMessage2, commitInfo)
     core.group('Default body', () => core.info(JSON.stringify(defaultBody, null, 2)))
@@ -156,10 +159,13 @@ const getBody = (inputs, config, commitInfo) => {
  * @param {Object} config - Configuration data for the card.
  * @param {Array} users - An array of user objects to include in the card's entities.
  * @param {Object} commitInfo - Information about the commit to include in the card.
- * @returns {Object} The payload for the Adaptive Card.
+ * @returns {Object|undefined}} The payload for the Adaptive Card, or undefined if get body processing results in undefined.
  */
 const createAdapterCardPayload = (inputs, config, users, commitInfo) => {
   const bodyContent = getBody(inputs, config, commitInfo)
+  if (bodyContent === undefined) {
+    return undefined
+  }
   const actionsContent = makeAction(inputs.actionTitles, inputs.actionUrls)
   const entities = makeEntities(users)
 
@@ -168,13 +174,11 @@ const createAdapterCardPayload = (inputs, config, users, commitInfo) => {
       {
         contentType: 'application/vnd.microsoft.card.adaptive',
         content: {
-          $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+          $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
           type: 'AdaptiveCard',
-          version: '1.2',
+          version: '1.4',
           body: bodyContent,
           actions: actionsContent,
-          $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
-          version: '1.4',
           msteams: {
             entities: entities
           }
@@ -273,7 +277,7 @@ export async function run() {
     }
 
     // make commit information
-    const commitInfo = context.eventName == 'issues' ? {} : await makeCommitInfo(execOptions)
+    const commitInfo = context.eventName === 'issues' ? {} : await makeCommitInfo(execOptions)
     // @note: Insert line breaks.The next core.group will be concatenated with the standard output.
     core.info('')
 
@@ -292,6 +296,10 @@ export async function run() {
 
     // Create the body and actions of the Adaptive Card
     const payload = createAdapterCardPayload(inputs, config, users, commitInfo)
+    if (payload === undefined) {
+      core.info('No filtered changed files to notify. Skipping notification.')
+      return
+    }
     core.group('Payload', () => core.info(JSON.stringify(payload, null, 2)))
 
     // Send Adaptive Card to webhook-url via POST request

@@ -786,7 +786,7 @@ describe('generateChangedFilesString', () => {
     }
     const changedFiles = ['file1.js', 'file2.txt', 'file3.md']
     const result = generateChangedFilesString(config, changedFiles)
-    expect(result).toBe('')
+    expect(result).toBe(undefined)
   })
 
   it('handles dotfiles correctly', () => {
