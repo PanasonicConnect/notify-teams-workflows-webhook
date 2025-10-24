@@ -31535,7 +31535,7 @@ const makeIssueDefaultBody = (config, customMessage1, customMessage2) => {
  * @param {string} config.mkdocs.baseUrl - Base URL for mkdocs site.
  * @param {string} config.mkdocs.rootDir - Root directory for mkdocs source files.
  * @param {string[]} changedFiles - An array of changed file paths.
- * @returns {string} A formatted string of changed files, limited by the max number specified in the config.
+ * @returns {string|undefined} A formatted string of changed files, limited by the max number specified in the config. Returns undefined if no files match the filter or the input is not an array.
  */
 const generateChangedFilesString = (config, changedFiles) => {
   if (!Array.isArray(changedFiles)) {
@@ -31550,6 +31550,10 @@ const generateChangedFilesString = (config, changedFiles) => {
       const fileExtension = getFileExtension(file);
       return extensionFilter.includes(fileExtension)
     });
+    // If there are changed files but none match the filter, return undefined
+    if (changedFiles.length > 0 && filteredFiles.length === 0) {
+      return undefined
+    }
   }
 
   const maxFiles = config?.changedFile?.max || DEFAULT_MAX_CHANGED_FILES;
@@ -31684,10 +31688,13 @@ const makeIssueBody = (config, body) => {
  * @param {Object} commitInfo - Information about the commit.
  * @param {string} commitInfo.commitMessage - The commit message to replace the {COMMIT_MESSAGE} placeholder.
  * @param {Array<string>} commitInfo.changedFiles - List of changed files to generate the {CHANGED_FILES} placeholder.
- * @returns {string} The target string with all placeholders replaced by their corresponding values.
+ * @returns {string|undefined} The target string with all placeholders replaced by their corresponding values, or undefined if changed files string is undefined.
  */
 const replaceBodyParameters = (config, target, customMessage1, customMessage2, commitInfo) => {
   const changedFilesString = generateChangedFilesString(config, commitInfo?.changedFiles);
+  if (changedFilesString === undefined) {
+    return undefined
+  }
   const labelsString = githubExports.context.payload?.issue?.labels?.map((l) => l.name).join(', ');
   const displayIssueBody = makeIssueBody(config, githubExports.context.payload?.issue?.body);
 
@@ -31832,7 +31839,7 @@ const getCommitAuthor = async (execOptions) => {
  * @param {Object} commitInfo - The commit information.
  * @param {string} commitInfo.commitMessage - The commit message.
  * @param {Array} commitInfo.changedFiles - The list of changed files.
- * @returns {Object} The body object generated from the template or default values.
+ * @returns {Object|undefined} The body object generated from the template or default values, or undefined if template processing results in undefined.
  * @throws {Error} Throws an error if the template file specified by inputs.template cannot be loaded or parsed.
  */
 const getBody = (inputs, config, commitInfo) => {
@@ -31840,6 +31847,9 @@ const getBody = (inputs, config, commitInfo) => {
     try {
       const templatesContent = fs.readFileSync(inputs.template, { encoding: 'utf8' });
       const processedContent = replaceBodyParameters(config, templatesContent, inputs.customMessage1, inputs.customMessage2, commitInfo);
+      if (processedContent === undefined) {
+        return undefined
+      }
       const processedObject = JSON.parse(processedContent);
       coreExports.group('Template body', () => coreExports.info(JSON.stringify(processedObject, null, 2)));
       return processedObject
@@ -31865,10 +31875,13 @@ const getBody = (inputs, config, commitInfo) => {
  * @param {Object} config - Configuration data for the card.
  * @param {Array} users - An array of user objects to include in the card's entities.
  * @param {Object} commitInfo - Information about the commit to include in the card.
- * @returns {Object} The payload for the Adaptive Card.
+ * @returns {Object|undefined}} The payload for the Adaptive Card, or undefined if get body processing results in undefined.
  */
 const createAdapterCardPayload = (inputs, config, users, commitInfo) => {
   const bodyContent = getBody(inputs, config, commitInfo);
+  if (bodyContent === undefined) {
+    return undefined
+  }
   const actionsContent = makeAction(inputs.actionTitles, inputs.actionUrls);
   const entities = makeEntities(users);
 
@@ -32001,6 +32014,10 @@ async function run() {
 
     // Create the body and actions of the Adaptive Card
     const payload = createAdapterCardPayload(inputs, config, users, commitInfo);
+    if (payload === undefined) {
+      coreExports.info('No filtered changed files to notify. Skipping notification.');
+      return
+    }
     coreExports.group('Payload', () => coreExports.info(JSON.stringify(payload, null, 2)));
 
     // Send Adaptive Card to webhook-url via POST request

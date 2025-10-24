@@ -1,0 +1,8 @@
+{
+  "filter": {
+    "extension": [".js", ".ts"]
+  },
+  "changedFile": {
+    "max": 10
+  }
+}

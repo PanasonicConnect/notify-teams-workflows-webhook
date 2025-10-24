@@ -428,4 +428,23 @@ describe('Custom Action Tests', () => {
     ]
     expect(requestBody?.attachments[0].content?.msteams?.entities).toEqual(expectedEntities)
   })
+
+  it('Filtering no matched testing', async () => {
+    core.getInput.mockImplementation((name) => {
+      if (name === 'webhook-url') return 'https://dummy.url'
+      if (name === 'template') return './__tests__/assets/template.json'
+      if (name === 'message1') return '<at>Admin</at>'
+      if (name === 'message2') return '<at>Admin2</at>'
+      if (name === 'action-titles') return 'Title1'
+      if (name === 'action-urls') return 'https://url1'
+      if (name === 'config') return './__tests__/assets/config-filter.json' // not match 'dummy output' changed files
+      if (name === 'users') return './__tests__/assets/users.json'
+      return ''
+    })
+
+    await run()
+
+    // Validate that fetch was not called
+    expect(fetch).not.toHaveBeenCalled()
+  })
 })

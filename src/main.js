@@ -123,7 +123,7 @@ const getCommitAuthor = async (execOptions) => {
  * @param {Object} commitInfo - The commit information.
  * @param {string} commitInfo.commitMessage - The commit message.
  * @param {Array} commitInfo.changedFiles - The list of changed files.
- * @returns {Object} The body object generated from the template or default values.
+ * @returns {Object|undefined} The body object generated from the template or default values, or undefined if template processing results in undefined.
  * @throws {Error} Throws an error if the template file specified by inputs.template cannot be loaded or parsed.
  */
 const getBody = (inputs, config, commitInfo) => {
@@ -131,6 +131,9 @@ const getBody = (inputs, config, commitInfo) => {
     try {
       const templatesContent = fs.readFileSync(inputs.template, { encoding: 'utf8' })
       const processedContent = replaceBodyParameters(config, templatesContent, inputs.customMessage1, inputs.customMessage2, commitInfo)
+      if (processedContent === undefined) {
+        return undefined
+      }
       const processedObject = JSON.parse(processedContent)
       core.group('Template body', () => core.info(JSON.stringify(processedObject, null, 2)))
       return processedObject
@@ -156,10 +159,13 @@ const getBody = (inputs, config, commitInfo) => {
  * @param {Object} config - Configuration data for the card.
  * @param {Array} users - An array of user objects to include in the card's entities.
  * @param {Object} commitInfo - Information about the commit to include in the card.
- * @returns {Object} The payload for the Adaptive Card.
+ * @returns {Object|undefined}} The payload for the Adaptive Card, or undefined if get body processing results in undefined.
  */
 const createAdapterCardPayload = (inputs, config, users, commitInfo) => {
   const bodyContent = getBody(inputs, config, commitInfo)
+  if (bodyContent === undefined) {
+    return undefined
+  }
   const actionsContent = makeAction(inputs.actionTitles, inputs.actionUrls)
   const entities = makeEntities(users)
 
@@ -292,6 +298,10 @@ export async function run() {
 
     // Create the body and actions of the Adaptive Card
     const payload = createAdapterCardPayload(inputs, config, users, commitInfo)
+    if (payload === undefined) {
+      core.info('No filtered changed files to notify. Skipping notification.')
+      return
+    }
     core.group('Payload', () => core.info(JSON.stringify(payload, null, 2)))
 
     // Send Adaptive Card to webhook-url via POST request

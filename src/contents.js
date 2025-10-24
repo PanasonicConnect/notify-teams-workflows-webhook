@@ -300,7 +300,7 @@ export const makeIssueDefaultBody = (config, customMessage1, customMessage2) => 
  * @param {string} config.mkdocs.baseUrl - Base URL for mkdocs site.
  * @param {string} config.mkdocs.rootDir - Root directory for mkdocs source files.
  * @param {string[]} changedFiles - An array of changed file paths.
- * @returns {string} A formatted string of changed files, limited by the max number specified in the config.
+ * @returns {string|undefined} A formatted string of changed files, limited by the max number specified in the config. Returns undefined if no files match the filter or the input is not an array.
  */
 export const generateChangedFilesString = (config, changedFiles) => {
   if (!Array.isArray(changedFiles)) {
@@ -315,6 +315,10 @@ export const generateChangedFilesString = (config, changedFiles) => {
       const fileExtension = getFileExtension(file)
       return extensionFilter.includes(fileExtension)
     })
+    // If there are changed files but none match the filter, return undefined
+    if (changedFiles.length > 0 && filteredFiles.length === 0) {
+      return undefined
+    }
   }
 
   const maxFiles = config?.changedFile?.max || DEFAULT_MAX_CHANGED_FILES
@@ -449,10 +453,13 @@ export const makeIssueBody = (config, body) => {
  * @param {Object} commitInfo - Information about the commit.
  * @param {string} commitInfo.commitMessage - The commit message to replace the {COMMIT_MESSAGE} placeholder.
  * @param {Array<string>} commitInfo.changedFiles - List of changed files to generate the {CHANGED_FILES} placeholder.
- * @returns {string} The target string with all placeholders replaced by their corresponding values.
+ * @returns {string|undefined} The target string with all placeholders replaced by their corresponding values, or undefined if changed files string is undefined.
  */
 export const replaceBodyParameters = (config, target, customMessage1, customMessage2, commitInfo) => {
   const changedFilesString = generateChangedFilesString(config, commitInfo?.changedFiles)
+  if (changedFilesString === undefined) {
+    return undefined
+  }
   const labelsString = context.payload?.issue?.labels?.map((l) => l.name).join(', ')
   const displayIssueBody = makeIssueBody(config, context.payload?.issue?.body)
 
