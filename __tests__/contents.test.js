@@ -137,7 +137,6 @@ describe('makeCodeDefaultBody', () => {
   it('should create a default body without custom messages', () => {
     const customMessage1 = ''
     const customMessage2 = ''
-    defaultCommitInfo
     const config = {
       visible: {
         repository_name: true,
