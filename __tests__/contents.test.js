@@ -21,7 +21,7 @@ const resetContext = () => {
       body: 'IssueBody',
       labels: [{ name: 'IssueLabel1' }, { name: 'IssueLabel2' }],
       milestone: { title: 'IssueMilestone' },
-      html_url: 'https;//github.com/test-user/test-repo/issues/1'
+      html_url: 'https://github.com/test-user/test-repo/issues/1'
     }
   }
   context.ref = 'refs/heads/main'
