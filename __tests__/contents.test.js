@@ -632,7 +632,7 @@ describe('makeAction', () => {
         body: 'IssueBody', // todo 改行は？
         labels: [{ name: 'IssueLabel1' }, { name: 'IssueLabel2' }],
         milestone: { title: 'IssueMilestone' },
-        html_url: 'https;//github.com/test-user/test-repo/issues/1'
+        html_url: 'https://github.com/test-user/test-repo/issues/1'
       }
     }
     context.runNumber = '123'
@@ -662,7 +662,7 @@ describe('makeAction', () => {
     expect(actions[0]).toEqual({
       type: 'Action.OpenUrl',
       title: 'View Issue',
-      url: 'https;//github.com/test-user/test-repo/issues/1'
+      url: 'https://github.com/test-user/test-repo/issues/1'
     })
   })
 
