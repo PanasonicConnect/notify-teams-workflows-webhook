@@ -629,7 +629,7 @@ describe('makeAction', () => {
       repository: { name: 'test-repo', html_url: 'https://github.com/test-repo' },
       issue: {
         title: 'IssueTitle',
-        body: 'IssueBody', // todo 改行は？
+        body: 'IssueBody', // TODO: Should this contain line breaks?
         labels: [{ name: 'IssueLabel1' }, { name: 'IssueLabel2' }],
         milestone: { title: 'IssueMilestone' },
         html_url: 'https://github.com/test-user/test-repo/issues/1'
