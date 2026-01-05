@@ -63,7 +63,6 @@ describe('makeCodeDefaultBody', () => {
     }
 
     const body = makeCodeDefaultBody(config, defaultCustomMassage.customMessage1, defaultCustomMassage.customMessage2, defaultCommitInfo)
-    console.log(body)
     expect(body).toEqual([
       {
         type: 'TextBlock',
