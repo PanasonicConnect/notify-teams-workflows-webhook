@@ -88715,7 +88715,7 @@ const makeEntities = (users) => {
  * @param {string} customMessage1 - The first custom message to include in the body.
  * @param {string} customMessage2 - The second custom message to include in the body.
  * @param {Object} commitInfo - Information about the commit.
- * @returns {Object} The constructed body object with the provided parameters.
+ * @returns {Object|undefined} The constructed body object with the provided parameters, or undefined if filtering removes all changed files.
  */
 const makeCodeDefaultBody = (config, customMessage1, customMessage2, commitInfo) => {
   const body = [];
@@ -88755,6 +88755,9 @@ const makeCodeDefaultBody = (config, customMessage1, customMessage2, commitInfo)
     body.push(singleTextBlockChangedFiles);
   }
   const replacedBody = replaceBodyParameters(config, JSON.stringify(body), customMessage1, customMessage2, commitInfo);
+  if (replacedBody === undefined) {
+    return undefined
+  }
   const parsedBody = JSON.parse(replacedBody);
   return parsedBody
 };
