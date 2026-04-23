@@ -447,4 +447,22 @@ describe('Custom Action Tests', () => {
     // Validate that fetch was not called
     expect(fetch).not.toHaveBeenCalled()
   })
+
+  it('does not send notification when config filter removes all changed files without template', async () => {
+    core.getInput.mockImplementation((name) => {
+      if (name === 'webhook-url') return 'https://dummy.url'
+      if (name === 'template') return ''
+      if (name === 'message1') return 'dummyMessage1'
+      if (name === 'message2') return 'dummyMessage2'
+      if (name === 'action-titles') return ''
+      if (name === 'action-urls') return ''
+      if (name === 'config') return './__tests__/assets/config-filter.json'
+      return ''
+    })
+
+    await run()
+
+    expect(fetch).not.toHaveBeenCalled()
+    expect(core.setFailed).not.toHaveBeenCalled()
+  })
 })
