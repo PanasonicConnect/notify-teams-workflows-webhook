@@ -268,6 +268,31 @@ describe('makeCodeDefaultBody', () => {
     ])
   })
 
+  it('returns undefined when all changed files are filtered out', () => {
+    const config = {
+      visible: {
+        repository_name: true,
+        branch_name: true,
+        workflow_name: true,
+        event: true,
+        actor: true,
+        sha1: true,
+        changed_files: true
+      },
+      filter: {
+        extension: ['.js', '.ts', '.json']
+      }
+    }
+    const commitInfo = {
+      ...defaultCommitInfo,
+      changedFiles: ['.node-version']
+    }
+
+    const body = makeCodeDefaultBody(config, undefined, undefined, commitInfo)
+
+    expect(body).toBeUndefined()
+  })
+
   it('should create a default body based on config visibility', () => {
     const config = {
       visible: {
