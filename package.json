@@ -55,7 +55,7 @@
     "globals": "^17.7.0",
     "make-coverage-badge": "^1.2.0",
     "prettier": "^3.8.4",
-    "prettier-eslint": "^16.4.2",
+    "prettier-eslint": "^17.1.1",
     "rollup": "^4.62.2",
     "vitest": "^4.0.18"
   },
