@@ -32,7 +32,8 @@ const resetContext = () => {
   context.serverUrl = 'https://github.com'
 }
 
-const { makeCodeDefaultBody, makeIssueDefaultBody, makeAction, makeEntities, generateChangedFilesString } = await import('../src/contents.js')
+const { makeCodeDefaultBody, makeIssueDefaultBody, makeAction, makeEntities, generateChangedFilesString, replaceBodyParameters } =
+  await import('../src/contents.js')
 
 const defaultCustomMassage = {
   customMessage1: 'Custom Message 1',
@@ -49,6 +50,21 @@ describe('makeCodeDefaultBody', () => {
   beforeEach(() => {
     resetContext()
   })
+  it('preserves JSON-special characters in notification text', () => {
+    const message = 'Please review "quoted" paths and \\ separators\nNext line with $&'
+    const commitInfo = {
+      sha: 'abc123',
+      commitMessage: 'Fix "quoted" path',
+      changedFiles: ['src/a"b.js']
+    }
+
+    const body = makeCodeDefaultBody({ visible: { changed_files: true } }, message, '', commitInfo)
+
+    expect(body[0].text).toBe('#123 Fix "quoted" path')
+    expect(body[1].text).toBe(message)
+    expect(body.at(-1).text).toBe('`src/a"b.js`')
+  })
+
   it('should create a default body with all parameters', () => {
     const config = {
       visible: {
@@ -407,9 +423,37 @@ describe('makeCodeDefaultBody', () => {
   })
 })
 
+describe('replaceBodyParameters', () => {
+  beforeEach(() => {
+    resetContext()
+  })
+
+  it('keeps repeated template placeholders and replacement symbols literal', () => {
+    const message = '$& "quoted"'
+    const template = JSON.stringify([{ type: 'TextBlock', text: '{CUSTOM_MESSAGE_1} / {CUSTOM_MESSAGE_1}' }])
+
+    const body = JSON.parse(replaceBodyParameters({}, template, message, '', {}))
+
+    expect(body[0].text).toBe(`${message} / ${message}`)
+  })
+})
+
 describe('makeIssueDefaultBody', () => {
   beforeEach(() => {
     resetContext()
+  })
+
+  it('preserves quotes and line breaks in issue notifications', () => {
+    context.eventName = 'issues'
+    context.payload.issue.title = 'Issue with "quoted" text'
+    context.payload.issue.body = 'First "line"\nSecond \\ line'
+    context.payload.issue.labels = [{ name: 'needs "review"' }]
+
+    const body = makeIssueDefaultBody({}, '', '')
+
+    expect(body[0].text).toBe(context.payload.issue.title)
+    expect(body[1].facts[0].value).toBe('needs "review"')
+    expect(body[2].text).toBe('First "line"\n\nSecond \\ line')
   })
 
   it('create a default issue body with all parameters', () => {
