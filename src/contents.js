@@ -305,7 +305,7 @@ export const makeIssueDefaultBody = (config, customMessage1, customMessage2) => 
  * @param {string[]} changedFiles - An array of changed file paths.
  * @returns {string|undefined} A formatted string of changed files, limited by the max number specified in the config. Returns undefined if no files match the filter or the input is not an array.
  */
-export const generateChangedFilesString = (config, changedFiles) => {
+export const generateChangedFilesString = (config, changedFiles, separator = '\\n\\n') => {
   if (!Array.isArray(changedFiles)) {
     return ''
   }
@@ -336,7 +336,7 @@ export const generateChangedFilesString = (config, changedFiles) => {
   if (filteredFiles.length > maxFiles) {
     displayedFiles.push('...')
   }
-  return displayedFiles.join('\\n\\n')
+  return displayedFiles.join(separator)
 }
 
 /**
@@ -424,7 +424,7 @@ const generateMkdocsUrl = (filePath, mkdocsConfig) => {
  * @param {string} body - The original issue body.
  * @returns {string} The truncated issue body with an ellipsis if it exceeds the maximum length.
  */
-export const makeIssueBody = (config, body) => {
+export const makeIssueBody = (config, body, separator = '\\n\\n') => {
   if (!body) return undefined
 
   const maxIssueBodyLines = config?.issue?.maxLines || DEFAULT_MAX_ISSUE_BODY_LINES // max lines
@@ -443,7 +443,7 @@ export const makeIssueBody = (config, body) => {
   if (bodyLines.length > maxIssueBodyLines) {
     displayBodyLines.push('...')
   }
-  return displayBodyLines.join('\\n\\n')
+  return displayBodyLines.join(separator)
 }
 
 /**
@@ -459,30 +459,35 @@ export const makeIssueBody = (config, body) => {
  * @returns {string|undefined} The target string with all placeholders replaced by their corresponding values, or undefined if changed files string is undefined.
  */
 export const replaceBodyParameters = (config, target, customMessage1, customMessage2, commitInfo) => {
-  const changedFilesString = generateChangedFilesString(config, commitInfo?.changedFiles)
+  const changedFilesString = generateChangedFilesString(config, commitInfo?.changedFiles, '\n\n')
   if (changedFilesString === undefined) {
     return undefined
   }
   const labelsString = context.payload?.issue?.labels?.map((l) => l.name).join(', ')
-  const displayIssueBody = makeIssueBody(config, context.payload?.issue?.body)
+  const displayIssueBody = makeIssueBody(config, context.payload?.issue?.body, '\n\n')
+  const replacements = {
+    GITHUB_RUN_NUMBER: context.runNumber,
+    COMMIT_MESSAGE: commitInfo?.commitMessage,
+    CUSTOM_MESSAGE_1: customMessage1,
+    GITHUB_REPOSITORY: context.payload.repository?.name,
+    BRANCH: getBranch(),
+    GITHUB_EVENT_NAME: context.eventName,
+    GITHUB_WORKFLOW: context.workflow,
+    GITHUB_ACTOR: context.actor,
+    GITHUB_SHA: commitInfo?.sha,
+    CHANGED_FILES: changedFilesString,
+    CUSTOM_MESSAGE_2: customMessage2,
+    AUTHOR: commitInfo?.author,
+    ISSUE_TITLE: context.payload?.issue?.title,
+    ISSUE_LABELS: labelsString,
+    ISSUE_MILESTONE: context.payload?.issue?.milestone?.title,
+    ISSUE_BODY: displayIssueBody
+  }
 
-  const replacesStr = target
-    .replace('{GITHUB_RUN_NUMBER}', context.runNumber)
-    .replace('{COMMIT_MESSAGE}', commitInfo?.commitMessage)
-    .replace('{CUSTOM_MESSAGE_1}', customMessage1)
-    .replace('{GITHUB_REPOSITORY}', context.payload.repository?.name)
-    .replace('{BRANCH}', getBranch())
-    .replace('{GITHUB_EVENT_NAME}', context.eventName)
-    .replace('{GITHUB_WORKFLOW}', context.workflow)
-    .replace('{GITHUB_ACTOR}', context.actor)
-    .replace('{GITHUB_SHA}', commitInfo?.sha)
-    .replace('{CHANGED_FILES}', changedFilesString)
-    .replace('{CUSTOM_MESSAGE_2}', customMessage2)
-    .replace('{AUTHOR}', commitInfo?.author)
-    .replace('{ISSUE_TITLE}', context.payload?.issue?.title)
-    .replace('{ISSUE_LABELS}', labelsString)
-    .replace('{ISSUE_MILESTONE}', context.payload?.issue?.milestone?.title)
-    .replace('{ISSUE_BODY}', displayIssueBody)
+  // Placeholders live inside JSON strings; escape their values before parsing.
+  const replacesStr = target.replace(/\{([A-Z_0-9]+)\}/g, (match, key) =>
+    Object.hasOwn(replacements, key) ? JSON.stringify(String(replacements[key])).slice(1, -1) : match
+  )
 
   core.group('Replaced data', () => core.info(replacesStr))
   return replacesStr
