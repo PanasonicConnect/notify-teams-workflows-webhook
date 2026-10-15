@@ -32,8 +32,9 @@ const resetContext = () => {
   context.serverUrl = 'https://github.com'
 }
 
-const { makeCodeDefaultBody, makeIssueDefaultBody, makeAction, makeEntities, generateChangedFilesString, replaceBodyParameters } =
-  await import('../src/contents.js')
+const contents = await import('../src/contents.js')
+const { makeCodeDefaultBody, makeIssueDefaultBody, makeAction } = contents
+const { makeEntities, generateChangedFilesString, replaceBodyParameters } = contents
 
 const defaultCustomMassage = {
   customMessage1: 'Custom Message 1',
