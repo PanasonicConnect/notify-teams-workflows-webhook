@@ -108,6 +108,27 @@ const getCommitAuthor = async (execOptions) => {
   const { stdout: author } = await exec.getExecOutput('git', ['log', '-1', '--pretty=format:%an'], execOptions)
   return author.replace(/\\/g, '').trim()
 }
+
+/**
+ * Resolves the author for the current event.
+ *
+ * For pull_request/pull_request_target events, uses the pull request author's login.
+ * For push events, uses the head commit's author name from the payload.
+ * Falls back to the latest commit's git author when the payload value is unavailable,
+ * and for all other events.
+ *
+ * @param {object} execOptions - The options to pass to the exec command.
+ * @returns {Promise<string>} - A promise that resolves to the author.
+ */
+const getAuthor = async (execOptions) => {
+  if (['pull_request', 'pull_request_target'].includes(context.eventName)) {
+    return context.payload.pull_request?.user?.login || (await getCommitAuthor(execOptions))
+  }
+  if (context.eventName === 'push') {
+    return context.payload.head_commit?.author?.name || (await getCommitAuthor(execOptions))
+  }
+  return getCommitAuthor(execOptions)
+}
 /**
  * Generates the body object for the custom action.
  *
@@ -248,10 +269,8 @@ const makeCommitInfo = async (execOptions) => {
   // Get the list of changed files from the latest commit
   const changedFiles = await getChangedFiles(sha, execOptions)
 
-  // For pull request events use the PR author's login, otherwise the latest commit's author
-  const author = ['pull_request', 'pull_request_target'].includes(context.eventName)
-    ? context.payload.pull_request?.user?.login || (await getCommitAuthor(execOptions))
-    : await getCommitAuthor(execOptions)
+  // Resolve the author for the current event
+  const author = await getAuthor(execOptions)
 
   return {
     sha,
