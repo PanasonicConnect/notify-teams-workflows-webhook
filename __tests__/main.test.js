@@ -19,6 +19,9 @@ const resetContext = () => {
       head: {
         sha: 'pr-sha1',
         ref: 'feature/branch'
+      },
+      user: {
+        login: 'pr-author'
       }
     }
   }
@@ -367,7 +370,82 @@ describe('Custom Action Tests', () => {
       { type: 'TextBlock', text: 'pr-sha1', wrap: true }, // abc123 -> pr-sha1
       { type: 'TextBlock', text: '`dummy output`', wrap: true },
       { type: 'TextBlock', text: 'dummyMessage2', wrap: true },
-      { type: 'TextBlock', text: 'dummy author', wrap: true }
+      { type: 'TextBlock', text: 'pr-author', wrap: true } // dummy author -> pull_request.user.login
+    ]
+    expect(requestBody?.attachments[0].content.body).toEqual(expectedTemplate)
+  })
+
+  it('Testing at pull request target', async () => {
+    context.eventName = 'pull_request_target'
+
+    core.getInput.mockImplementation((name) => {
+      if (name === 'webhook-url') return 'https://dummy.url'
+      if (name === 'template') return './__tests__/assets/template.json'
+      if (name === 'message1') return 'dummyMessage1'
+      if (name === 'message2') return 'dummyMessage2'
+      if (name === 'action-titles') return 'Title1'
+      if (name === 'action-urls') return 'https://url1'
+      if (name === 'config') return './__tests__/assets/config-ignore.json'
+      return ''
+    })
+
+    await run()
+
+    expect(fetch).toHaveBeenCalled()
+    const fetchCall = fetch.mock.calls[0][1]
+    const requestBody = JSON.parse(fetchCall.body)
+
+    const expectedTemplate = [
+      { type: 'TextBlock', text: '123', wrap: true },
+      { type: 'TextBlock', text: 'first line', wrap: true }, // first line\nsecond line -> first line
+      { type: 'TextBlock', text: 'dummyMessage1', wrap: true },
+      { type: 'TextBlock', text: 'test-repo', wrap: true },
+      { type: 'TextBlock', text: 'main', wrap: true },
+      { type: 'TextBlock', text: 'pull_request_target', wrap: true }, // push -> pull_request_target
+      { type: 'TextBlock', text: 'CI', wrap: true },
+      { type: 'TextBlock', text: 'test-actor', wrap: true },
+      { type: 'TextBlock', text: 'abc123', wrap: true },
+      { type: 'TextBlock', text: '`dummy output`', wrap: true },
+      { type: 'TextBlock', text: 'dummyMessage2', wrap: true },
+      { type: 'TextBlock', text: 'pr-author', wrap: true } // dummy author -> pull_request.user.login
+    ]
+    expect(requestBody?.attachments[0].content.body).toEqual(expectedTemplate)
+  })
+
+  it('Falls back to the commit author when the pull request user is unavailable', async () => {
+    context.eventName = 'pull_request'
+    delete context.payload.pull_request.user
+
+    core.getInput.mockImplementation((name) => {
+      if (name === 'webhook-url') return 'https://dummy.url'
+      if (name === 'template') return './__tests__/assets/template.json'
+      if (name === 'message1') return 'dummyMessage1'
+      if (name === 'message2') return 'dummyMessage2'
+      if (name === 'action-titles') return 'Title1'
+      if (name === 'action-urls') return 'https://url1'
+      if (name === 'config') return './__tests__/assets/config-ignore.json'
+      return ''
+    })
+
+    await run()
+
+    expect(fetch).toHaveBeenCalled()
+    const fetchCall = fetch.mock.calls[0][1]
+    const requestBody = JSON.parse(fetchCall.body)
+
+    const expectedTemplate = [
+      { type: 'TextBlock', text: '123', wrap: true },
+      { type: 'TextBlock', text: 'first line', wrap: true }, // first line\nsecond line -> first line
+      { type: 'TextBlock', text: 'dummyMessage1', wrap: true },
+      { type: 'TextBlock', text: 'test-repo', wrap: true },
+      { type: 'TextBlock', text: 'feature/branch', wrap: true },
+      { type: 'TextBlock', text: 'pull_request', wrap: true }, // push -> pull_request
+      { type: 'TextBlock', text: 'CI', wrap: true },
+      { type: 'TextBlock', text: 'test-actor', wrap: true },
+      { type: 'TextBlock', text: 'pr-sha1', wrap: true }, // abc123 -> pr-sha1
+      { type: 'TextBlock', text: '`dummy output`', wrap: true },
+      { type: 'TextBlock', text: 'dummyMessage2', wrap: true },
+      { type: 'TextBlock', text: 'dummy author', wrap: true } // pull_request.user.login -> git commit author
     ]
     expect(requestBody?.attachments[0].content.body).toEqual(expectedTemplate)
   })

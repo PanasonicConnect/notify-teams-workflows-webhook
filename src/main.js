@@ -248,8 +248,10 @@ const makeCommitInfo = async (execOptions) => {
   // Get the list of changed files from the latest commit
   const changedFiles = await getChangedFiles(sha, execOptions)
 
-  // Get the latest author of the commit
-  const author = await getCommitAuthor(execOptions)
+  // For pull request events use the PR author's login, otherwise the latest commit's author
+  const author = ['pull_request', 'pull_request_target'].includes(context.eventName)
+    ? context.payload.pull_request?.user?.login || (await getCommitAuthor(execOptions))
+    : await getCommitAuthor(execOptions)
 
   return {
     sha,
