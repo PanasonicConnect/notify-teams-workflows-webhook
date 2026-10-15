@@ -38,7 +38,7 @@ describe('Custom Action Tests', () => {
 
     resetContext()
 
-    exec.getExecOutput.mockImplementation((commandLine, args, options) => {
+    exec.getExecOutput.mockImplementation((_commandLine, args, _options) => {
       if (args[0] === 'show') {
         return { stdout: 'first line\nsecond line' }
       }
@@ -146,7 +146,7 @@ describe('Custom Action Tests', () => {
       { type: 'TextBlock', text: 'CI', wrap: true },
       { type: 'TextBlock', text: 'test-actor', wrap: true },
       { type: 'TextBlock', text: 'abc123', wrap: true },
-      { type: 'TextBlock', text: '\`dummy output\`', wrap: true },
+      { type: 'TextBlock', text: '`dummy output`', wrap: true },
       { type: 'TextBlock', text: 'dummyMessage2', wrap: true },
       { type: 'TextBlock', text: 'dummy author', wrap: true }
     ]
@@ -188,7 +188,7 @@ describe('Custom Action Tests', () => {
 
   it('calls core.setFailed if an error occurs during execution', async () => {
     // Force getInput to throw an error.
-    core.getInput.mockImplementation((name) => {
+    core.getInput.mockImplementation((_name) => {
       throw new Error('dummy error')
     })
 
@@ -255,7 +255,7 @@ describe('Custom Action Tests', () => {
     })
 
     // Mock the commit message to include the ignore keyword
-    exec.getExecOutput.mockImplementation((commandLine, args, options) => {
+    exec.getExecOutput.mockImplementation((_commandLine, args, _options) => {
       if (args[0] === 'show') {
         return { stdout: 'typo: fixed a typo' }
       }
@@ -283,7 +283,7 @@ describe('Custom Action Tests', () => {
     })
 
     // Mock the commit message to include the ignore keyword
-    exec.getExecOutput.mockImplementation((commandLine, args, options) => {
+    exec.getExecOutput.mockImplementation((_commandLine, args, _options) => {
       if (args[0] === 'show') {
         return { stdout: 'fixed a typo' }
       }
