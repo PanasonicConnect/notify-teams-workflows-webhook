@@ -332,24 +332,24 @@ creation.
 
 The following variables can be used in the template file.
 
-| Variable Name       | Description                                     |
-| ------------------- | ----------------------------------------------- |
-| {CUSTOM_MESSAGE_1}  | Custom message 1                                |
-| {CUSTOM_MESSAGE_2}  | Custom message 2                                |
-| {GITHUB_RUN_NUMBER} | Workflow run number                             |
-| {COMMIT_MESSAGE}    | First line of the last commit message           |
-| {GITHUB_SHA}        | SHA-1 value of the last commit                  |
-| {CHANGED_FILES}     | Changed files in the last commit                |
-| {AUTHOR}            | Author in the last commit                       |
-| {GITHUB_REPOSITORY} | Repository name                                 |
-| {BRANCH}            | Branch name                                     |
-| {GITHUB_WORKFLOW}   | Workflow name                                   |
-| {GITHUB_EVENT_NAME} | Event name that triggered the workflow          |
-| {GITHUB_ACTOR}      | Username of the user who triggered the workflow |
-| {ISSUE_TITLE}       | Issue title.                                    |
-| {ISSUE_LABELS}      | Labels set in Issue.                            |
-| {ISSUE_MILESTONE}   | Milestones set for the Issue.                   |
-| {ISSUE_BODY}        | Issue text.                                     |
+| Variable Name       | Description                                                     |
+| ------------------- | --------------------------------------------------------------- |
+| {CUSTOM_MESSAGE_1}  | Custom message 1                                                |
+| {CUSTOM_MESSAGE_2}  | Custom message 2                                                |
+| {GITHUB_RUN_NUMBER} | Workflow run number                                             |
+| {COMMIT_MESSAGE}    | First line of the last commit message                           |
+| {GITHUB_SHA}        | SHA-1 value of the last commit                                  |
+| {CHANGED_FILES}     | Changed files in the last commit (shown as a fenced code block) |
+| {AUTHOR}            | Author in the last commit                                       |
+| {GITHUB_REPOSITORY} | Repository name                                                 |
+| {BRANCH}            | Branch name                                                     |
+| {GITHUB_WORKFLOW}   | Workflow name                                                   |
+| {GITHUB_EVENT_NAME} | Event name that triggered the workflow                          |
+| {GITHUB_ACTOR}      | Username of the user who triggered the workflow                 |
+| {ISSUE_TITLE}       | Issue title.                                                    |
+| {ISSUE_LABELS}      | Labels set in Issue.                                            |
+| {ISSUE_MILESTONE}   | Milestones set for the Issue.                                   |
+| {ISSUE_BODY}        | Issue text.                                                     |
 
 ### Configuration
 
@@ -453,6 +453,8 @@ When notifying with a mentions, please enclose the alias name in the message wit
 
 By configuring the MkDocs option, you can display changed files as links to static sites built with MkDocs. When this option is specified, the changed file
 paths displayed in `{CHANGED_FILES}` will be output as links to the deployed site.
+
+If none of the changed files can be converted to MkDocs links, `{CHANGED_FILES}` is displayed as a fenced code block instead.
 
 ```JSONC
 {

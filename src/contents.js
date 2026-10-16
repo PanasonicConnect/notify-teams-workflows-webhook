@@ -303,6 +303,7 @@ export const makeIssueDefaultBody = (config, customMessage1, customMessage2) => 
  * @param {string} config.mkdocs.baseUrl - Base URL for mkdocs site.
  * @param {string} config.mkdocs.rootDir - Root directory for mkdocs source files.
  * @param {string[]} changedFiles - An array of changed file paths.
+ * @param {string} separator - Separator used to join entries in the inline code / link format. The code block format always uses a single line break in the same escaping style.
  * @returns {string|undefined} A formatted string of changed files, limited by the max number specified in the config. Returns undefined if no files match the filter or the input is not an array.
  */
 export const generateChangedFilesString = (config, changedFiles, separator = '\\n\\n') => {
@@ -325,18 +326,36 @@ export const generateChangedFilesString = (config, changedFiles, separator = '\\
   }
 
   const maxFiles = config?.changedFile?.max || DEFAULT_MAX_CHANGED_FILES
-  const displayedFiles = filteredFiles.slice(0, maxFiles).map((file) => {
-    // Check if mkdocs configuration is provided and file should be converted to link
-    if (config?.mkdocs?.baseUrl && shouldConvertToLink(file, config.mkdocs)) {
-      const linkUrl = generateMkdocsUrl(file, config.mkdocs)
-      return `[\`${file}\`](${linkUrl})`
-    }
-    return `\`${file}\``
-  })
+  const displayedFiles = filteredFiles.slice(0, maxFiles)
   if (filteredFiles.length > maxFiles) {
     displayedFiles.push('...')
   }
-  return displayedFiles.join(separator)
+
+  const mkdocsLinkFor = (file) =>
+    file !== '...' && config?.mkdocs?.baseUrl && shouldConvertToLink(file, config.mkdocs) ? generateMkdocsUrl(file, config.mkdocs) : undefined
+
+  // If at least one displayed file has a mkdocs link, keep the inline code /
+  // link format so the links remain clickable.
+  if (displayedFiles.some((file) => mkdocsLinkFor(file))) {
+    return displayedFiles
+      .map((file) => {
+        const linkUrl = mkdocsLinkFor(file)
+        if (linkUrl) {
+          return `[\`${file}\`](${linkUrl})`
+        }
+        return file === '...' ? file : `\`${file}\``
+      })
+      .join(separator)
+  }
+
+  if (displayedFiles.length === 0) {
+    return ''
+  }
+
+  // Otherwise render the list as a fenced code block joined by single line
+  // breaks, matching the escaping style of the separator.
+  const lineBreak = separator.includes('\\') ? '\\n' : '\n'
+  return ['```', ...displayedFiles, '```'].join(lineBreak)
 }
 
 /**
