@@ -63,7 +63,7 @@ describe('makeCodeDefaultBody', () => {
 
     expect(body[0].text).toBe('#123 Fix "quoted" path')
     expect(body[1].text).toBe(message)
-    expect(body.at(-1).text).toBe('`src/a"b.js`')
+    expect(body.at(-1).text).toBe('```\nsrc/a"b.js\n```')
   })
 
   it('should create a default body with all parameters', () => {
@@ -141,9 +141,10 @@ describe('makeCodeDefaultBody', () => {
       },
       {
         type: 'TextBlock',
-        text: `\`file1.js\`
-
-\`file2.js\``,
+        text: `\`\`\`
+file1.js
+file2.js
+\`\`\``,
         size: 'small',
         wrap: false
       }
@@ -215,9 +216,10 @@ describe('makeCodeDefaultBody', () => {
       },
       {
         type: 'TextBlock',
-        text: `\`file1.js\`
-
-\`file2.js\``,
+        text: `\`\`\`
+file1.js
+file2.js
+\`\`\``,
         size: 'small',
         wrap: false
       }
@@ -374,9 +376,10 @@ describe('makeCodeDefaultBody', () => {
       },
       {
         type: 'TextBlock',
-        text: `\`file1.js\`
-
-\`file2.js\``,
+        text: `\`\`\`
+file1.js
+file2.js
+\`\`\``,
         size: 'small',
         wrap: false
       }
@@ -772,13 +775,13 @@ describe('generateChangedFilesString', () => {
     }
     const changedFiles = Array.from({ length: 15 }, (_, i) => `file${i + 1}.txt`)
     const result = generateChangedFilesString(config, changedFiles)
-    expect(result).toBe('`file1.txt`\\n\\n`file2.txt`\\n\\n`file3.txt`\\n\\n`file4.txt`\\n\\n`file5.txt`\\n\\n...')
+    expect(result).toBe('```\\nfile1.txt\\nfile2.txt\\nfile3.txt\\nfile4.txt\\nfile5.txt\\n...\\n```')
   })
   it('limits the number of displayed changed files to the default value', () => {
     const changedFiles = Array.from({ length: 15 }, (_, i) => `file${i + 1}.txt`)
     const result = generateChangedFilesString({}, changedFiles)
     expect(result).toBe(
-      '`file1.txt`\\n\\n`file2.txt`\\n\\n`file3.txt`\\n\\n`file4.txt`\\n\\n`file5.txt`\\n\\n`file6.txt`\\n\\n`file7.txt`\\n\\n`file8.txt`\\n\\n`file9.txt`\\n\\n`file10.txt`\\n\\n...'
+      '```\\nfile1.txt\\nfile2.txt\\nfile3.txt\\nfile4.txt\\nfile5.txt\\nfile6.txt\\nfile7.txt\\nfile8.txt\\nfile9.txt\\nfile10.txt\\n...\\n```'
     )
   })
 
@@ -793,7 +796,7 @@ describe('generateChangedFilesString', () => {
     }
     const changedFiles = ['file1.js', 'file2.ts', 'file3.txt', 'file4.js', 'file5.md', 'file6.ts']
     const result = generateChangedFilesString(config, changedFiles)
-    expect(result).toBe('`file1.js`\\n\\n`file2.ts`\\n\\n`file4.js`\\n\\n`file6.ts`')
+    expect(result).toBe('```\\nfile1.js\\nfile2.ts\\nfile4.js\\nfile6.ts\\n```')
   })
 
   it('does not filter files when extension filter is empty array', () => {
@@ -807,7 +810,7 @@ describe('generateChangedFilesString', () => {
     }
     const changedFiles = ['file1.js', 'file2.txt', 'file3.md']
     const result = generateChangedFilesString(config, changedFiles)
-    expect(result).toBe('`file1.js`\\n\\n`file2.txt`\\n\\n`file3.md`')
+    expect(result).toBe('```\\nfile1.js\\nfile2.txt\\nfile3.md\\n```')
   })
 
   it('does not filter files when extension filter is not specified', () => {
@@ -818,7 +821,7 @@ describe('generateChangedFilesString', () => {
     }
     const changedFiles = ['file1.js', 'file2.txt', 'file3.md']
     const result = generateChangedFilesString(config, changedFiles)
-    expect(result).toBe('`file1.js`\\n\\n`file2.txt`\\n\\n`file3.md`')
+    expect(result).toBe('```\\nfile1.js\\nfile2.txt\\nfile3.md\\n```')
   })
 
   it('filters files and applies max limit correctly', () => {
@@ -832,7 +835,7 @@ describe('generateChangedFilesString', () => {
     }
     const changedFiles = ['file1.js', 'file2.txt', 'file3.js', 'file4.js', 'file5.md']
     const result = generateChangedFilesString(config, changedFiles)
-    expect(result).toBe('`file1.js`\\n\\n`file3.js`\\n\\n...')
+    expect(result).toBe('```\\nfile1.js\\nfile3.js\\n...\\n```')
   })
 
   it('handles files without extension correctly', () => {
@@ -843,7 +846,7 @@ describe('generateChangedFilesString', () => {
     }
     const changedFiles = ['Dockerfile', 'README', 'file1.js', 'Makefile', 'file2.ts']
     const result = generateChangedFilesString(config, changedFiles)
-    expect(result).toBe('`file1.js`\\n\\n`file2.ts`')
+    expect(result).toBe('```\\nfile1.js\\nfile2.ts\\n```')
   })
 
   it('returns empty string when all files are filtered out', () => {
@@ -865,7 +868,7 @@ describe('generateChangedFilesString', () => {
     }
     const changedFiles = ['.gitignore', '.env', 'file1.js', '.eslintrc.js']
     const result = generateChangedFilesString(config, changedFiles)
-    expect(result).toBe('`file1.js`\\n\\n`.eslintrc.js`')
+    expect(result).toBe('```\\nfile1.js\\n.eslintrc.js\\n```')
   })
 
   describe('mkdocs link generation', () => {
@@ -946,7 +949,19 @@ describe('generateChangedFilesString', () => {
       const config = {}
       const changedFiles = ['docs/guide.md', 'src/main.js']
       const result = generateChangedFilesString(config, changedFiles)
-      expect(result).toBe('`docs/guide.md`\\n\\n`src/main.js`')
+      expect(result).toBe('```\\ndocs/guide.md\\nsrc/main.js\\n```')
+    })
+
+    it('renders a code block when no file converts to a mkdocs link', () => {
+      const config = {
+        mkdocs: {
+          baseUrl: 'https://example.com',
+          rootDir: 'docs'
+        }
+      }
+      const changedFiles = ['src/main.js', 'src/util.js']
+      const result = generateChangedFilesString(config, changedFiles)
+      expect(result).toBe('```\\nsrc/main.js\\nsrc/util.js\\n```')
     })
 
     it('combines with extension filtering', () => {

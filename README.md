@@ -330,24 +330,24 @@ templateパラメータでは、ユーザーが作成したテンプレートフ
 
 テンプレートファイル内で使用可能な変数は以下の通りです。
 
-| 変数名              | 説明                                       |
-| ------------------- | ------------------------------------------ |
-| {CUSTOM_MESSAGE_1}  | カスタムメッセージ1                        |
-| {CUSTOM_MESSAGE_2}  | カスタムメッセージ2                        |
-| {GITHUB_RUN_NUMBER} | ワークフロー実行番号                       |
-| {COMMIT_MESSAGE}    | 最終コミットのメッセージの最初の行         |
-| {GITHUB_SHA}        | 最終コミットのSHA-1値                      |
-| {CHANGED_FILES}     | 最終コミットの変更ファイル                 |
-| {AUTHOR}            | 最終コミットの著者                         |
-| {GITHUB_REPOSITORY} | リポジトリ名                               |
-| {BRANCH}            | ブランチ名                                 |
-| {GITHUB_WORKFLOW}   | ワークフロー名                             |
-| {GITHUB_EVENT_NAME} | ワークフローのトリガーとなったイベント名   |
-| {GITHUB_ACTOR}      | ワークフローのトリガーを実行したユーザー名 |
-| {ISSUE_TITLE}       | Issueのタイトル                            |
-| {ISSUE_LABELS}      | Issueに設定されたラべル                    |
-| {ISSUE_MILESTONE}   | Issueに設定されたマイルストーン            |
-| {ISSUE_BODY}        | Issueの本文                                |
+| 変数名              | 説明                                                   |
+| ------------------- | ------------------------------------------------------ |
+| {CUSTOM_MESSAGE_1}  | カスタムメッセージ1                                    |
+| {CUSTOM_MESSAGE_2}  | カスタムメッセージ2                                    |
+| {GITHUB_RUN_NUMBER} | ワークフロー実行番号                                   |
+| {COMMIT_MESSAGE}    | 最終コミットのメッセージの最初の行                     |
+| {GITHUB_SHA}        | 最終コミットのSHA-1値                                  |
+| {CHANGED_FILES}     | 最終コミットの変更ファイル（コードブロック形式で表示） |
+| {AUTHOR}            | 最終コミットの著者                                     |
+| {GITHUB_REPOSITORY} | リポジトリ名                                           |
+| {BRANCH}            | ブランチ名                                             |
+| {GITHUB_WORKFLOW}   | ワークフロー名                                         |
+| {GITHUB_EVENT_NAME} | ワークフローのトリガーとなったイベント名               |
+| {GITHUB_ACTOR}      | ワークフローのトリガーを実行したユーザー名             |
+| {ISSUE_TITLE}       | Issueのタイトル                                        |
+| {ISSUE_LABELS}      | Issueに設定されたラべル                                |
+| {ISSUE_MILESTONE}   | Issueに設定されたマイルストーン                        |
+| {ISSUE_BODY}        | Issueの本文                                            |
 
 ### Configuration
 
@@ -448,6 +448,8 @@ usersパラメータを指定することで、メンションを行うことが
 ### MkDocs
 
 MkDocsオプションを設定することで、変更ファイルをMkDocsで構築された静的サイトへのリンクとして表示できます。このオプションを指定すると、`{CHANGED_FILES}`で表示される変更ファイルのパスが、デプロイ先のサイトへのリンクとして出力されます。
+
+リンクが生成されるファイルが1件もない場合、`{CHANGED_FILES}`はフェンス付きコードブロック形式で表示されます。
 
 ```JSONC
 {

@@ -154,7 +154,7 @@ describe('Custom Action Tests', () => {
       { type: 'TextBlock', text: 'CI', wrap: true },
       { type: 'TextBlock', text: 'test-actor', wrap: true },
       { type: 'TextBlock', text: 'abc123', wrap: true },
-      { type: 'TextBlock', text: '`dummy output`', wrap: true },
+      { type: 'TextBlock', text: '```\ndummy output\n```', wrap: true },
       { type: 'TextBlock', text: 'dummyMessage2', wrap: true },
       { type: 'TextBlock', text: 'push-author', wrap: true } // dummy author -> head_commit.author.name
     ]
@@ -335,7 +335,7 @@ describe('Custom Action Tests', () => {
       { type: 'TextBlock', text: 'CI', wrap: true },
       { type: 'TextBlock', text: 'test-actor', wrap: true },
       { type: 'TextBlock', text: 'abc123', wrap: true },
-      { type: 'TextBlock', text: '`dummy output`', wrap: true },
+      { type: 'TextBlock', text: '```\ndummy output\n```', wrap: true },
       { type: 'TextBlock', text: 'dummyMessage2', wrap: true },
       { type: 'TextBlock', text: 'push-author', wrap: true } // dummy author -> head_commit.author.name
     ]
@@ -373,7 +373,7 @@ describe('Custom Action Tests', () => {
       { type: 'TextBlock', text: 'CI', wrap: true },
       { type: 'TextBlock', text: 'test-actor', wrap: true },
       { type: 'TextBlock', text: 'pr-sha1', wrap: true }, // abc123 -> pr-sha1
-      { type: 'TextBlock', text: '`dummy output`', wrap: true },
+      { type: 'TextBlock', text: '```\ndummy output\n```', wrap: true },
       { type: 'TextBlock', text: 'dummyMessage2', wrap: true },
       { type: 'TextBlock', text: 'pr-author', wrap: true } // dummy author -> pull_request.user.login
     ]
@@ -410,7 +410,7 @@ describe('Custom Action Tests', () => {
       { type: 'TextBlock', text: 'CI', wrap: true },
       { type: 'TextBlock', text: 'test-actor', wrap: true },
       { type: 'TextBlock', text: 'abc123', wrap: true },
-      { type: 'TextBlock', text: '`dummy output`', wrap: true },
+      { type: 'TextBlock', text: '```\ndummy output\n```', wrap: true },
       { type: 'TextBlock', text: 'dummyMessage2', wrap: true },
       { type: 'TextBlock', text: 'pr-author', wrap: true } // dummy author -> pull_request.user.login
     ]
@@ -448,7 +448,7 @@ describe('Custom Action Tests', () => {
       { type: 'TextBlock', text: 'CI', wrap: true },
       { type: 'TextBlock', text: 'test-actor', wrap: true },
       { type: 'TextBlock', text: 'pr-sha1', wrap: true }, // abc123 -> pr-sha1
-      { type: 'TextBlock', text: '`dummy output`', wrap: true },
+      { type: 'TextBlock', text: '```\ndummy output\n```', wrap: true },
       { type: 'TextBlock', text: 'dummyMessage2', wrap: true },
       { type: 'TextBlock', text: 'dummy author', wrap: true } // pull_request.user.login -> git commit author
     ]
@@ -485,7 +485,7 @@ describe('Custom Action Tests', () => {
       { type: 'TextBlock', text: 'CI', wrap: true },
       { type: 'TextBlock', text: 'test-actor', wrap: true },
       { type: 'TextBlock', text: 'abc123', wrap: true },
-      { type: 'TextBlock', text: '`dummy output`', wrap: true },
+      { type: 'TextBlock', text: '```\ndummy output\n```', wrap: true },
       { type: 'TextBlock', text: 'dummyMessage2', wrap: true },
       { type: 'TextBlock', text: 'dummy author', wrap: true } // head_commit.author.name -> git commit author
     ]
@@ -522,7 +522,7 @@ describe('Custom Action Tests', () => {
       { type: 'TextBlock', text: 'CI', wrap: true },
       { type: 'TextBlock', text: 'test-actor', wrap: true },
       { type: 'TextBlock', text: 'abc123', wrap: true }, // abc123 -> pr-sha1
-      { type: 'TextBlock', text: '`dummy output`', wrap: true },
+      { type: 'TextBlock', text: '```\ndummy output\n```', wrap: true },
       { type: 'TextBlock', text: '<at>Admin2</at>', wrap: true },
       { type: 'TextBlock', text: 'push-author', wrap: true } // dummy author -> head_commit.author.name
     ]
